@@ -94,7 +94,24 @@ export default function Dashboard() {
       setDoctors(doctorData?.length || 0);
     }
 
-    setAiConsultations(0);
+    const {
+      data: aiData,
+      error: aiError,
+    } = await supabase
+      .from("ai_usage_logs")
+      .select("id");
+
+    if (aiError) {
+      console.error(
+        "AI Usage Error:",
+        aiError.message
+      );
+
+      setAiConsultations(0);
+    } else {
+      setAiConsultations(aiData?.length || 0);
+    }
+
     setLoading(false);
   }
 
@@ -115,6 +132,7 @@ export default function Dashboard() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
           <div className="bg-white p-6 rounded-2xl shadow">
             <h2 className="text-gray-500">
               Patients
@@ -154,9 +172,11 @@ export default function Dashboard() {
               {loading ? "..." : aiConsultations}
             </p>
           </div>
+
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4">
+
           <button
             onClick={() => router.push("/appointments")}
             className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold"
@@ -182,12 +202,20 @@ export default function Dashboard() {
             Profile
           </button>
 
+          <a
+            href="/ai-assistant"
+            className="bg-purple-600 text-white text-center px-6 py-3 rounded-xl font-semibold hover:bg-purple-700"
+          >
+            🤖 Ask SmartClinic AI
+          </a>
+
           <button
             onClick={logoutUser}
             className="bg-red-500 text-white px-6 py-3 rounded-xl font-semibold"
           >
             Logout
           </button>
+
         </div>
       </div>
     </main>
