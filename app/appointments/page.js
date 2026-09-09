@@ -19,6 +19,10 @@ export default function AppointmentsPage() {
   const [reason, setReason] = useState("");
   const [booking, setBooking] = useState(false);
 
+  const SHORTEST_WAITING_TIME = 5;
+  const AVERAGE_WAITING_TIME = 10;
+  const LONGEST_WAITING_TIME = 30;
+
   useEffect(() => {
     fetchDoctors();
   }, []);
@@ -69,12 +73,14 @@ export default function AppointmentsPage() {
 
     const dayOfWeek = days[date.getDay()];
 
-    const { data: scheduleData, error: scheduleError } =
-      await supabase
-        .from("doctor_schedules")
-        .select("start_time, end_time")
-        .eq("doctor_id", Number(selectedDoctor))
-        .eq("day_of_week", dayOfWeek);
+    const {
+      data: scheduleData,
+      error: scheduleError,
+    } = await supabase
+      .from("doctor_schedules")
+      .select("start_time, end_time")
+      .eq("doctor_id", Number(selectedDoctor))
+      .eq("day_of_week", dayOfWeek);
 
     if (scheduleError) {
       alert("Schedule Error: " + scheduleError.message);
@@ -88,13 +94,15 @@ export default function AppointmentsPage() {
       return;
     }
 
-    const { data: bookedData, error: bookedError } =
-      await supabase
-        .from("appointments")
-        .select("start_time, end_time, status")
-        .eq("doctor_id", Number(selectedDoctor))
-        .eq("appointment_date", selectedDate)
-        .neq("status", "Cancelled");
+    const {
+      data: bookedData,
+      error: bookedError,
+    } = await supabase
+      .from("appointments")
+      .select("start_time, end_time, status")
+      .eq("doctor_id", Number(selectedDoctor))
+      .eq("appointment_date", selectedDate)
+      .neq("status", "Cancelled");
 
     if (bookedError) {
       alert("Appointment Error: " + bookedError.message);
@@ -121,9 +129,10 @@ export default function AppointmentsPage() {
         hour < endHour ||
         (hour === endHour && minute < endMinute)
       ) {
-        const time = `${String(hour).padStart(2, "0")}:${String(
-          minute
-        ).padStart(2, "0")}`;
+        const time = `${String(hour).padStart(
+          2,
+          "0"
+        )}:${String(minute).padStart(2, "0")}`;
 
         if (!bookedTimes.has(time)) {
           times.push(time);
@@ -141,9 +150,10 @@ export default function AppointmentsPage() {
     const [hour, minute] = startTime.split(":").map(Number);
     const endHour = hour + 1;
 
-    return `${String(endHour).padStart(2, "0")}:${String(
-      minute
-    ).padStart(2, "0")}:00`;
+    return `${String(endHour).padStart(
+      2,
+      "0"
+    )}:${String(minute).padStart(2, "0")}:00`;
   }
 
   async function confirmAppointment() {
@@ -154,11 +164,10 @@ export default function AppointmentsPage() {
 
     setBooking(true);
 
-    // GET LOGGED-IN USER
-    const { data: userData, error: userError } =
-      await supabase.auth.getUser();
-
-    const user = userData?.user;
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
       alert("Please login first.");
@@ -167,13 +176,14 @@ export default function AppointmentsPage() {
       return;
     }
 
-    // GET PATIENT PROFILE
-    const { data: profile, error: profileError } =
-      await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .single();
+    const {
+      data: profile,
+      error: profileError,
+    } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
 
     if (profileError || !profile) {
       alert("Patient profile not found.");
@@ -183,7 +193,6 @@ export default function AppointmentsPage() {
 
     const endTime = getEndTime(selectedTime);
 
-    // CHECK DOUBLE BOOKING
     const {
       data: existingAppointment,
       error: existingError,
@@ -215,13 +224,10 @@ export default function AppointmentsPage() {
       );
 
       setBooking(false);
-
       await fetchAvailableTimes();
-
       return;
     }
 
-    // GET DOCTOR NAME
     const selectedDoctorData = doctors.find(
       (doctor) =>
         String(doctor.id) === String(selectedDoctor)
@@ -230,7 +236,6 @@ export default function AppointmentsPage() {
     const doctorName =
       selectedDoctorData?.name || "Doctor";
 
-    // GET PATIENT NAME
     const patientName =
       user.user_metadata?.full_name ||
       user.user_metadata?.name ||
@@ -238,11 +243,26 @@ export default function AppointmentsPage() {
       user.email?.split("@")[0] ||
       "Patient";
 
-    // SAVE APPOINTMENT
-    const {
-      data: appointmentData,
-      error,
-    } = await supabase
+    let consultationFee = 0;
+
+    const specialization =
+      selectedDoctorData?.specialization
+        ?.toLowerCase()
+        .trim();
+
+    if (specialization === "general medicine") {
+      consultationFee = 500;
+    } else if (specialization === "pediatrics") {
+      consultationFee = 800;
+    } else if (specialization === "dermatology") {
+      consultationFee = 1000;
+    } else if (specialization === "cardiology") {
+      consultationFee = 1500;
+    } else if (specialization === "neurology") {
+      consultationFee = 700;
+    }
+
+    const { error } = await supabase
       .from("appointments")
       .insert({
         patient_id: profile.id,
@@ -252,6 +272,8 @@ export default function AppointmentsPage() {
         end_time: endTime,
         reason: reason || null,
         status: "Pending",
+        waiting_time: AVERAGE_WAITING_TIME,
+        consultation_fee: consultationFee,
       })
       .select()
       .single();
@@ -266,17 +288,14 @@ export default function AppointmentsPage() {
       return;
     }
 
-    // SEND EMAIL CONFIRMATION
     try {
       const emailResponse = await fetch(
         "/api/send-confirmation",
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             email: user.email,
             patientName: patientName,
@@ -288,8 +307,7 @@ export default function AppointmentsPage() {
         }
       );
 
-      const emailResult =
-        await emailResponse.json();
+      const emailResult = await emailResponse.json();
 
       if (!emailResponse.ok) {
         console.error(
@@ -300,22 +318,13 @@ export default function AppointmentsPage() {
         alert(
           "Appointment successfully booked, but the email confirmation could not be sent.\n\n" +
             "Reason: " +
-            (emailResult.error ||
-              "Unknown error")
+            (emailResult.error || "Unknown error")
         );
 
         setBooking(false);
-
         router.push("/dashboard");
-
         return;
       }
-
-      console.log(
-        "Email sent successfully:",
-        emailResult
-      );
-
     } catch (emailError) {
       console.error(
         "Email API error:",
@@ -327,30 +336,61 @@ export default function AppointmentsPage() {
       );
 
       setBooking(false);
-
       router.push("/dashboard");
-
       return;
     }
 
-    // SUCCESS
     alert(
       "Appointment successfully booked!\n\n" +
+        "Expected Waiting Time: " +
+        AVERAGE_WAITING_TIME +
+        " minutes\n" +
+        "Shortest Possible Waiting Time: " +
+        SHORTEST_WAITING_TIME +
+        " minutes\n" +
+        "Longest Possible Waiting Time: " +
+        LONGEST_WAITING_TIME +
+        " minutes\n" +
+        "Consultation Fee: ₱" +
+        consultationFee.toLocaleString("en-PH") +
+        "\n\n" +
         "Confirmation email sent to:\n" +
         user.email
     );
 
     setBooking(false);
-
     router.push("/dashboard");
   }
 
+  const selectedDoctorData = doctors.find(
+    (doctor) =>
+      String(doctor.id) === String(selectedDoctor)
+  );
+
   const selectedDoctorName =
-    doctors.find(
-      (doctor) =>
-        String(doctor.id) ===
-        String(selectedDoctor)
-    )?.name || "";
+    selectedDoctorData?.name || "";
+
+  const selectedDoctorSpecialization =
+    selectedDoctorData?.specialization || "";
+
+  let selectedConsultationFee = 0;
+
+  const selectedSpecialization =
+    selectedDoctorSpecialization
+      .toLowerCase()
+      .trim();
+
+  if (selectedSpecialization === "general medicine") {
+    selectedConsultationFee = 500;
+  } else if (selectedSpecialization === "pediatrics") {
+    selectedConsultationFee = 800;
+  } else if (selectedSpecialization === "dermatology") {
+    selectedConsultationFee = 1000;
+  } else if (selectedSpecialization === "cardiology") {
+    selectedConsultationFee = 1500;
+  } else if (selectedSpecialization === "neurology") {
+    selectedConsultationFee = 700;
+  }
 
   return (
     <main
@@ -371,7 +411,6 @@ export default function AppointmentsPage() {
             "0 4px 15px rgba(0,0,0,0.08)",
         }}
       >
-
         <button
           onClick={() =>
             router.push("/dashboard")
@@ -402,9 +441,7 @@ export default function AppointmentsPage() {
           appointment date and time.
         </p>
 
-        {/* SELECT DOCTOR */}
         <div style={{ marginBottom: "25px" }}>
-
           <label
             style={{
               display: "block",
@@ -421,9 +458,7 @@ export default function AppointmentsPage() {
             <select
               value={selectedDoctor}
               onChange={(e) =>
-                setSelectedDoctor(
-                  e.target.value
-                )
+                setSelectedDoctor(e.target.value)
               }
               style={{
                 width: "100%",
@@ -448,12 +483,9 @@ export default function AppointmentsPage() {
               ))}
             </select>
           )}
-
         </div>
 
-        {/* SELECT DATE */}
         <div style={{ marginBottom: "25px" }}>
-
           <label
             style={{
               display: "block",
@@ -468,9 +500,7 @@ export default function AppointmentsPage() {
             type="date"
             value={selectedDate}
             onChange={(e) =>
-              setSelectedDate(
-                e.target.value
-              )
+              setSelectedDate(e.target.value)
             }
             style={{
               width: "100%",
@@ -480,10 +510,8 @@ export default function AppointmentsPage() {
               fontSize: "16px",
             }}
           />
-
         </div>
 
-        {/* SELECT TIME */}
         {selectedDoctor &&
           selectedDate && (
             <div
@@ -491,7 +519,6 @@ export default function AppointmentsPage() {
                 marginBottom: "25px",
               }}
             >
-
               <label
                 style={{
                   display: "block",
@@ -504,23 +531,18 @@ export default function AppointmentsPage() {
 
               {loadingTimes ? (
                 <p>
-                  Loading available
-                  times...
+                  Loading available times...
                 </p>
-              ) : availableTimes.length ===
-                0 ? (
+              ) : availableTimes.length === 0 ? (
                 <p>
-                  No available time for
-                  this doctor on the
-                  selected day.
+                  No available time for this
+                  doctor on the selected day.
                 </p>
               ) : (
                 <select
                   value={selectedTime}
                   onChange={(e) =>
-                    setSelectedTime(
-                      e.target.value
-                    )
+                    setSelectedTime(e.target.value)
                   }
                   style={{
                     width: "100%",
@@ -547,13 +569,10 @@ export default function AppointmentsPage() {
                   )}
                 </select>
               )}
-
             </div>
           )}
 
-        {/* REASON */}
         <div style={{ marginBottom: "25px" }}>
-
           <label
             style={{
               display: "block",
@@ -580,10 +599,8 @@ export default function AppointmentsPage() {
               resize: "vertical",
             }}
           />
-
         </div>
 
-        {/* APPOINTMENT DETAILS */}
         {selectedDoctor &&
           selectedDate &&
           selectedTime && (
@@ -596,19 +613,21 @@ export default function AppointmentsPage() {
                 marginBottom: "20px",
               }}
             >
-
               <strong>
                 Appointment Details
               </strong>
 
-              <p
-                style={{
-                  marginTop: "10px",
-                }}
-              >
+              <p style={{ marginTop: "10px" }}>
                 Doctor:{" "}
                 <strong>
                   {selectedDoctorName}
+                </strong>
+              </p>
+
+              <p>
+                Specialization:{" "}
+                <strong>
+                  {selectedDoctorSpecialization}
                 </strong>
               </p>
 
@@ -627,16 +646,42 @@ export default function AppointmentsPage() {
               </p>
 
               <p>
+                Expected Waiting Time:{" "}
+                <strong>
+                  {AVERAGE_WAITING_TIME} minutes
+                </strong>
+              </p>
+
+              <p>
+                Possible Waiting Range:{" "}
+                <strong>
+                  {SHORTEST_WAITING_TIME}–{LONGEST_WAITING_TIME} minutes
+                </strong>
+              </p>
+
+              <p>
+                Consultation Fee:{" "}
+                <strong>
+                  ₱
+                  {selectedConsultationFee.toLocaleString(
+                    "en-PH",
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }
+                  )}
+                </strong>
+              </p>
+
+              <p>
                 Reason:{" "}
                 <strong>
                   {reason || "None"}
                 </strong>
               </p>
-
             </div>
           )}
 
-        {/* CONFIRM BUTTON */}
         <button
           onClick={confirmAppointment}
           disabled={
@@ -650,7 +695,6 @@ export default function AppointmentsPage() {
             padding: "14px",
             border: "none",
             borderRadius: "8px",
-
             backgroundColor:
               booking ||
               !selectedDoctor ||
@@ -658,11 +702,9 @@ export default function AppointmentsPage() {
               !selectedTime
                 ? "#9ca3af"
                 : "#2563eb",
-
             color: "white",
             fontSize: "16px",
             fontWeight: "600",
-
             cursor:
               booking ||
               !selectedDoctor ||
@@ -676,7 +718,6 @@ export default function AppointmentsPage() {
             ? "Booking..."
             : "Confirm Appointment"}
         </button>
-
       </div>
     </main>
   );

@@ -13,6 +13,12 @@ export default function ManageAppointmentsPage() {
 
   useEffect(() => {
     loadAppointments();
+
+    const interval = setInterval(() => {
+      loadAppointments();
+    }, 60000);
+
+    return () => clearInterval(interval);
   }, []);
 
   async function loadAppointments() {
@@ -27,6 +33,8 @@ export default function ManageAppointmentsPage() {
       router.push("/login");
       return;
     }
+
+    await updateExpiredAppointments(user.id);
 
     const { data, error } = await supabase
       .from("appointments")
@@ -58,23 +66,139 @@ export default function ManageAppointmentsPage() {
     setLoading(false);
   }
 
-  async function cancelAppointment(id) {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this appointment?"
-    );
+  async function updateExpiredAppointments(userId) {
+    const { data, error } = await supabase
+      .from("appointments")
+      .select("id, appointment_date, end_time, status")
+      .eq("patient_id", userId)
+      .in("status", ["Pending", "Confirmed"]);
 
-    if (!confirmed) {
+    if (error || !data) {
+      console.error("Expired appointment check error:", error);
+      return;
+    }
+
+    const now = new Date();
+
+    const currentDate =
+      now.getFullYear() +
+      "-" +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(now.getDate()).padStart(2, "0");
+
+    const currentTime =
+      String(now.getHours()).padStart(2, "0") +
+      ":" +
+      String(now.getMinutes()).padStart(2, "0") +
+      ":" +
+      String(now.getSeconds()).padStart(2, "0");
+
+    for (const appointment of data) {
+      const appointmentDate = appointment.appointment_date;
+      const appointmentTime = appointment.end_time;
+
+      const isExpired =
+        appointmentDate < currentDate ||
+        (appointmentDate === currentDate &&
+          appointmentTime <= currentTime);
+
+      if (!isExpired) continue;
+
+      const newStatus =
+        appointment.status === "Pending"
+          ? "Expired"
+          : "Completed";
+
+      const { error: updateError } = await supabase
+        .from("appointments")
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", appointment.id)
+        .eq("patient_id", userId);
+
+      if (updateError) {
+        console.error(
+          "Failed to update appointment:",
+          appointment.id,
+          updateError.message
+        );
+      }
+    }
+  }
+
+  async function updateStatus(id, newStatus) {
+    if (actionLoading) return;
+
+    const message =
+      newStatus === "Confirmed"
+        ? "Are you sure you want to confirm this appointment?"
+        : "Are you sure you want to mark this appointment as completed?";
+
+    if (!window.confirm(message)) return;
+
+    setActionLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .eq("patient_id", user.id);
+
+    if (error) {
+      alert("Failed to update appointment: " + error.message);
+      setActionLoading(false);
+      return;
+    }
+
+    await loadAppointments();
+    setActionLoading(false);
+  }
+
+  async function cancelAppointment(id) {
+    if (actionLoading) return;
+
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel this appointment?"
+      )
+    ) {
       return;
     }
 
     setActionLoading(true);
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
     const { error } = await supabase
       .from("appointments")
       .update({
         status: "Cancelled",
+        updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("patient_id", user.id);
 
     if (error) {
       alert("Failed to cancel appointment: " + error.message);
@@ -82,13 +206,54 @@ export default function ManageAppointmentsPage() {
       return;
     }
 
-    alert("Appointment cancelled successfully.");
-
     await loadAppointments();
     setActionLoading(false);
   }
 
-  function rescheduleAppointment(id) {
+  async function removeDoctorFromAppointment(id) {
+    if (actionLoading) return;
+
+    if (
+      !window.confirm(
+        "Remove this doctor from your pending appointment and choose another doctor?"
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("appointments")
+      .delete()
+      .eq("id", id)
+      .eq("patient_id", user.id)
+      .eq("status", "Pending");
+
+    if (error) {
+      alert(
+        "Failed to remove doctor from appointment: " +
+          error.message
+      );
+      setActionLoading(false);
+      return;
+    }
+
+    setActionLoading(false);
+
+    router.push("/appointments");
+  }
+
+  function editAppointment(id) {
     router.push("/appointments?reschedule=" + id);
   }
 
@@ -121,10 +286,10 @@ export default function ManageAppointmentsPage() {
       };
     }
 
-    if (status === "Rescheduled") {
+    if (status === "Expired") {
       return {
-        backgroundColor: "#ede9fe",
-        color: "#5b21b6",
+        backgroundColor: "#f3f4f6",
+        color: "#4b5563",
       };
     }
 
@@ -135,14 +300,13 @@ export default function ManageAppointmentsPage() {
   }
 
   function formatDate(date) {
-    return new Date(date + "T00:00:00").toLocaleDateString(
-      "en-US",
-      {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }
-    );
+    return new Date(
+      date + "T00:00:00"
+    ).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
   }
 
   function formatTime(time) {
@@ -157,13 +321,15 @@ export default function ManageAppointmentsPage() {
   const activeAppointments = appointments.filter(
     (appointment) =>
       appointment.status !== "Cancelled" &&
-      appointment.status !== "Completed"
+      appointment.status !== "Completed" &&
+      appointment.status !== "Expired"
   );
 
   const historyAppointments = appointments.filter(
     (appointment) =>
       appointment.status === "Cancelled" ||
-      appointment.status === "Completed"
+      appointment.status === "Completed" ||
+      appointment.status === "Expired"
   );
 
   return (
@@ -290,7 +456,9 @@ export default function ManageAppointmentsPage() {
                         borderRadius: "20px",
                         fontSize: "13px",
                         fontWeight: "600",
-                        ...getStatusStyle(appointment.status),
+                        ...getStatusStyle(
+                          appointment.status
+                        ),
                       }}
                     >
                       {appointment.status}
@@ -299,20 +467,25 @@ export default function ManageAppointmentsPage() {
 
                   <p style={{ color: "#555" }}>
                     Specialization:{" "}
-                    {appointment.doctors?.specialization || "N/A"}
+                    {appointment.doctors?.specialization ||
+                      "N/A"}
                   </p>
 
                   <p style={{ marginTop: "8px" }}>
                     Date:{" "}
                     <strong>
-                      {formatDate(appointment.appointment_date)}
+                      {formatDate(
+                        appointment.appointment_date
+                      )}
                     </strong>
                   </p>
 
                   <p style={{ marginTop: "8px" }}>
                     Time:{" "}
                     <strong>
-                      {formatTime(appointment.start_time)}
+                      {formatTime(
+                        appointment.start_time
+                      )}
                     </strong>
                   </p>
 
@@ -326,49 +499,153 @@ export default function ManageAppointmentsPage() {
                   <div
                     style={{
                       display: "flex",
+                      flexWrap: "wrap",
                       gap: "10px",
                       marginTop: "20px",
                     }}
                   >
-                    <button
-                      onClick={() =>
-                        rescheduleAppointment(appointment.id)
-                      }
-                      disabled={
-                        actionLoading ||
-                        appointment.status === "Completed"
-                      }
-                      style={{
-                        padding: "10px 16px",
-                        border: "none",
-                        borderRadius: "8px",
-                        backgroundColor: "#2563eb",
-                        color: "white",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Reschedule
-                    </button>
+                    {appointment.status === "Pending" && (
+                      <>
+                        <button
+                          onClick={() =>
+                            updateStatus(
+                              appointment.id,
+                              "Confirmed"
+                            )
+                          }
+                          disabled={actionLoading}
+                          style={{
+                            padding: "10px 16px",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#16a34a",
+                            color: "white",
+                            cursor: actionLoading
+                              ? "not-allowed"
+                              : "pointer",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Confirm
+                        </button>
 
-                    <button
-                      onClick={() =>
-                        cancelAppointment(appointment.id)
-                      }
-                      disabled={
-                        actionLoading ||
-                        appointment.status === "Completed"
-                      }
-                      style={{
-                        padding: "10px 16px",
-                        border: "none",
-                        borderRadius: "8px",
-                        backgroundColor: "#dc2626",
-                        color: "white",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Cancel
-                    </button>
+                        <button
+                          onClick={() =>
+                            editAppointment(
+                              appointment.id
+                            )
+                          }
+                          disabled={actionLoading}
+                          style={{
+                            padding: "10px 16px",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#2563eb",
+                            color: "white",
+                            cursor: actionLoading
+                              ? "not-allowed"
+                              : "pointer",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            removeDoctorFromAppointment(
+                              appointment.id
+                            )
+                          }
+                          disabled={actionLoading}
+                          style={{
+                            padding: "10px 16px",
+                            border: "none",
+                            borderRadius: "8px",
+                            backgroundColor: "#dc2626",
+                            color: "white",
+                            cursor: actionLoading
+                              ? "not-allowed"
+                              : "pointer",
+                            fontWeight: "600",
+                          }}
+                        >
+                          Remove Doctor
+                        </button>
+                      </>
+                    )}
+
+                    {appointment.status === "Confirmed" && (
+                      <button
+                        onClick={() =>
+                          updateStatus(
+                            appointment.id,
+                            "Completed"
+                          )
+                        }
+                        disabled={actionLoading}
+                        style={{
+                          padding: "10px 16px",
+                          border: "none",
+                          borderRadius: "8px",
+                          backgroundColor: "#2563eb",
+                          color: "white",
+                          cursor: actionLoading
+                            ? "not-allowed"
+                            : "pointer",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Complete
+                      </button>
+                    )}
+
+                    {appointment.status !== "Confirmed" && (
+                      <button
+                        onClick={() =>
+                          editAppointment(
+                            appointment.id
+                          )
+                        }
+                        disabled={actionLoading}
+                        style={{
+                          padding: "10px 16px",
+                          border: "none",
+                          borderRadius: "8px",
+                          backgroundColor: "#6b7280",
+                          color: "white",
+                          cursor: actionLoading
+                            ? "not-allowed"
+                            : "pointer",
+                        }}
+                      >
+                        Reschedule
+                      </button>
+                    )}
+
+                    {appointment.status === "Pending" ||
+                    appointment.status === "Confirmed" ? (
+                      <button
+                        onClick={() =>
+                          cancelAppointment(
+                            appointment.id
+                          )
+                        }
+                        disabled={actionLoading}
+                        style={{
+                          padding: "10px 16px",
+                          border: "none",
+                          borderRadius: "8px",
+                          backgroundColor: "#ef4444",
+                          color: "white",
+                          cursor: actionLoading
+                            ? "not-allowed"
+                            : "pointer",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ))}
@@ -415,7 +692,8 @@ export default function ManageAppointmentsPage() {
                       }}
                     >
                       <strong>
-                        {appointment.doctors?.name || "Doctor"}
+                        {appointment.doctors?.name ||
+                          "Doctor"}
                       </strong>
 
                       <span
@@ -424,7 +702,9 @@ export default function ManageAppointmentsPage() {
                           borderRadius: "15px",
                           fontSize: "12px",
                           fontWeight: "600",
-                          ...getStatusStyle(appointment.status),
+                          ...getStatusStyle(
+                            appointment.status
+                          ),
                         }}
                       >
                         {appointment.status}
@@ -432,18 +712,26 @@ export default function ManageAppointmentsPage() {
                     </div>
 
                     <p style={{ marginTop: "8px" }}>
-                      {formatDate(appointment.appointment_date)}
+                      {formatDate(
+                        appointment.appointment_date
+                      )}
                     </p>
 
                     <p style={{ marginTop: "5px" }}>
-                      {formatTime(appointment.start_time)}
+                      {formatTime(
+                        appointment.start_time
+                      )}
                     </p>
 
-                    {appointment.reason && (
-                      <p style={{ marginTop: "5px" }}>
-                        Reason: {appointment.reason}
-                      </p>
-                    )}
+                    <p
+                      style={{
+                        marginTop: "5px",
+                        color: "#666",
+                      }}
+                    >
+                      {appointment.reason ||
+                        "No reason provided"}
+                    </p>
                   </div>
                 ))}
               </div>
