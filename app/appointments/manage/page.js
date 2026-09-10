@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import AppLayout from "@/components/AppLayout";
 
 export default function ManageAppointmentsPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function ManageAppointmentsPage() {
     }, 60000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadAppointments() {
@@ -47,6 +49,8 @@ export default function ManageAppointmentsPage() {
         status,
         created_at,
         doctor_id,
+        waiting_time,
+        consultation_fee,
         doctors (
           name,
           specialization
@@ -95,13 +99,10 @@ export default function ManageAppointmentsPage() {
       String(now.getSeconds()).padStart(2, "0");
 
     for (const appointment of data) {
-      const appointmentDate = appointment.appointment_date;
-      const appointmentTime = appointment.end_time;
-
       const isExpired =
-        appointmentDate < currentDate ||
-        (appointmentDate === currentDate &&
-          appointmentTime <= currentTime);
+        appointment.appointment_date < currentDate ||
+        (appointment.appointment_date === currentDate &&
+          appointment.end_time <= currentTime);
 
       if (!isExpired) continue;
 
@@ -122,22 +123,20 @@ export default function ManageAppointmentsPage() {
       if (updateError) {
         console.error(
           "Failed to update appointment:",
-          appointment.id,
           updateError.message
         );
       }
     }
   }
 
-  async function updateStatus(id, newStatus) {
+  async function confirmAppointment(id) {
     if (actionLoading) return;
 
-    const message =
-      newStatus === "Confirmed"
-        ? "Are you sure you want to confirm this appointment?"
-        : "Are you sure you want to mark this appointment as completed?";
+    const confirmed = window.confirm(
+      "Are you sure you want to confirm this appointment?"
+    );
 
-    if (!window.confirm(message)) return;
+    if (!confirmed) return;
 
     setActionLoading(true);
 
@@ -153,14 +152,55 @@ export default function ManageAppointmentsPage() {
     const { error } = await supabase
       .from("appointments")
       .update({
-        status: newStatus,
+        status: "Confirmed",
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .eq("patient_id", user.id);
+      .eq("patient_id", user.id)
+      .eq("status", "Pending");
 
     if (error) {
-      alert("Failed to update appointment: " + error.message);
+      alert("Failed to confirm appointment: " + error.message);
+      setActionLoading(false);
+      return;
+    }
+
+    await loadAppointments();
+    setActionLoading(false);
+  }
+
+  async function completeAppointment(id) {
+    if (actionLoading) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to mark this appointment as completed?"
+    );
+
+    if (!confirmed) return;
+
+    setActionLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({
+        status: "Completed",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .eq("patient_id", user.id)
+      .eq("status", "Confirmed");
+
+    if (error) {
+      alert("Failed to complete appointment: " + error.message);
       setActionLoading(false);
       return;
     }
@@ -172,13 +212,11 @@ export default function ManageAppointmentsPage() {
   async function cancelAppointment(id) {
     if (actionLoading) return;
 
-    if (
-      !window.confirm(
-        "Are you sure you want to cancel this appointment?"
-      )
-    ) {
-      return;
-    }
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this appointment?"
+    );
+
+    if (!confirmed) return;
 
     setActionLoading(true);
 
@@ -198,7 +236,8 @@ export default function ManageAppointmentsPage() {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .eq("patient_id", user.id);
+      .eq("patient_id", user.id)
+      .in("status", ["Pending", "Confirmed"]);
 
     if (error) {
       alert("Failed to cancel appointment: " + error.message);
@@ -213,13 +252,11 @@ export default function ManageAppointmentsPage() {
   async function removeDoctorFromAppointment(id) {
     if (actionLoading) return;
 
-    if (
-      !window.confirm(
-        "Remove this doctor from your pending appointment and choose another doctor?"
-      )
-    ) {
-      return;
-    }
+    const confirmed = window.confirm(
+      "Remove this appointment so you can choose another doctor?"
+    );
+
+    if (!confirmed) return;
 
     setActionLoading(true);
 
@@ -241,8 +278,7 @@ export default function ManageAppointmentsPage() {
 
     if (error) {
       alert(
-        "Failed to remove doctor from appointment: " +
-          error.message
+        "Failed to remove appointment: " + error.message
       );
       setActionLoading(false);
       return;
@@ -258,51 +294,58 @@ export default function ManageAppointmentsPage() {
   }
 
   function getStatusStyle(status) {
-    if (status === "Pending") {
-      return {
-        backgroundColor: "#fef3c7",
-        color: "#92400e",
-      };
-    }
+    switch (status) {
+      case "Pending":
+        return {
+          backgroundColor: "#fff7ed",
+          color: "#c2410c",
+          border: "1px solid #fed7aa",
+        };
 
-    if (status === "Confirmed") {
-      return {
-        backgroundColor: "#dcfce7",
-        color: "#166534",
-      };
-    }
+      case "Confirmed":
+        return {
+          backgroundColor: "#ecfdf5",
+          color: "#047857",
+          border: "1px solid #a7f3d0",
+        };
 
-    if (status === "Completed") {
-      return {
-        backgroundColor: "#dbeafe",
-        color: "#1e40af",
-      };
-    }
+      case "Completed":
+        return {
+          backgroundColor: "rgba(59,130,246,0.12)",
+          color: "#93c5fd",
+          border: "1px solid rgba(59,130,246,0.25)",
+        };
 
-    if (status === "Cancelled") {
-      return {
-        backgroundColor: "#fee2e2",
-        color: "#991b1b",
-      };
-    }
+      case "Cancelled":
+        return {
+          backgroundColor: "rgba(244,63,94,0.12)",
+          color: "#fda4af",
+          border: "1px solid #fecaca",
+        };
 
-    if (status === "Expired") {
-      return {
-        backgroundColor: "#f3f4f6",
-        color: "#4b5563",
-      };
-    }
+      case "Expired":
+        return {
+          backgroundColor: "rgba(15,23,42,0.55)",
+          color: "#94a3b8",
+          border: "1px solid rgba(255,255,255,0.12)",
+        };
 
-    return {
-      backgroundColor: "#e5e7eb",
-      color: "#374151",
-    };
+      default:
+        return {
+          backgroundColor: "rgba(15,23,42,0.55)",
+          color: "#e2e8f0",
+          border: "1px solid rgba(255,255,255,0.12)",
+        };
+    }
   }
 
   function formatDate(date) {
+    if (!date) return "N/A";
+
     return new Date(
       date + "T00:00:00"
     ).toLocaleDateString("en-US", {
+      weekday: "short",
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -310,12 +353,28 @@ export default function ManageAppointmentsPage() {
   }
 
   function formatTime(time) {
+    if (!time) return "N/A";
+
     return new Date(
       `1970-01-01T${time}`
     ).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
     });
+  }
+
+  function formatFee(fee) {
+    if (fee === null || fee === undefined) {
+      return "₱0.00";
+    }
+
+    return (
+      "₱" +
+      Number(fee).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+    );
   }
 
   const activeAppointments = appointments.filter(
@@ -332,29 +391,35 @@ export default function ManageAppointmentsPage() {
       appointment.status === "Expired"
   );
 
+  const pendingCount = appointments.filter(
+    (appointment) => appointment.status === "Pending"
+  ).length;
+
+  const confirmedCount = appointments.filter(
+    (appointment) => appointment.status === "Confirmed"
+  ).length;
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px",
-        backgroundColor: "#f5f7fb",
-      }}
-    >
+    <AppLayout title="My Appointments" subtitle="View and manage your appointments" activeNav="appointments-manage">
       <div
         style={{
-          maxWidth: "1000px",
+          maxWidth: "1100px",
           margin: "0 auto",
         }}
       >
         <button
           onClick={() => router.push("/dashboard")}
           style={{
-            marginBottom: "25px",
-            padding: "10px 16px",
             border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#e5e7eb",
+            backgroundColor: "rgba(15,23,42,0.6)",
+            color: "#e2e8f0",
+            padding: "10px 16px",
+            borderRadius: "9px",
+            fontSize: "14px",
+            fontWeight: "600",
             cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            marginBottom: "24px",
           }}
         >
           ← Back to Dashboard
@@ -362,17 +427,15 @@ export default function ManageAppointmentsPage() {
 
         <div
           style={{
-            backgroundColor: "white",
-            padding: "30px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+            marginBottom: "28px",
           }}
         >
           <h1
             style={{
-              fontSize: "30px",
-              fontWeight: "700",
-              marginBottom: "8px",
+              fontSize: "32px",
+              fontWeight: "800",
+              margin: 0,
+              color: "#f1f5f9",
             }}
           >
             My Appointments
@@ -380,82 +443,329 @@ export default function ManageAppointmentsPage() {
 
           <p
             style={{
-              color: "#666",
-              marginBottom: "30px",
+              marginTop: "8px",
+              marginBottom: 0,
+              color: "#94a3b8",
+              fontSize: "15px",
             }}
           >
-            View and manage your appointments.
+            View, edit, and manage your clinic appointments.
           </p>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "16px",
+            marginBottom: "28px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "rgba(15,23,42,0.6)",
+              borderRadius: "14px",
+              padding: "20px",
+              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              border: "1px solid #eef0f4",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: "#94a3b8",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              Total Appointments
+            </p>
+
+            <h2
+              style={{
+                margin: "8px 0 0",
+                fontSize: "28px",
+                color: "#f1f5f9",
+              }}
+            >
+              {appointments.length}
+            </h2>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: "rgba(15,23,42,0.6)",
+              borderRadius: "14px",
+              padding: "20px",
+              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              border: "1px solid #eef0f4",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: "#94a3b8",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              Pending
+            </p>
+
+            <h2
+              style={{
+                margin: "8px 0 0",
+                fontSize: "28px",
+                color: "#c2410c",
+              }}
+            >
+              {pendingCount}
+            </h2>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: "rgba(15,23,42,0.6)",
+              borderRadius: "14px",
+              padding: "20px",
+              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              border: "1px solid #eef0f4",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: "#94a3b8",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              Confirmed
+            </p>
+
+            <h2
+              style={{
+                margin: "8px 0 0",
+                fontSize: "28px",
+                color: "#047857",
+              }}
+            >
+              {confirmedCount}
+            </h2>
+          </div>
+
+          <div
+            style={{
+              backgroundColor: "rgba(15,23,42,0.6)",
+              borderRadius: "14px",
+              padding: "20px",
+              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              border: "1px solid #eef0f4",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: "#94a3b8",
+                fontSize: "13px",
+                fontWeight: "600",
+              }}
+            >
+              History
+            </p>
+
+            <h2
+              style={{
+                margin: "8px 0 0",
+                fontSize: "28px",
+                color: "#e2e8f0",
+              }}
+            >
+              {historyAppointments.length}
+            </h2>
+          </div>
+        </div>
+
+        <section
+          style={{
+            backgroundColor: "rgba(15,23,42,0.6)",
+            borderRadius: "16px",
+            padding: "28px",
+            boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
+            border: "1px solid #edf0f4",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "15px",
+              flexWrap: "wrap",
+              marginBottom: "24px",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "22px",
+                  fontWeight: "750",
+                  color: "#f1f5f9",
+                }}
+              >
+                Active Appointments
+              </h2>
+
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  color: "#94a3b8",
+                  fontSize: "14px",
+                }}
+              >
+                Your upcoming appointments.
+              </p>
+            </div>
+
+            <button
+              onClick={() => router.push("/appointments")}
+              style={{
+                border: "none",
+                borderRadius: "9px",
+                padding: "11px 17px",
+                backgroundColor: "#2563eb",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "650",
+                cursor: "pointer",
+              }}
+            >
+              + Book Appointment
+            </button>
+          </div>
 
           {loading ? (
-            <p>Loading appointments...</p>
+            <div
+              style={{
+                padding: "50px 20px",
+                textAlign: "center",
+                color: "#94a3b8",
+              }}
+            >
+              Loading appointments...
+            </div>
           ) : activeAppointments.length === 0 ? (
             <div
               style={{
-                padding: "30px",
+                padding: "50px 20px",
                 textAlign: "center",
-                backgroundColor: "#f9fafb",
-                borderRadius: "10px",
+                backgroundColor: "rgba(15,23,42,0.55)",
+                borderRadius: "12px",
+                border: "1px dashed #d1d5db",
               }}
             >
-              <p style={{ color: "#666" }}>
-                You have no active appointments.
+              <div
+                style={{
+                  fontSize: "40px",
+                  marginBottom: "12px",
+                }}
+              >
+                📅
+              </div>
+
+              <h3
+                style={{
+                  margin: 0,
+                  color: "#f1f5f9",
+                  fontSize: "18px",
+                }}
+              >
+                No active appointments
+              </h3>
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "8px 0 18px",
+                }}
+              >
+                You currently have no upcoming appointments.
               </p>
 
               <button
                 onClick={() => router.push("/appointments")}
                 style={{
-                  marginTop: "15px",
-                  padding: "10px 18px",
                   border: "none",
-                  borderRadius: "8px",
+                  borderRadius: "9px",
+                  padding: "11px 18px",
                   backgroundColor: "#2563eb",
                   color: "white",
+                  fontWeight: "600",
                   cursor: "pointer",
                 }}
               >
-                Book Appointment
+                Book an Appointment
               </button>
             </div>
           ) : (
             <div
               style={{
                 display: "grid",
-                gap: "20px",
+                gap: "18px",
               }}
             >
               {activeAppointments.map((appointment) => (
                 <div
                   key={appointment.id}
                   style={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "10px",
-                    padding: "20px",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: "14px",
+                    padding: "22px",
+                    backgroundColor: "rgba(15,23,42,0.6)",
                   }}
                 >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "15px",
+                      alignItems: "flex-start",
+                      gap: "15px",
+                      flexWrap: "wrap",
+                      marginBottom: "18px",
                     }}
                   >
-                    <h2
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: "700",
-                      }}
-                    >
-                      {appointment.doctors?.name || "Doctor"}
-                    </h2>
+                    <div>
+                      <h3
+                        style={{
+                          margin: 0,
+                          fontSize: "20px",
+                          fontWeight: "750",
+                          color: "#f1f5f9",
+                        }}
+                      >
+                        {appointment.doctors?.name || "Doctor"}
+                      </h3>
+
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#94a3b8",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {appointment.doctors?.specialization ||
+                          "General Practice"}
+                      </p>
+                    </div>
 
                     <span
                       style={{
-                        padding: "6px 12px",
-                        borderRadius: "20px",
-                        fontSize: "13px",
-                        fontWeight: "600",
+                        padding: "7px 13px",
+                        borderRadius: "999px",
+                        fontSize: "12px",
+                        fontWeight: "700",
                         ...getStatusStyle(
                           appointment.status
                         ),
@@ -465,65 +775,177 @@ export default function ManageAppointmentsPage() {
                     </span>
                   </div>
 
-                  <p style={{ color: "#555" }}>
-                    Specialization:{" "}
-                    {appointment.doctors?.specialization ||
-                      "N/A"}
-                  </p>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(180px, 1fr))",
+                      gap: "14px",
+                      padding: "18px",
+                      backgroundColor: "rgba(15,23,42,0.55)",
+                      borderRadius: "11px",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#94a3b8",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        DATE
+                      </p>
 
-                  <p style={{ marginTop: "8px" }}>
-                    Date:{" "}
-                    <strong>
-                      {formatDate(
-                        appointment.appointment_date
-                      )}
-                    </strong>
-                  </p>
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#f1f5f9",
+                          fontWeight: "650",
+                        }}
+                      >
+                        {formatDate(
+                          appointment.appointment_date
+                        )}
+                      </p>
+                    </div>
 
-                  <p style={{ marginTop: "8px" }}>
-                    Time:{" "}
-                    <strong>
-                      {formatTime(
-                        appointment.start_time
-                      )}
-                    </strong>
-                  </p>
+                    <div>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#94a3b8",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        TIME
+                      </p>
 
-                  <p style={{ marginTop: "8px" }}>
-                    Reason:{" "}
-                    <strong>
-                      {appointment.reason || "None"}
-                    </strong>
-                  </p>
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#f1f5f9",
+                          fontWeight: "650",
+                        }}
+                      >
+                        {formatTime(
+                          appointment.start_time
+                        )}{" "}
+                        -{" "}
+                        {formatTime(
+                          appointment.end_time
+                        )}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#94a3b8",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        WAITING TIME
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#f1f5f9",
+                          fontWeight: "650",
+                        }}
+                      >
+                        {appointment.waiting_time ||
+                          10}{" "}
+                        minutes
+                      </p>
+                    </div>
+
+                    <div>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#94a3b8",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        CONSULTATION FEE
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#f1f5f9",
+                          fontWeight: "650",
+                        }}
+                      >
+                        {formatFee(
+                          appointment.consultation_fee
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#94a3b8",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      REASON FOR APPOINTMENT
+                    </p>
+
+                    <p
+                      style={{
+                        margin: "6px 0 0",
+                        color: "#e2e8f0",
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      {appointment.reason ||
+                        "No reason provided"}
+                    </p>
+                  </div>
 
                   <div
                     style={{
                       display: "flex",
                       flexWrap: "wrap",
-                      gap: "10px",
-                      marginTop: "20px",
+                      gap: "9px",
                     }}
                   >
                     {appointment.status === "Pending" && (
                       <>
                         <button
                           onClick={() =>
-                            updateStatus(
-                              appointment.id,
-                              "Confirmed"
+                            confirmAppointment(
+                              appointment.id
                             )
                           }
                           disabled={actionLoading}
                           style={{
-                            padding: "10px 16px",
+                            padding: "10px 15px",
                             border: "none",
                             borderRadius: "8px",
                             backgroundColor: "#16a34a",
                             color: "white",
+                            fontWeight: "650",
                             cursor: actionLoading
                               ? "not-allowed"
                               : "pointer",
-                            fontWeight: "600",
                           }}
                         >
                           Confirm
@@ -537,15 +959,15 @@ export default function ManageAppointmentsPage() {
                           }
                           disabled={actionLoading}
                           style={{
-                            padding: "10px 16px",
+                            padding: "10px 15px",
                             border: "none",
                             borderRadius: "8px",
                             backgroundColor: "#2563eb",
                             color: "white",
+                            fontWeight: "650",
                             cursor: actionLoading
                               ? "not-allowed"
                               : "pointer",
-                            fontWeight: "600",
                           }}
                         >
                           Edit
@@ -559,15 +981,17 @@ export default function ManageAppointmentsPage() {
                           }
                           disabled={actionLoading}
                           style={{
-                            padding: "10px 16px",
+                            padding: "10px 15px",
                             border: "none",
                             borderRadius: "8px",
-                            backgroundColor: "#dc2626",
-                            color: "white",
+                            backgroundColor: "rgba(15,23,42,0.55)",
+                            color: "#dc2626",
+                            border:
+                              "1px solid #fecaca",
+                            fontWeight: "650",
                             cursor: actionLoading
                               ? "not-allowed"
                               : "pointer",
-                            fontWeight: "600",
                           }}
                         >
                           Remove Doctor
@@ -578,25 +1002,24 @@ export default function ManageAppointmentsPage() {
                     {appointment.status === "Confirmed" && (
                       <button
                         onClick={() =>
-                          updateStatus(
-                            appointment.id,
-                            "Completed"
+                          completeAppointment(
+                            appointment.id
                           )
                         }
                         disabled={actionLoading}
                         style={{
-                          padding: "10px 16px",
+                          padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
                           backgroundColor: "#2563eb",
                           color: "white",
+                          fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"
                             : "pointer",
-                          fontWeight: "600",
                         }}
                       >
-                        Complete
+                        Mark Completed
                       </button>
                     )}
 
@@ -609,11 +1032,14 @@ export default function ManageAppointmentsPage() {
                         }
                         disabled={actionLoading}
                         style={{
-                          padding: "10px 16px",
+                          padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
-                          backgroundColor: "#6b7280",
-                          color: "white",
+                          backgroundColor: "rgba(15,23,42,0.55)",
+                          color: "#e2e8f0",
+                          border:
+                            "1px solid #d1d5db",
+                          fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"
                             : "pointer",
@@ -623,8 +1049,8 @@ export default function ManageAppointmentsPage() {
                       </button>
                     )}
 
-                    {appointment.status === "Pending" ||
-                    appointment.status === "Confirmed" ? (
+                    {(appointment.status === "Pending" ||
+                      appointment.status === "Confirmed") && (
                       <button
                         onClick={() =>
                           cancelAppointment(
@@ -633,11 +1059,14 @@ export default function ManageAppointmentsPage() {
                         }
                         disabled={actionLoading}
                         style={{
-                          padding: "10px 16px",
+                          padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
-                          backgroundColor: "#ef4444",
-                          color: "white",
+                          backgroundColor: "rgba(244,63,94,0.12)",
+                          color: "#dc2626",
+                          border:
+                            "1px solid #fecaca",
+                          fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"
                             : "pointer",
@@ -645,100 +1074,144 @@ export default function ManageAppointmentsPage() {
                       >
                         Cancel
                       </button>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </section>
 
-          <div style={{ marginTop: "40px" }}>
+        <section
+          style={{
+            backgroundColor: "rgba(15,23,42,0.6)",
+            borderRadius: "16px",
+            padding: "28px",
+            boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
+            border: "1px solid #edf0f4",
+            marginTop: "24px",
+          }}
+        >
+          <div style={{ marginBottom: "20px" }}>
             <h2
               style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                marginBottom: "15px",
+                margin: 0,
+                fontSize: "22px",
+                fontWeight: "750",
+                color: "#f1f5f9",
               }}
             >
               Appointment History
             </h2>
 
-            {historyAppointments.length === 0 ? (
-              <p style={{ color: "#666" }}>
-                No appointment history yet.
-              </p>
-            ) : (
-              <div
-                style={{
-                  display: "grid",
-                  gap: "15px",
-                }}
-              >
-                {historyAppointments.map((appointment) => (
+            <p
+              style={{
+                margin: "6px 0 0",
+                color: "#94a3b8",
+                fontSize: "14px",
+              }}
+            >
+              Your completed, cancelled, and expired appointments.
+            </p>
+          </div>
+
+          {historyAppointments.length === 0 ? (
+            <div
+              style={{
+                padding: "30px",
+                textAlign: "center",
+                backgroundColor: "rgba(15,23,42,0.55)",
+                borderRadius: "11px",
+                color: "#94a3b8",
+              }}
+            >
+              No appointment history yet.
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gap: "12px",
+              }}
+            >
+              {historyAppointments.map((appointment) => (
+                <div
+                  key={appointment.id}
+                  style={{
+                    padding: "17px",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: "11px",
+                    backgroundColor: "rgba(15,23,42,0.55)",
+                  }}
+                >
                   <div
-                    key={appointment.id}
                     style={{
-                      padding: "18px",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "10px",
-                      backgroundColor: "#fafafa",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "15px",
+                      flexWrap: "wrap",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <strong>
+                    <div>
+                      <strong
+                        style={{
+                          color: "#f1f5f9",
+                          fontSize: "15px",
+                        }}
+                      >
                         {appointment.doctors?.name ||
                           "Doctor"}
                       </strong>
 
-                      <span
+                      <p
                         style={{
-                          padding: "5px 10px",
-                          borderRadius: "15px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          ...getStatusStyle(
-                            appointment.status
-                          ),
+                          margin: "5px 0 0",
+                          color: "#94a3b8",
+                          fontSize: "13px",
                         }}
                       >
-                        {appointment.status}
-                      </span>
+                        {appointment.doctors?.specialization ||
+                          "N/A"}
+                      </p>
+
+                      <p
+                        style={{
+                          margin: "5px 0 0",
+                          color: "#e2e8f0",
+                          fontSize: "13px",
+                        }}
+                      >
+                        {formatDate(
+                          appointment.appointment_date
+                        )}{" "}
+                        •{" "}
+                        {formatTime(
+                          appointment.start_time
+                        )}
+                      </p>
                     </div>
 
-                    <p style={{ marginTop: "8px" }}>
-                      {formatDate(
-                        appointment.appointment_date
-                      )}
-                    </p>
-
-                    <p style={{ marginTop: "5px" }}>
-                      {formatTime(
-                        appointment.start_time
-                      )}
-                    </p>
-
-                    <p
+                    <span
                       style={{
-                        marginTop: "5px",
-                        color: "#666",
+                        padding: "6px 11px",
+                        borderRadius: "999px",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        ...getStatusStyle(
+                          appointment.status
+                        ),
                       }}
                     >
-                      {appointment.reason ||
-                        "No reason provided"}
-                    </p>
+                      {appointment.status}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-    </main>
+    </AppLayout>
   );
 }

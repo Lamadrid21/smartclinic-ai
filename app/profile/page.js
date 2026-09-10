@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import AppLayout from "@/components/AppLayout";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -9,8 +11,10 @@ export default function Profile() {
   const [phone, setPhone] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     loadProfile();
   }, []);
 
@@ -44,41 +48,34 @@ export default function Profile() {
   }
 
   async function uploadImage(event) {
-  const file = event.target.files?.[0];
+    const file = event.target.files?.[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
 
-  console.log("Current User:", currentUser);
+    const fileName = `${currentUser.id}-${Date.now()}`;
 
-  const fileName = `${currentUser.id}-${Date.now()}`;
+    const result = await supabase.storage
+      .from("avatars")
+      .upload(fileName, file);
 
-  const result = await supabase.storage
-  .from("avatars")
-  .upload(fileName, file);
+    if (result.error) {
+      alert(result.error.message);
+      return;
+    }
 
-console.log(result);
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(fileName);
 
-if (result.error) {
-  console.error(result.error);
-  alert(result.error.message);
-}
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage
-    .from("avatars")
-    .getPublicUrl(fileName);
-
-  console.log("PUBLIC URL:", publicUrl);
-
-  setAvatarUrl(publicUrl);
-
-  alert("Upload success");
-}
+    setAvatarUrl(publicUrl);
+    alert("Upload success");
+  }
 
   async function saveProfile() {
     if (!user) {
@@ -86,7 +83,7 @@ if (result.error) {
       return;
     }
 
-    console.log("Saving avatar:", avatarUrl);
+    setSaving(true);
 
     const { error } = await supabase
       .from("profiles")
@@ -99,68 +96,77 @@ if (result.error) {
 
     if (error) {
       alert(error.message);
+      setSaving(false);
       return;
     }
 
     alert("Profile updated successfully.");
+    setSaving(false);
   }
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <h1 className="text-2xl">Loading...</h1>
-      </main>
+      <AppLayout title="My Profile" subtitle="Loading..." activeNav="profile">
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
+          <p className="text-slate-400 text-sm">Loading profile...</p>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 flex justify-center p-10">
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-[600px]">
-        <h1 className="text-3xl font-bold text-blue-600 mb-6">
-          My Profile
-        </h1>
+    <AppLayout title="My Profile" subtitle="Manage your personal information" activeNav="profile">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Profile Card */}
+        <div className="glass-card p-6 rounded-2xl text-center h-fit">
+          <div className="flex flex-col items-center">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Profile" className="w-28 h-28 rounded-full object-cover ring-2 ring-blue-500/30" /> // eslint-disable-line @next/next/no-img-element
+            ) : (
+              <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold ring-2 ring-blue-500/30">
+                {(fullName || user?.email || "U").charAt(0).toUpperCase()}
+              </div>
+            )}
+            <h2 className="mt-4 text-lg font-bold text-white">{fullName || "Clinic Staff"}</h2>
+            <p className="text-xs text-slate-400 mt-1">{user?.email}</p>
+            <label className="mt-4 inline-block cursor-pointer">
+              <span className="btn-secondary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M15.5 8.5L12 5l-3.5 3.5"/><path d="M12 5v12"/></svg>
+                Upload Photo
+              </span>
+              <input type="file" accept="image/*" onChange={uploadImage} className="hidden" />
+            </label>
+          </div>
+        </div>
 
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt="Profile"
-            className="w-32 h-32 rounded-full object-cover mb-4"
-          />
-        )}
-
-        <input
-          type="file"
-          onChange={uploadImage}
-          className="mb-4"
-        />
-
-        <input
-          className="w-full border p-3 rounded-xl mb-4"
-          placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        />
-
-        <input
-          className="w-full border p-3 rounded-xl mb-4"
-          placeholder="Phone Number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-
-        {user && (
-          <p className="mb-4 text-gray-600">
-            Email: {user.email}
-          </p>
-        )}
-
-        <button
-          onClick={saveProfile}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700"
-        >
-          Save Profile
-        </button>
+        {/* Edit Form */}
+        <div className="glass-card p-6 rounded-2xl lg:col-span-2">
+          <h2 className="text-lg font-bold text-white mb-6">Personal Information</h2>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Full Name</label>
+              <input className="glass-input w-full rounded-xl px-4 py-3 text-sm" placeholder="Dr. Juan Dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Phone Number</label>
+              <input className="glass-input w-full rounded-xl px-4 py-3 text-sm" placeholder="+63 9XX XXX XXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Email Address</label>
+              <input className="glass-input w-full rounded-xl px-4 py-3 text-sm opacity-60 cursor-not-allowed" value={user?.email || ""} disabled />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button onClick={saveProfile} disabled={saving} className="btn-primary px-6 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50">
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <Link href="/change-password" className="btn-secondary px-6 py-2.5 rounded-xl text-sm font-medium">
+                Change Password
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </AppLayout>
   );
 }

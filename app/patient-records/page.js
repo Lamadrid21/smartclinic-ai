@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
+import AppLayout from "@/components/AppLayout";
 
 export default function PatientRecordsPage() {
   const router = useRouter();
@@ -481,829 +482,206 @@ export default function PatientRecordsPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px",
-        backgroundColor: "#f5f7fb",
-        fontFamily:
-          "Arial, sans-serif",
-      }}
+    <AppLayout
+      title="Patient Records"
+      subtitle="Search, view, edit, archive, and restore patient records"
+      activeNav="patients"
     >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        <button
-          onClick={() =>
-            router.push("/dashboard")
-          }
-          style={{
-            marginBottom: "25px",
-            padding: "10px 16px",
-            border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#e5e7eb",
-            cursor: "pointer",
-            fontWeight: "600",
-            color: "#111827",
-          }}
-        >
-          ← Back to Dashboard
-        </button>
-
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: "30px",
-            borderRadius: "14px",
-            boxShadow:
-              "0 4px 15px rgba(0,0,0,0.08)",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "30px",
-              fontWeight: "700",
-              marginBottom: "8px",
-              color: "#111827",
-            }}
-          >
-            Patient Records
-          </h1>
-
-          <p
-            style={{
-              color: "#666",
-              marginBottom: "25px",
-            }}
-          >
-            Search, view, edit, archive,
-            and restore patient records.
-          </p>
-
+      {/* SEARCH */}
+      <div className="mb-6">
+        <div className="relative">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
           <input
             type="text"
-            placeholder="Search patient by name, ID, contact, or email..."
+            placeholder="Search by name, ID, contact, or email..."
             value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-            style={{
-              width: "100%",
-              padding: "13px",
-              marginBottom: "25px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              color: "#111827",
-              outline: "none",
-              boxSizing: "border-box",
-            }}
+            onChange={(event) => setSearch(event.target.value)}
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-blue-500/50 transition-colors"
           />
-
-          <h2
-            style={{
-              fontSize: "22px",
-              marginBottom: "15px",
-              color: "#111827",
-            }}
-          >
-            Active Patients
-          </h2>
-
-          {loading ? (
-            <p>Loading patients...</p>
-          ) : filteredPatients.length ===
-            0 ? (
-            <div
-              style={{
-                padding: "30px",
-                textAlign: "center",
-                backgroundColor:
-                  "#f9fafb",
-                borderRadius: "10px",
-              }}
-            >
-              <p
-                style={{
-                  color: "#666",
-                }}
-              >
-                No active patient
-                records found.
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                overflowX: "auto",
-              }}
-            >
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse:
-                    "collapse",
-                }}
-              >
-                <thead>
-                  <tr
-                    style={{
-                      backgroundColor:
-                        "#f3f4f6",
-                    }}
-                  >
-                    <th
-                      style={headerStyle}
-                    >
-                      Patient ID
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
-                      Name
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
-                      Age
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
-                      Gender
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
-                      Contact
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredPatients.map(
-                    (patient) => (
-                      <tr
-                        key={patient.id}
-                      >
-                        <td
-                          style={cellStyle}
-                        >
-                          {patient.patient_number ||
-                            "N/A"}
-                        </td>
-
-                        <td
-                          style={cellStyle}
-                        >
-                          {patient.first_name ||
-                            ""}{" "}
-                          {patient.middle_name ||
-                            ""}{" "}
-                          {patient.last_name ||
-                            ""}
-                        </td>
-
-                        <td
-                          style={cellStyle}
-                        >
-                          {calculateAge(
-                            patient.date_of_birth
-                          )}
-                        </td>
-
-                        <td
-                          style={cellStyle}
-                        >
-                          {patient.gender ||
-                            "N/A"}
-                        </td>
-
-                        <td
-                          style={cellStyle}
-                        >
-                          {patient.contact_number ||
-                            "N/A"}
-                        </td>
-
-                        <td
-                          style={cellStyle}
-                        >
-                          <div
-                            style={{
-                              display:
-                                "flex",
-                              flexWrap:
-                                "wrap",
-                              gap: "8px",
-                            }}
-                          >
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  `/patient-records/${patient.id}`
-                                )
-                              }
-                              style={{
-                                ...buttonStyle,
-                                backgroundColor:
-                                  "#2563eb",
-                              }}
-                            >
-                              View
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                startEdit(
-                                  patient
-                                )
-                              }
-                              style={{
-                                ...buttonStyle,
-                                backgroundColor:
-                                  "#16a34a",
-                              }}
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                archivePatient(
-                                  patient.id
-                                )
-                              }
-                              style={{
-                                ...buttonStyle,
-                                backgroundColor:
-                                  "#dc2626",
-                              }}
-                            >
-                              Archive
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <div
-            style={{
-              marginTop: "45px",
-              paddingTop: "30px",
-              borderTop:
-                "1px solid #e5e7eb",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "22px",
-                marginBottom: "8px",
-                color: "#111827",
-              }}
-            >
-              Archived Patients
-            </h2>
-
-            <p
-              style={{
-                color: "#666",
-                marginBottom: "20px",
-              }}
-            >
-              Patients with is_archived =
-              true appear here.
-            </p>
-
-            {loadingArchived ? (
-              <p>
-                Loading archived
-                patients...
-              </p>
-            ) : filteredArchivedPatients.length ===
-              0 ? (
-              <div
-                style={{
-                  padding: "25px",
-                  textAlign:
-                    "center",
-                  backgroundColor:
-                    "#f9fafb",
-                  borderRadius: "10px",
-                }}
-              >
-                <p
-                  style={{
-                    color: "#666",
-                  }}
-                >
-                  No archived
-                  patients.
-                </p>
-              </div>
-            ) : (
-              <div
-                style={{
-                  overflowX: "auto",
-                }}
-              >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse:
-                      "collapse",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        backgroundColor:
-                          "#f3f4f6",
-                      }}
-                    >
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Patient ID
-                      </th>
-
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Name
-                      </th>
-
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Age
-                      </th>
-
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Gender
-                      </th>
-
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Contact
-                      </th>
-
-                      <th
-                        style={
-                          headerStyle
-                        }
-                      >
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filteredArchivedPatients.map(
-                      (patient) => (
-                        <tr
-                          key={
-                            patient.id
-                          }
-                        >
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            {patient.patient_number ||
-                              "N/A"}
-                          </td>
-
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            {patient.first_name ||
-                              ""}{" "}
-                            {patient.middle_name ||
-                              ""}{" "}
-                            {patient.last_name ||
-                              ""}
-                          </td>
-
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            {calculateAge(
-                              patient.date_of_birth
-                            )}
-                          </td>
-
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            {patient.gender ||
-                              "N/A"}
-                          </td>
-
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            {patient.contact_number ||
-                              "N/A"}
-                          </td>
-
-                          <td
-                            style={
-                              cellStyle
-                            }
-                          >
-                            <button
-                              onClick={() =>
-                                restorePatient(
-                                  patient.id
-                                )
-                              }
-                              style={{
-                                ...buttonStyle,
-                                backgroundColor:
-                                  "#16a34a",
-                              }}
-                            >
-                              Restore
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
         </div>
+      </div>
 
-        {editingPatient && (
-          <div
-            style={{
-              marginTop: "25px",
-              backgroundColor: "white",
-              padding: "30px",
-              borderRadius: "14px",
-              boxShadow:
-                "0 4px 15px rgba(0,0,0,0.08)",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                marginBottom:
-                  "25px",
-                color: "#111827",
-              }}
-            >
-              Edit Patient
-            </h2>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "18px",
-              }}
-            >
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Patient Number
-                </label>
-
-                <input
-                  name="patient_number"
-                  value={
-                    editingPatient.patient_number
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  First Name
-                </label>
-
-                <input
-                  name="first_name"
-                  value={
-                    editingPatient.first_name
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Middle Name
-                </label>
-
-                <input
-                  name="middle_name"
-                  value={
-                    editingPatient.middle_name
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Last Name
-                </label>
-
-                <input
-                  name="last_name"
-                  value={
-                    editingPatient.last_name
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Date of Birth
-                </label>
-
-                <input
-                  type="date"
-                  name="date_of_birth"
-                  value={
-                    editingPatient.date_of_birth
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Gender
-                </label>
-
-                <select
-                  name="gender"
-                  value={
-                    editingPatient.gender
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                >
-                  <option value="">
-                    Select Gender
-                  </option>
-
-                  <option value="Male">
-                    Male
-                  </option>
-
-                  <option value="Female">
-                    Female
-                  </option>
-
-                  <option value="Other">
-                    Other
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Contact Number
-                </label>
-
-                <input
-                  name="contact_number"
-                  value={
-                    editingPatient.contact_number
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-
-              <div>
-                <label
-                  style={
-                    labelStyle
-                  }
-                >
-                  Email
-                </label>
-
-                <input
-                  type="email"
-                  name="email"
-                  value={
-                    editingPatient.email
-                  }
-                  onChange={
-                    handleEditChange
-                  }
-                  style={
-                    inputStyle
-                  }
-                />
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "25px",
-              }}
-            >
-              <button
-                onClick={
-                  saveEdit
-                }
-                disabled={
-                  saving
-                }
-                style={{
-                  ...buttonStyle,
-                  backgroundColor:
-                    "#16a34a",
-                  padding:
-                    "11px 20px",
-                  opacity:
-                    saving
-                      ? 0.6
-                      : 1,
-                }}
-              >
-                {saving
-                  ? "Saving..."
-                  : "Save Changes"}
-              </button>
-
-              <button
-                onClick={() =>
-                  setEditingPatient(
-                    null
-                  )
-                }
-                disabled={
-                  saving
-                }
-                style={{
-                  ...buttonStyle,
-                  backgroundColor:
-                    "#6b7280",
-                  padding:
-                    "11px 20px",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
+      {/* ACTIVE PATIENTS TABLE */}
+      <div className="glass-card rounded-2xl overflow-hidden mb-8">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h2 className="text-base font-bold text-white">Active Patients</h2>
+        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16 gap-3">
+            <div className="w-5 h-5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <span className="text-sm text-slate-400">Loading patients...</span>
+          </div>
+        ) : filteredPatients.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-slate-400 text-sm">No active patient records found.</p>
+          </div>
+          ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-3 font-semibold">Patient ID</th>
+                  <th className="px-6 py-3 font-semibold">Name</th>
+                  <th className="px-6 py-3 font-semibold">Age</th>
+                  <th className="px-6 py-3 font-semibold">Gender</th>
+                  <th className="px-6 py-3 font-semibold">Contact</th>
+                  <th className="px-6 py-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {filteredPatients.map((patient) => (
+                  <tr key={patient.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.patient_number || "N/A"}</td>
+                    <td className="px-6 py-3.5 text-white font-medium whitespace-nowrap">
+                      {patient.first_name || ""}{" "}{patient.middle_name || ""}{" "}{patient.last_name || ""}
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{calculateAge(patient.date_of_birth)}</td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.gender || "N/A"}</td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.contact_number || "N/A"}</td>
+                    <td className="px-6 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => router.push(`/patient-records/${patient.id}`)}
+                          className="px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-400 text-xs font-semibold hover:bg-blue-600/20 transition-colors"
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => startEdit(patient)}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-600/20 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => archivePatient(patient.id)}
+                          className="px-3 py-1.5 rounded-lg bg-rose-600/10 border border-rose-500/20 text-rose-400 text-xs font-semibold hover:bg-rose-600/20 transition-colors"
+                        >
+                          Archive
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-    </main>
+
+      {/* ARCHIVED PATIENTS TABLE */}
+      <div className="glass-card rounded-2xl overflow-hidden mb-8">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h2 className="text-base font-bold text-white">Archived Patients</h2>
+        </div>
+        {loadingArchived ? (
+          <div className="flex items-center justify-center py-16 gap-3">
+            <div className="w-5 h-5 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <span className="text-sm text-slate-400">Loading archived patients...</span>
+          </div>
+        ) : filteredArchivedPatients.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-slate-400 text-sm">No archived patients.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-3 font-semibold">Patient ID</th>
+                  <th className="px-6 py-3 font-semibold">Name</th>
+                  <th className="px-6 py-3 font-semibold">Age</th>
+                  <th className="px-6 py-3 font-semibold">Gender</th>
+                  <th className="px-6 py-3 font-semibold">Contact</th>
+                  <th className="px-6 py-3 font-semibold">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {filteredArchivedPatients.map((patient) => (
+                  <tr key={patient.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.patient_number || "N/A"}</td>
+                    <td className="px-6 py-3.5 text-white font-medium whitespace-nowrap">
+                      {patient.first_name || ""}{" "}{patient.middle_name || ""}{" "}{patient.last_name || ""}
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{calculateAge(patient.date_of_birth)}</td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.gender || "N/A"}</td>
+                    <td className="px-6 py-3.5 text-slate-300 whitespace-nowrap">{patient.contact_number || "N/A"}</td>
+                    <td className="px-6 py-3.5 whitespace-nowrap">
+                      <button
+                        onClick={() => restorePatient(patient.id)}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold hover:bg-emerald-600/20 transition-colors"
+                      >
+                        Restore
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* EDIT PATIENT PANEL */}
+      {editingPatient && (
+        <div className="glass-card rounded-2xl p-6 sm:p-8">
+          <h2 className="text-lg font-bold text-white mb-6">Edit Patient</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { name: "patient_number", label: "Patient Number", type: "text" },
+              { name: "first_name", label: "First Name", type: "text" },
+              { name: "middle_name", label: "Middle Name", type: "text" },
+              { name: "last_name", label: "Last Name", type: "text" },
+              { name: "date_of_birth", label: "Date of Birth", type: "date" },
+              { name: "contact_number", label: "Contact Number", type: "text" },
+              { name: "email", label: "Email", type: "email" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">{field.label}</label>
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={editingPatient[field.name]}
+                  onChange={handleEditChange}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 outline-none focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+            ))}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Gender</label>
+              <select
+                name="gender"
+                value={editingPatient.gender}
+                onChange={handleEditChange}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 outline-none focus:border-blue-500/50 transition-colors"
+              >
+                <option value="" className="bg-slate-900">Select gender</option>
+                <option value="Male" className="bg-slate-900">Male</option>
+                <option value="Female" className="bg-slate-900">Female</option>
+                <option value="Other" className="bg-slate-900">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              onClick={saveEdit}
+              disabled={saving}
+              className={`px-5 py-2.5 rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 text-sm font-semibold hover:bg-emerald-600/20 transition-colors ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            <button
+              onClick={() => setEditingPatient(null)}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-300 text-sm font-semibold hover:bg-white/[0.08] transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </AppLayout>
   );
 }
-
-const headerStyle = {
-  textAlign: "left",
-  padding: "13px",
-  borderBottom: "1px solid #ddd",
-  color: "#374151",
-};
-
-const cellStyle = {
-  padding: "13px",
-  borderBottom: "1px solid #eee",
-  color: "#111827",
-};
-
-const buttonStyle = {
-  padding: "8px 13px",
-  border: "none",
-  borderRadius: "7px",
-  color: "white",
-  cursor: "pointer",
-  fontWeight: "600",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "7px",
-  fontWeight: "600",
-  color: "#374151",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "11px",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  color: "#111827",
-  backgroundColor: "white",
-  boxSizing: "border-box",
-};

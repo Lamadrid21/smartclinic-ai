@@ -1,40 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "../../lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import AppLayout from "@/components/AppLayout";
 
-export default function AppointmentsPage() {
+function AppointmentsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [loading, setLoading] = useState(true);
-
   const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedTime, setSelectedTime] = useState("");
-  const [loadingTimes, setLoadingTimes] = useState(false);
-
   const [reason, setReason] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [loadingTimes, setLoadingTimes] = useState(false);
   const [booking, setBooking] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const [activeTab, setActiveTab] = useState("book");
+
+  const [rescheduleId, setRescheduleId] = useState(null);
 
   const SHORTEST_WAITING_TIME = 5;
   const AVERAGE_WAITING_TIME = 10;
   const LONGEST_WAITING_TIME = 30;
 
   useEffect(() => {
+    getUser();
     fetchDoctors();
-  }, []);
+
+    const reschedule = searchParams.get("reschedule");
+
+    if (reschedule) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRescheduleId(reschedule);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedDoctor && selectedDate) {
       fetchAvailableTimes();
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvailableTimes([]);
       setSelectedTime("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDoctor, selectedDate]);
+
+  async function getUser() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    setUser(user);
+  }
 
   async function fetchDoctors() {
     setLoading(true);
@@ -116,6 +140,20 @@ export default function AppointmentsPage() {
       )
     );
 
+    if (rescheduleId) {
+      const { data: currentAppointment } = await supabase
+        .from("appointments")
+        .select("start_time")
+        .eq("id", rescheduleId)
+        .single();
+
+      if (currentAppointment) {
+        bookedTimes.delete(
+          currentAppointment.start_time.slice(0, 5)
+        );
+      }
+    }
+
     const times = [];
 
     for (const schedule of scheduleData) {
@@ -148,12 +186,44 @@ export default function AppointmentsPage() {
 
   function getEndTime(startTime) {
     const [hour, minute] = startTime.split(":").map(Number);
-    const endHour = hour + 1;
 
-    return `${String(endHour).padStart(
+    const date = new Date();
+    date.setHours(hour);
+    date.setMinutes(minute);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    date.setHours(date.getHours() + 1);
+
+    return `${String(date.getHours()).padStart(
       2,
       "0"
-    )}:${String(minute).padStart(2, "0")}:00`;
+    )}:${String(date.getMinutes()).padStart(2, "0")}:00`;
+  }
+
+  function getConsultationFee(specialization) {
+    const value = specialization?.toLowerCase().trim();
+
+    if (value === "general medicine") {
+      return 500;
+    }
+
+    if (value === "pediatrics") {
+      return 800;
+    }
+
+    if (value === "dermatology") {
+      return 1000;
+    }
+
+    if (value === "cardiology") {
+      return 1500;
+    }
+
+    if (value === "neurology") {
+      return 700;
+    }
+
+    return 0;
   }
 
   async function confirmAppointment() {
@@ -165,11 +235,11 @@ export default function AppointmentsPage() {
     setBooking(true);
 
     const {
-      data: { user },
+      data: { user: currentUser },
       error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (userError || !currentUser) {
       alert("Please login first.");
       setBooking(false);
       router.push("/login");
@@ -182,7 +252,7 @@ export default function AppointmentsPage() {
     } = await supabase
       .from("profiles")
       .select("id")
-      .eq("id", user.id)
+      .eq("id", currentUser.id)
       .single();
 
     if (profileError || !profile) {
@@ -210,14 +280,21 @@ export default function AppointmentsPage() {
         "Could not check appointment availability: " +
           existingError.message
       );
-
       setBooking(false);
       return;
     }
 
+    const isSameRescheduledAppointment =
+      rescheduleId &&
+      existingAppointment?.some(
+        (appointment) =>
+          String(appointment.id) === String(rescheduleId)
+      );
+
     if (
       existingAppointment &&
-      existingAppointment.length > 0
+      existingAppointment.length > 0 &&
+      !isSameRescheduledAppointment
     ) {
       alert(
         "This time slot is already booked. Please select another time."
@@ -237,55 +314,69 @@ export default function AppointmentsPage() {
       selectedDoctorData?.name || "Doctor";
 
     const patientName =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.user_metadata?.display_name ||
-      user.email?.split("@")[0] ||
+      currentUser.user_metadata?.full_name ||
+      currentUser.user_metadata?.name ||
+      currentUser.user_metadata?.display_name ||
+      currentUser.email?.split("@")[0] ||
       "Patient";
 
-    let consultationFee = 0;
-
-    const specialization =
+    const consultationFee = getConsultationFee(
       selectedDoctorData?.specialization
-        ?.toLowerCase()
-        .trim();
+    );
 
-    if (specialization === "general medicine") {
-      consultationFee = 500;
-    } else if (specialization === "pediatrics") {
-      consultationFee = 800;
-    } else if (specialization === "dermatology") {
-      consultationFee = 1000;
-    } else if (specialization === "cardiology") {
-      consultationFee = 1500;
-    } else if (specialization === "neurology") {
-      consultationFee = 700;
-    }
+    let appointmentId = rescheduleId;
 
-    const { error } = await supabase
-      .from("appointments")
-      .insert({
-        patient_id: profile.id,
-        doctor_id: Number(selectedDoctor),
-        appointment_date: selectedDate,
-        start_time: selectedTime + ":00",
-        end_time: endTime,
-        reason: reason || null,
-        status: "Pending",
-        waiting_time: AVERAGE_WAITING_TIME,
-        consultation_fee: consultationFee,
-      })
-      .select()
-      .single();
+    if (rescheduleId) {
+      const { error: updateError } = await supabase
+        .from("appointments")
+        .update({
+          doctor_id: Number(selectedDoctor),
+          appointment_date: selectedDate,
+          start_time: selectedTime + ":00",
+          end_time: endTime,
+          reason: reason || null,
+          consultation_fee: consultationFee,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", rescheduleId)
+        .eq("patient_id", profile.id);
 
-    if (error) {
-      alert(
-        "Failed to save appointment: " +
-          error.message
-      );
+      if (updateError) {
+        alert(
+          "Failed to reschedule appointment: " +
+            updateError.message
+        );
+        setBooking(false);
+        return;
+      }
+    } else {
+      const { data: insertedAppointment, error } =
+        await supabase
+          .from("appointments")
+          .insert({
+            patient_id: profile.id,
+            doctor_id: Number(selectedDoctor),
+            appointment_date: selectedDate,
+            start_time: selectedTime + ":00",
+            end_time: endTime,
+            reason: reason || null,
+            status: "Pending",
+            waiting_time: AVERAGE_WAITING_TIME,
+            consultation_fee: consultationFee,
+          })
+          .select()
+          .single();
 
-      setBooking(false);
-      return;
+      if (error) {
+        alert(
+          "Failed to save appointment: " +
+            error.message
+        );
+        setBooking(false);
+        return;
+      }
+
+      appointmentId = insertedAppointment?.id;
     }
 
     try {
@@ -297,7 +388,7 @@ export default function AppointmentsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: user.email,
+            email: currentUser.email,
             patientName: patientName,
             doctorName: doctorName,
             appointmentDate: selectedDate,
@@ -316,7 +407,10 @@ export default function AppointmentsPage() {
         );
 
         alert(
-          "Appointment successfully booked, but the email confirmation could not be sent.\n\n" +
+          (rescheduleId
+            ? "Appointment successfully rescheduled"
+            : "Appointment successfully booked") +
+            ", but the email confirmation could not be sent.\n\n" +
             "Reason: " +
             (emailResult.error || "Unknown error")
         );
@@ -332,7 +426,10 @@ export default function AppointmentsPage() {
       );
 
       alert(
-        "Appointment successfully booked, but there was a problem sending the email."
+        (rescheduleId
+          ? "Appointment successfully rescheduled"
+          : "Appointment successfully booked") +
+          ", but there was a problem sending the email."
       );
 
       setBooking(false);
@@ -341,7 +438,10 @@ export default function AppointmentsPage() {
     }
 
     alert(
-      "Appointment successfully booked!\n\n" +
+      (rescheduleId
+        ? "Appointment successfully rescheduled!"
+        : "Appointment successfully booked!") +
+        "\n\n" +
         "Expected Waiting Time: " +
         AVERAGE_WAITING_TIME +
         " minutes\n" +
@@ -355,11 +455,30 @@ export default function AppointmentsPage() {
         consultationFee.toLocaleString("en-PH") +
         "\n\n" +
         "Confirmation email sent to:\n" +
-        user.email
+        currentUser.email
     );
 
     setBooking(false);
-    router.push("/dashboard");
+
+    if (appointmentId) {
+      router.push("/appointments/manage");
+    } else {
+      router.push("/dashboard");
+    }
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
+  function goToTab(tab) {
+    if (tab === "manage") {
+      router.push("/appointments/manage");
+      return;
+    }
+
+    setActiveTab("book");
   }
 
   const selectedDoctorData = doctors.find(
@@ -373,352 +492,750 @@ export default function AppointmentsPage() {
   const selectedDoctorSpecialization =
     selectedDoctorData?.specialization || "";
 
-  let selectedConsultationFee = 0;
-
-  const selectedSpecialization =
+  const selectedConsultationFee = getConsultationFee(
     selectedDoctorSpecialization
-      .toLowerCase()
-      .trim();
+  );
 
-  if (selectedSpecialization === "general medicine") {
-    selectedConsultationFee = 500;
-  } else if (selectedSpecialization === "pediatrics") {
-    selectedConsultationFee = 800;
-  } else if (selectedSpecialization === "dermatology") {
-    selectedConsultationFee = 1000;
-  } else if (selectedSpecialization === "cardiology") {
-    selectedConsultationFee = 1500;
-  } else if (selectedSpecialization === "neurology") {
-    selectedConsultationFee = 700;
-  }
+  const today = new Date();
+
+  const minDate =
+    today.getFullYear() +
+    "-" +
+    String(today.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(today.getDate()).padStart(2, "0");
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px",
-        backgroundColor: "#f5f7fb",
-      }}
-    >
-      <div
+    <AppLayout title="Book Appointment" subtitle="Schedule your next clinic visit" activeNav="appointments">
+
+      <section
         style={{
-          maxWidth: "700px",
-          margin: "0 auto",
-          backgroundColor: "white",
-          padding: "30px",
-          borderRadius: "12px",
-          boxShadow:
-            "0 4px 15px rgba(0,0,0,0.08)",
+          flex: 1,
+          padding: "30px 38px 45px",
+          overflow: "auto",
         }}
       >
-        <button
-          onClick={() =>
-            router.push("/dashboard")
-          }
+        <header
           style={{
-            marginBottom: "20px",
-            padding: "8px 14px",
-            border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#e5e7eb",
-            cursor: "pointer",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "25px",
           }}
         >
-          ← Back to Dashboard
-        </button>
-
-        <h1 style={{ marginBottom: "10px" }}>
-          Appointment Booking
-        </h1>
-
-        <p
-          style={{
-            color: "#666",
-            marginBottom: "30px",
-          }}
-        >
-          Select your doctor, preferred
-          appointment date and time.
-        </p>
-
-        <div style={{ marginBottom: "25px" }}>
-          <label
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "8px",
-            }}
-          >
-            Select Doctor
-          </label>
-
-          {loading ? (
-            <p>Loading doctors...</p>
-          ) : (
-            <select
-              value={selectedDoctor}
-              onChange={(e) =>
-                setSelectedDoctor(e.target.value)
-              }
+          <div>
+            <h1
               style={{
-                width: "100%",
-                padding: "12px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                fontSize: "16px",
+                margin: 0,
+                fontSize: "32px",
+                fontWeight: "700",
+                color: "#e2e8f0",
               }}
             >
-              <option value="">
-                -- Select Doctor --
-              </option>
+              Appointments
+            </h1>
 
-              {doctors.map((doctor) => (
-                <option
-                  key={doctor.id}
-                  value={doctor.id}
-                >
-                  {doctor.name} -{" "}
-                  {doctor.specialization}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+            <p
+              style={{
+                marginTop: "7px",
+                marginBottom: 0,
+                color: "#64748b",
+                fontSize: "14px",
+              }}
+            >
+              Book and manage your clinic appointments.
+            </p>
+          </div>
 
-        <div style={{ marginBottom: "25px" }}>
-          <label
+          <div
             style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "25px",
             }}
           >
-            Select Date
-          </label>
-
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) =>
-              setSelectedDate(e.target.value)
-            }
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              fontSize: "16px",
-            }}
-          />
-        </div>
-
-        {selectedDoctor &&
-          selectedDate && (
             <div
               style={{
+                textAlign: "right",
+                fontSize: "11px",
+                color: "#64748b",
+                lineHeight: "1.5",
+              }}
+            >
+              <strong
+                style={{
+                  color: "#e2e8f0",
+                }}
+              >
+                📅{" "}
+                {today.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </strong>
+
+              <br />
+
+              {today.toLocaleDateString("en-US", {
+                weekday: "long",
+              })}{" "}
+              •{" "}
+              {today.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                paddingLeft: "15px",
+                borderLeft: "1px solid #dbe3ed",
+              }}
+            >
+              <div
+                style={{
+                  width: "38px",
+                  height: "38px",
+                  borderRadius: "50%",
+                  backgroundColor: "#dbeafe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "18px",
+                }}
+              >
+                👤
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    color: "#1e293b",
+                  }}
+                >
+                  {user?.user_metadata?.full_name ||
+                    user?.user_metadata?.name ||
+                    "Patient"}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#64748b",
+                  }}
+                >
+                  Patient
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div
+          style={{
+            borderBottom: "1px solid #dbe3ed",
+            marginBottom: "22px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: "5px",
+            }}
+          >
+            <button
+              onClick={() => goToTab("book")}
+              style={{
+                border: "none",
+                backgroundColor:
+                  activeTab === "book"
+                    ? "#2563eb"
+                    : "transparent",
+                color:
+                  activeTab === "book"
+                    ? "white"
+                    : "#475569",
+                padding: "11px 18px",
+                borderRadius: "7px 7px 0 0",
+                fontWeight: "600",
+                fontSize: "13px",
+                cursor: "pointer",
+              }}
+            >
+              Book Appointment
+            </button>
+
+            <button
+              onClick={() => goToTab("manage")}
+              style={{
+                border: "none",
+                backgroundColor: "transparent",
+                color: "#94a3b8",
+                padding: "11px 18px",
+                borderRadius: "7px 7px 0 0",
+                fontWeight: "600",
+                fontSize: "13px",
+                cursor: "pointer",
+              }}
+            >
+              My Appointments
+            </button>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "minmax(0, 2fr) minmax(300px, 0.85fr)",
+            gap: "22px",
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "rgba(15,23,42,0.6)",
+              border: "1px solid #dce5ef",
+              borderRadius: "10px",
+              padding: "25px",
+              boxShadow:
+                "0 2px 8px rgba(15, 23, 42, 0.04)",
+            }}
+          >
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "20px",
+                fontWeight: "700",
+                color: "#e2e8f0",
+              }}
+            >
+              {rescheduleId
+                ? "Reschedule Appointment"
+                : "Book an Appointment"}
+            </h2>
+
+            <p
+              style={{
+                marginTop: "7px",
                 marginBottom: "25px",
+                fontSize: "12px",
+                color: "#64748b",
+              }}
+            >
+              Select your preferred doctor, date, and appointment time.
+            </p>
+
+            <div
+              style={{
+                marginBottom: "19px",
               }}
             >
               <label
                 style={{
                   display: "block",
+                  fontSize: "12px",
                   fontWeight: "600",
-                  marginBottom: "8px",
+                  color: "#e2e8f0",
+                  marginBottom: "7px",
                 }}
               >
-                Select Time
+                Doctor
               </label>
 
-              {loadingTimes ? (
-                <p>
-                  Loading available times...
-                </p>
-              ) : availableTimes.length === 0 ? (
-                <p>
-                  No available time for this
-                  doctor on the selected day.
-                </p>
+              {loading ? (
+                <div
+                  style={{
+                    border: "1px solid #d5dee9",
+                    borderRadius: "7px",
+                    padding: "11px",
+                    color: "#64748b",
+                    fontSize: "13px",
+                  }}
+                >
+                  Loading doctors...
+                </div>
               ) : (
+                <select
+                  value={selectedDoctor}
+                  onChange={(e) =>
+                    setSelectedDoctor(e.target.value)
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "11px 12px",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "7px",
+                    fontSize: "13px",
+                    color: "#e2e8f0",
+                    backgroundColor: "rgba(15,23,42,0.6)",
+                    outline: "none",
+                  }}
+                >
+                  <option value="">
+                    Select a doctor
+                  </option>
+
+                  {doctors.map((doctor) => (
+                    <option
+                      key={doctor.id}
+                      value={doctor.id}
+                    >
+                      {doctor.name} - {doctor.specialization}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+                marginBottom: "19px",
+              }}
+            >
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: "#e2e8f0",
+                    marginBottom: "7px",
+                  }}
+                >
+                  Appointment Date
+                </label>
+
+                <input
+                  type="date"
+                  min={minDate}
+                  value={selectedDate}
+                  onChange={(e) =>
+                    setSelectedDate(e.target.value)
+                  }
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "11px 12px",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "7px",
+                    fontSize: "13px",
+                    color: "#e2e8f0",
+                    backgroundColor: "rgba(15,23,42,0.6)",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: "#e2e8f0",
+                    marginBottom: "7px",
+                  }}
+                >
+                  Appointment Time
+                </label>
+
                 <select
                   value={selectedTime}
                   onChange={(e) =>
                     setSelectedTime(e.target.value)
                   }
+                  disabled={
+                    !selectedDoctor ||
+                    !selectedDate ||
+                    loadingTimes
+                  }
                   style={{
                     width: "100%",
-                    padding: "12px",
-                    border:
-                      "1px solid #ccc",
+                    padding: "11px 12px",
+                    border: "1px solid rgba(255,255,255,0.12)",
                     borderRadius: "8px",
-                    fontSize: "16px",
+                    fontSize: "13px",
+                    color: "#cbd5e1",
+                    backgroundColor:
+                      !selectedDoctor ||
+                      !selectedDate
+                        ? "rgba(255,255,255,0.03)"
+                        : "rgba(255,255,255,0.06)",
                   }}
                 >
                   <option value="">
-                    -- Select Time --
+                    {loadingTimes
+                      ? "Loading times..."
+                      : "Select a time"}
                   </option>
 
-                  {availableTimes.map(
-                    (time) => (
-                      <option
-                        key={time}
-                        value={time}
-                      >
-                        {time}
-                      </option>
-                    )
-                  )}
+                  {availableTimes.map((time) => (
+                    <option
+                      key={time}
+                      value={time}
+                    >
+                      {new Date(
+                        `1970-01-01T${time}`
+                      ).toLocaleTimeString(
+                        "en-US",
+                        {
+                          hour: "numeric",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </option>
+                  ))}
                 </select>
-              )}
+              </div>
             </div>
-          )}
 
-        <div style={{ marginBottom: "25px" }}>
-          <label
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "8px",
-            }}
-          >
-            Reason
-          </label>
-
-          <textarea
-            value={reason}
-            onChange={(e) =>
-              setReason(e.target.value)
-            }
-            placeholder="Optional reason for appointment"
-            rows="3"
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              fontSize: "16px",
-              resize: "vertical",
-            }}
-          />
-        </div>
-
-        {selectedDoctor &&
-          selectedDate &&
-          selectedTime && (
             <div
               style={{
-                padding: "15px",
-                backgroundColor: "#f0f7ff",
-                borderRadius: "8px",
-                marginTop: "20px",
                 marginBottom: "20px",
               }}
             >
-              <strong>
-                Appointment Details
-              </strong>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  color: "#e2e8f0",
+                  marginBottom: "7px",
+                }}
+              >
+                Reason for Visit
+              </label>
 
-              <p style={{ marginTop: "10px" }}>
-                Doctor:{" "}
-                <strong>
-                  {selectedDoctorName}
-                </strong>
-              </p>
+              <textarea
+                value={reason}
+                onChange={(e) =>
+                  setReason(e.target.value)
+                }
+                placeholder="Describe the reason for your appointment..."
+                rows={4}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "12px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "7px",
+                  fontSize: "13px",
+                  color: "#e2e8f0",
+                  resize: "vertical",
+                  fontFamily: "inherit",
+                }}
+              />
+            </div>
 
-              <p>
-                Specialization:{" "}
-                <strong>
-                  {selectedDoctorSpecialization}
-                </strong>
-              </p>
+            {selectedDoctor &&
+              selectedDate &&
+              selectedTime && (
+                <div
+                  style={{
+                    padding: "14px",
+                    borderRadius: "8px",
+                    backgroundColor: "#f0f7ff",
+                    border: "1px solid #dbeafe",
+                    marginBottom: "18px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      color: "#1e40af",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Appointment Details
+                  </div>
 
-              <p>
-                Date:{" "}
-                <strong>
-                  {selectedDate}
-                </strong>
-              </p>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "7px 20px",
+                      fontSize: "12px",
+                      color: "#94a3b8",
+                    }}
+                  >
+                    <div>
+                      Doctor:{" "}
+                      <strong>
+                        {selectedDoctorName}
+                      </strong>
+                    </div>
 
-              <p>
-                Time:{" "}
-                <strong>
-                  {selectedTime}
-                </strong>
-              </p>
+                    <div>
+                      Specialization:{" "}
+                      <strong>
+                        {selectedDoctorSpecialization}
+                      </strong>
+                    </div>
 
-              <p>
-                Expected Waiting Time:{" "}
-                <strong>
-                  {AVERAGE_WAITING_TIME} minutes
-                </strong>
-              </p>
+                    <div>
+                      Date:{" "}
+                      <strong>
+                        {selectedDate}
+                      </strong>
+                    </div>
 
-              <p>
-                Possible Waiting Range:{" "}
-                <strong>
-                  {SHORTEST_WAITING_TIME}–{LONGEST_WAITING_TIME} minutes
-                </strong>
-              </p>
+                    <div>
+                      Time:{" "}
+                      <strong>
+                        {new Date(
+                          `1970-01-01T${selectedTime}`
+                        ).toLocaleTimeString(
+                          "en-US",
+                          {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </strong>
+                    </div>
 
-              <p>
-                Consultation Fee:{" "}
-                <strong>
-                  ₱
-                  {selectedConsultationFee.toLocaleString(
-                    "en-PH",
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}
-                </strong>
-              </p>
+                    <div>
+                      Consultation Fee:{" "}
+                      <strong>
+                        ₱
+                        {selectedConsultationFee.toLocaleString(
+                          "en-PH",
+                          {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              <p>
-                Reason:{" "}
-                <strong>
-                  {reason || "None"}
-                </strong>
+            <button
+              onClick={confirmAppointment}
+              disabled={
+                booking ||
+                !selectedDoctor ||
+                !selectedDate ||
+                !selectedTime
+              }
+              style={{
+                width: "100%",
+                border: "none",
+                borderRadius: "7px",
+                padding: "13px",
+                backgroundColor:
+                  booking ||
+                  !selectedDoctor ||
+                  !selectedDate ||
+                  !selectedTime
+                    ? "#9ca3af"
+                    : "#2563eb",
+                color: "white",
+                fontSize: "13px",
+                fontWeight: "700",
+                cursor:
+                  booking ||
+                  !selectedDoctor ||
+                  !selectedDate ||
+                  !selectedTime
+                    ? "not-allowed"
+                    : "pointer",
+              }}
+            >
+              {booking
+                ? "Processing..."
+                : rescheduleId
+                ? "Reschedule Appointment"
+                : "📅  Book Appointment"}
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "18px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "rgba(15,23,42,0.6)",
+                border: "1px solid #dce5ef",
+                borderRadius: "10px",
+                padding: "22px",
+                boxShadow:
+                  "0 2px 8px rgba(15, 23, 42, 0.04)",
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "17px",
+                  fontWeight: "700",
+                  color: "#e2e8f0",
+                }}
+              >
+                Estimated Waiting Time
+              </h2>
+
+              <div
+                style={{
+                  marginTop: "18px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom:
+                      "1px solid #edf2f7",
+                    fontSize: "12px",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#64748b",
+                    }}
+                  >
+                    Shortest
+                  </span>
+
+                  <strong
+                    style={{
+                      color: "#e2e8f0",
+                    }}
+                  >
+                    {SHORTEST_WAITING_TIME} min
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    borderBottom:
+                      "1px solid #edf2f7",
+                    fontSize: "12px",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#64748b",
+                    }}
+                  >
+                    Expected
+                  </span>
+
+                  <strong
+                    style={{
+                      color: "#60a5fa",
+                    }}
+                  >
+                    {AVERAGE_WAITING_TIME} min
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "12px 0",
+                    fontSize: "12px",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "#64748b",
+                    }}
+                  >
+                    Longest
+                  </span>
+
+                  <strong
+                    style={{
+                      color: "#e2e8f0",
+                    }}
+                  >
+                    {LONGEST_WAITING_TIME} min
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "rgba(16,185,129,0.12)",
+                border: "1px solid rgba(16,185,129,0.25)",
+                borderRadius: "10px",
+                padding: "18px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#34d399",
+                  marginBottom: "7px",
+                }}
+              >
+                💡 Appointment Tip
+              </div>
+
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "12px",
+                  lineHeight: "1.6",
+                  color: "#34d399",
+                }}
+              >
+                Please arrive a few minutes before
+                your scheduled appointment time.
               </p>
             </div>
-          )}
-
-        <button
-          onClick={confirmAppointment}
-          disabled={
-            booking ||
-            !selectedDoctor ||
-            !selectedDate ||
-            !selectedTime
-          }
+          </div>
+        </div>
+      </section>
+    </AppLayout>
+  );
+}
+export default function AppointmentsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
           style={{
-            width: "100%",
-            padding: "14px",
-            border: "none",
-            borderRadius: "8px",
-            backgroundColor:
-              booking ||
-              !selectedDoctor ||
-              !selectedDate ||
-              !selectedTime
-                ? "#9ca3af"
-                : "#2563eb",
-            color: "white",
-            fontSize: "16px",
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#090d16",
+            color: "#94a3b8",
+            fontSize: "14px",
             fontWeight: "600",
-            cursor:
-              booking ||
-              !selectedDoctor ||
-              !selectedDate ||
-              !selectedTime
-                ? "not-allowed"
-                : "pointer",
           }}
         >
-          {booking
-            ? "Booking..."
-            : "Confirm Appointment"}
-        </button>
-      </div>
-    </main>
+          Loading appointments...
+        </div>
+      }
+    >
+      <AppointmentsContent />
+    </Suspense>
   );
 }

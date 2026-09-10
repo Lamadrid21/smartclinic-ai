@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import AppLayout from "@/components/AppLayout";
 
 export default function ReportsPage() {
 const router = useRouter();
@@ -25,6 +26,7 @@ const [selectedDate, setSelectedDate] = useState(todayString);
 const [selectedMonth, setSelectedMonth] = useState(monthString);
 
 useEffect(() => {
+// eslint-disable-next-line react-hooks/immutability
 loadReports();
 }, []);
 
@@ -483,14 +485,7 @@ XLSX.writeFile(
 }
 
 return (
-<main
-style={{
-minHeight: "100vh",
-padding: "40px",
-backgroundColor: "#f5f7fb",
-fontFamily: "Arial, sans-serif",
-}}
->
+<AppLayout title="Reports & Analytics" subtitle="Daily, monthly, and annual clinic reports" activeNav="reports">
 <div
 style={{
 maxWidth: "1250px",
@@ -506,8 +501,8 @@ marginBottom: "25px",
 padding: "10px 16px",
 border: "none",
 borderRadius: "8px",
-backgroundColor: "#e5e7eb",
-color: "#111827",
+backgroundColor: "rgba(226,232,240,0.15)",
+color: "#f1f5f9",
 cursor: "pointer",
 fontWeight: "600",
 }}
@@ -517,7 +512,7 @@ fontWeight: "600",
 
     <div
       style={{
-        backgroundColor: "white",
+        backgroundColor: "rgba(15,23,42,0.6)",
         padding: "30px",
         borderRadius: "14px",
         boxShadow:
@@ -528,7 +523,7 @@ fontWeight: "600",
         style={{
           fontSize: "30px",
           fontWeight: "700",
-          color: "#111827",
+          color: "#f1f5f9",
           marginBottom: "8px",
         }}
       >
@@ -537,7 +532,7 @@ fontWeight: "600",
 
       <p
         style={{
-          color: "#666",
+          color: "#94a3b8",
           marginBottom: "30px",
         }}
       >
@@ -603,7 +598,7 @@ fontWeight: "600",
       <div
         style={{
           padding: "20px",
-          backgroundColor: "#f9fafb",
+          backgroundColor: "rgba(15,23,42,0.55)",
           borderRadius: "10px",
           marginBottom: "25px",
         }}
@@ -615,7 +610,7 @@ fontWeight: "600",
                 display: "block",
                 fontWeight: "600",
                 marginBottom: "8px",
-                color: "#374151",
+                color: "#e2e8f0",
               }}
             >
               Select Date
@@ -632,11 +627,11 @@ fontWeight: "600",
               style={{
                 padding: "11px",
                 border:
-                  "1px solid #ccc",
+                  "1px solid rgba(255,255,255,0.12)",
                 borderRadius: "8px",
-                color: "#111827",
+                color: "#e2e8f0",
                 backgroundColor:
-                  "white",
+                  "rgba(255,255,255,0.06)",
               }}
             />
           </div>
@@ -647,7 +642,7 @@ fontWeight: "600",
                 display: "block",
                 fontWeight: "600",
                 marginBottom: "8px",
-                color: "#374151",
+                color: "#e2e8f0",
               }}
             >
               Select Month
@@ -664,11 +659,11 @@ fontWeight: "600",
               style={{
                 padding: "11px",
                 border:
-                  "1px solid #ccc",
+                  "1px solid rgba(255,255,255,0.12)",
                 borderRadius: "8px",
-                color: "#111827",
+                color: "#e2e8f0",
                 backgroundColor:
-                  "white",
+                  "rgba(255,255,255,0.06)",
               }}
             />
           </div>
@@ -770,13 +765,14 @@ fontWeight: "600",
                 padding: "35px",
                 textAlign: "center",
                 backgroundColor:
-                  "#f9fafb",
+                  "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: "10px",
               }}
             >
               <p
                 style={{
-                  color: "#666",
+                  color: "#94a3b8",
                 }}
               >
                 No appointments found
@@ -801,7 +797,7 @@ fontWeight: "600",
                   <tr
                     style={{
                       backgroundColor:
-                        "#f3f4f6",
+                        "rgba(255,255,255,0.04)",
                     }}
                   >
                     <th
@@ -938,7 +934,7 @@ fontWeight: "600",
       )}
     </div>
   </div>
-</main>
+</AppLayout>
 
 
 );
@@ -952,8 +948,8 @@ return (
 <div
 style={{
 padding: "20px",
-backgroundColor: "#f9fafb",
-border: "1px solid #e5e7eb",
+backgroundColor: "rgba(15,23,42,0.55)",
+border: "1px solid rgba(255,255,255,0.12)",
 borderRadius: "10px",
 }}
 >
@@ -961,7 +957,7 @@ borderRadius: "10px",
 style={{
 margin: 0,
 marginBottom: "8px",
-color: "#6b7280",
+color: "#94a3b8",
 fontSize: "14px",
 }}
 >
@@ -971,7 +967,7 @@ fontSize: "14px",
   <h2
     style={{
       margin: 0,
-      color: "#111827",
+      color: "#f1f5f9",
       fontSize: "24px",
     }}
   >
@@ -986,14 +982,16 @@ fontSize: "14px",
 const headerStyle = {
 textAlign: "left",
 padding: "13px",
-borderBottom: "1px solid #ddd",
-color: "#374151",
+borderBottom: "1px solid rgba(255,255,255,0.08)",
+color: "#94a3b8",
+fontSize: "12px",
+fontWeight: "600",
 whiteSpace: "nowrap",
 };
 
 const cellStyle = {
 padding: "13px",
 borderBottom: "1px solid #eee",
-color: "#111827",
+color: "#f1f5f9",
 whiteSpace: "nowrap",
 };

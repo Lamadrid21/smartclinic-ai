@@ -2,31 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
 
-export default function EMRPage() {
+export default function PrescriptionsPage() {
   const params = useParams();
   const router = useRouter();
 
   const patientId = params.id;
 
   const [patient, setPatient] = useState(null);
-  const [emrRecords, setEmrRecords] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
 
-  const [diagnosis, setDiagnosis] = useState("");
-  const [treatmentNotes, setTreatmentNotes] = useState("");
-
-  const [editingId, setEditingId] = useState(null);
+  const [medicationName, setMedicationName] = useState("");
+  const [dosage, setDosage] = useState("");
+  const [frequency, setFrequency] = useState("");
+  const [duration, setDuration] = useState("");
+  const [instructions, setInstructions] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (patientId) {
       loadPatient();
-      loadEMR();
+      loadPrescriptions();
     }
   }, [patientId]);
 
@@ -38,513 +39,548 @@ export default function EMRPage() {
       .single();
 
     if (error) {
-      console.error("Patient error:", error);
-      setError("Unable to load patient information.");
+      console.error("Error loading patient:", error);
+      setMessage("Unable to load patient.");
       return;
     }
 
     setPatient(data);
   }
 
-  async function loadEMR() {
+  async function loadPrescriptions() {
     setLoading(true);
 
     const { data, error } = await supabase
-      .from("emr")
+      .from("prescriptions")
       .select("*")
       .eq("patient_id", patientId)
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("EMR error:", error);
-      setError("Unable to load EMR records.");
+      console.error("Error loading prescriptions:", error);
+      setMessage("Unable to load prescriptions.");
       setLoading(false);
       return;
     }
 
-    setEmrRecords(data || []);
+    setPrescriptions(data || []);
     setLoading(false);
   }
 
-  async function handleSubmit(e) {
+  async function handleCreatePrescription(e) {
     e.preventDefault();
 
     setMessage("");
-    setError("");
 
-    if (!diagnosis.trim()) {
-      setError("Please enter a diagnosis.");
-      return;
-    }
-
-    if (!treatmentNotes.trim()) {
-      setError("Please enter treatment notes.");
+    if (!medicationName || !dosage || !frequency || !duration) {
+      setMessage("Please fill in all required fields.");
       return;
     }
 
     setSaving(true);
 
-    /* =========================
-       UPDATE EXISTING EMR
-       ========================= */
-
-    if (editingId) {
-      const { data, error } = await supabase
-        .from("emr")
-        .update({
-          diagnosis: diagnosis.trim(),
-          treatment_notes: treatmentNotes.trim(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", editingId)
-        .eq("patient_id", patientId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Update EMR error:", error);
-        setError(error.message);
-        setSaving(false);
-        return;
-      }
-
-      setEmrRecords((previous) =>
-        previous.map((record) =>
-          record.id === editingId ? data : record
-        )
-      );
-
-      setDiagnosis("");
-      setTreatmentNotes("");
-      setEditingId(null);
-
-      setMessage("EMR updated successfully.");
-      setSaving(false);
-
-      return;
-    }
-
-    /* =========================
-       CREATE NEW EMR
-       ========================= */
-
     const { data, error } = await supabase
-      .from("emr")
+      .from("prescriptions")
       .insert([
         {
           patient_id: patientId,
-          diagnosis: diagnosis.trim(),
-          treatment_notes: treatmentNotes.trim(),
+          medication_name: medicationName.trim(),
+          dosage: dosage.trim(),
+          frequency: frequency.trim(),
+          duration: duration.trim(),
+          instructions: instructions.trim(),
         },
       ])
       .select()
       .single();
 
     if (error) {
-      console.error("Create EMR error:", error);
-      setError(error.message);
+      console.error("Error creating prescription:", error);
+      setMessage("Failed to create prescription.");
       setSaving(false);
       return;
     }
 
-    setEmrRecords((previous) => [data, ...previous]);
+    setPrescriptions((current) => [data, ...current]);
 
-    setDiagnosis("");
-    setTreatmentNotes("");
+    setMedicationName("");
+    setDosage("");
+    setFrequency("");
+    setDuration("");
+    setInstructions("");
 
-    setMessage("EMR created successfully.");
+    setMessage("Prescription created successfully.");
     setSaving(false);
   }
 
-  function handleEdit(record) {
-    setEditingId(record.id);
-    setDiagnosis(record.diagnosis || "");
-    setTreatmentNotes(record.treatment_notes || "");
+  function handleDownloadPDF(prescription) {
+    const doc = new jsPDF();
 
-    setMessage("");
-    setError("");
+    const patientName = patient
+      ? `${patient.first_name || ""} ${
+          patient.middle_name || ""
+        } ${patient.last_name || ""}`
+          .replace(/\s+/g, " ")
+          .trim()
+      : "Patient";
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
+    const patientNumber = patient?.patient_number || "N/A";
 
-  function handleCancelEdit() {
-    setEditingId(null);
-    setDiagnosis("");
-    setTreatmentNotes("");
+    const prescriptionDate = prescription.created_at
+      ? new Date(prescription.created_at).toLocaleDateString()
+      : "N/A";
 
-    setMessage("");
-    setError("");
+    // =========================
+    // HEADER
+    // =========================
+
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("SMARTCLINIC AI", 20, 25);
+
+    doc.setFontSize(16);
+    doc.text("PRESCRIPTION", 20, 40);
+
+    // =========================
+    // PATIENT INFORMATION
+    // =========================
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(`Patient: ${patientName}`, 20, 55);
+
+    doc.text(
+      `Patient Number: ${patientNumber}`,
+      20,
+      65
+    );
+
+    doc.text(
+      `Date: ${prescriptionDate}`,
+      20,
+      75
+    );
+
+    doc.line(20, 82, 190, 82);
+
+    // =========================
+    // MEDICATION
+    // =========================
+
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+
+    doc.text("Medication", 20, 100);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+
+    const medicationLines = doc.splitTextToSize(
+      `Medication: ${prescription.medication_name}`,
+      170
+    );
+
+    doc.text(medicationLines, 20, 115);
+
+    let currentY = 115 + medicationLines.length * 7;
+
+    const dosageLines = doc.splitTextToSize(
+      `Dosage: ${prescription.dosage}`,
+      170
+    );
+
+    doc.text(dosageLines, 20, currentY);
+
+    currentY += dosageLines.length * 7;
+
+    const frequencyLines = doc.splitTextToSize(
+      `Frequency: ${prescription.frequency}`,
+      170
+    );
+
+    doc.text(frequencyLines, 20, currentY);
+
+    currentY += frequencyLines.length * 7;
+
+    const durationLines = doc.splitTextToSize(
+      `Duration: ${prescription.duration}`,
+      170
+    );
+
+    doc.text(durationLines, 20, currentY);
+
+    currentY += durationLines.length * 7 + 8;
+
+    // =========================
+    // INSTRUCTIONS
+    // =========================
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Instructions:", 20, currentY);
+
+    currentY += 8;
+
+    doc.setFont("helvetica", "normal");
+
+    const instructionsText =
+      prescription.instructions || "None";
+
+    const instructionLines = doc.splitTextToSize(
+      instructionsText,
+      170
+    );
+
+    doc.text(instructionLines, 20, currentY);
+
+    currentY += instructionLines.length * 7 + 20;
+
+    // =========================
+    // PHYSICIAN AREA
+    // =========================
+
+    doc.line(20, currentY, 90, currentY);
+
+    doc.text(
+      "Prescribing Physician",
+      20,
+      currentY + 8
+    );
+
+    // =========================
+    // FOOTER
+    // =========================
+
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+
+    doc.text(
+      "Generated by SmartClinic AI",
+      20,
+      285
+    );
+
+    // =========================
+    // DOWNLOAD
+    // =========================
+
+    doc.save(
+      `Prescription-${patientNumber}.pdf`
+    );
   }
 
   return (
     <main
       style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: "32px",
+        padding: "40px",
+        maxWidth: "1000px",
+        margin: "0 auto",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      <div
+      {/* BACK BUTTON */}
+
+      <button
+        onClick={() =>
+          router.push(`/patient-records/${patientId}`)
+        }
         style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
+          marginBottom: "25px",
+          padding: "10px 16px",
+          border: "1px solid #ccc",
+          borderRadius: "6px",
+          background: "#fff",
+          cursor: "pointer",
         }}
       >
-        {/* Back Button */}
+        ← Back to Patient
+      </button>
 
-        <button
-          onClick={() =>
-            router.push(`/patient-records/${patientId}`)
-          }
+      {/* PATIENT INFORMATION */}
+
+      {patient && (
+        <div
           style={{
-            background: "#64748b",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            padding: "12px 20px",
-            fontSize: "16px",
-            cursor: "pointer",
-            marginBottom: "24px",
+            marginBottom: "30px",
+            padding: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            background: "#f8f9fa",
           }}
         >
-          ← Back to Patient
-        </button>
-
-        {/* Patient Header */}
-
-        <section
-          style={{
-            background: "white",
-            border: "1px solid #dbe3ef",
-            borderRadius: "18px",
-            padding: "34px",
-            marginBottom: "28px",
-          }}
-        >
-          <h1
-            style={{
-              color: "#173f91",
-              fontSize: "36px",
-              marginBottom: "14px",
-            }}
-          >
-            Electronic Medical Record
+          <h1 style={{ marginTop: 0 }}>
+            Prescriptions
           </h1>
 
-          {patient ? (
-            <>
-              <p
-                style={{
-                  fontSize: "20px",
-                  margin: "8px 0",
-                }}
-              >
-                <strong>Patient:</strong>{" "}
-                {patient.first_name}{" "}
-                {patient.middle_name
-                  ? patient.middle_name + " "
-                  : ""}
-                {patient.last_name}
-              </p>
+          <p>
+            <strong>Patient:</strong>{" "}
+            {patient.first_name}{" "}
+            {patient.middle_name || ""}{" "}
+            {patient.last_name}
+          </p>
 
-              <p
-                style={{
-                  fontSize: "20px",
-                  margin: "8px 0",
-                }}
-              >
-                <strong>Patient ID:</strong>{" "}
-                {patient.patient_number}
-              </p>
-            </>
-          ) : (
-            <p>Loading patient information...</p>
-          )}
-        </section>
+          <p>
+            <strong>Patient Number:</strong>{" "}
+            {patient.patient_number}
+          </p>
+        </div>
+      )}
 
-        {/* Create / Edit EMR Form */}
+      {/* CREATE PRESCRIPTION */}
 
-        <section
-          style={{
-            background: "white",
-            border: "1px solid #dbe3ef",
-            borderRadius: "18px",
-            padding: "34px",
-            marginBottom: "28px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "30px",
-              marginBottom: "24px",
-            }}
-          >
-            {editingId ? "Edit EMR" : "Create New EMR"}
-          </h2>
+      <section
+        style={{
+          marginBottom: "40px",
+          padding: "25px",
+          border: "1px solid #ddd",
+          borderRadius: "10px",
+        }}
+      >
+        <h2>Create Prescription</h2>
 
-          <form onSubmit={handleSubmit}>
-            {/* Diagnosis */}
+        <form onSubmit={handleCreatePrescription}>
+          {/* MEDICATION NAME */}
 
-            <label
-              style={{
-                display: "block",
-                fontWeight: "bold",
-                fontSize: "18px",
-                marginBottom: "8px",
-              }}
-            >
-              Diagnosis
+          <div style={{ marginBottom: "15px" }}>
+            <label>
+              <strong>Medication Name *</strong>
             </label>
 
             <input
               type="text"
-              value={diagnosis}
+              value={medicationName}
               onChange={(e) =>
-                setDiagnosis(e.target.value)
+                setMedicationName(e.target.value)
               }
-              placeholder="Enter diagnosis"
+              placeholder="e.g. Amoxicillin"
               style={{
                 width: "100%",
-                padding: "16px",
-                border: "1px solid #cbd5e1",
-                borderRadius: "10px",
-                fontSize: "17px",
-                marginBottom: "28px",
+                padding: "12px",
+                marginTop: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
               }}
             />
+          </div>
 
-            {/* Treatment Notes */}
+          {/* DOSAGE */}
 
-            <label
+          <div style={{ marginBottom: "15px" }}>
+            <label>
+              <strong>Dosage *</strong>
+            </label>
+
+            <input
+              type="text"
+              value={dosage}
+              onChange={(e) =>
+                setDosage(e.target.value)
+              }
+              placeholder="e.g. 500 mg"
               style={{
-                display: "block",
-                fontWeight: "bold",
-                fontSize: "18px",
-                marginBottom: "8px",
+                width: "100%",
+                padding: "12px",
+                marginTop: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
               }}
-            >
-              Treatment Notes
+            />
+          </div>
+
+          {/* FREQUENCY */}
+
+          <div style={{ marginBottom: "15px" }}>
+            <label>
+              <strong>Frequency *</strong>
+            </label>
+
+            <input
+              type="text"
+              value={frequency}
+              onChange={(e) =>
+                setFrequency(e.target.value)
+              }
+              placeholder="e.g. 3 times daily"
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginTop: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+              }}
+            />
+          </div>
+
+          {/* DURATION */}
+
+          <div style={{ marginBottom: "15px" }}>
+            <label>
+              <strong>Duration *</strong>
+            </label>
+
+            <input
+              type="text"
+              value={duration}
+              onChange={(e) =>
+                setDuration(e.target.value)
+              }
+              placeholder="e.g. 7 days"
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginTop: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+              }}
+            />
+          </div>
+
+          {/* INSTRUCTIONS */}
+
+          <div style={{ marginBottom: "20px" }}>
+            <label>
+              <strong>Instructions</strong>
             </label>
 
             <textarea
-              value={treatmentNotes}
+              value={instructions}
               onChange={(e) =>
-                setTreatmentNotes(e.target.value)
+                setInstructions(e.target.value)
               }
-              placeholder="Enter treatment notes"
-              rows={7}
+              placeholder="e.g. Take after meals."
+              rows={4}
               style={{
                 width: "100%",
-                padding: "16px",
-                border: "1px solid #cbd5e1",
-                borderRadius: "10px",
-                fontSize: "17px",
+                padding: "12px",
+                marginTop: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
                 resize: "vertical",
-                marginBottom: "20px",
               }}
             />
+          </div>
 
-            {/* Error */}
+          {/* CREATE BUTTON */}
 
-            {error && (
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "6px",
+              background: "#2563eb",
+              color: "white",
+              cursor: saving
+                ? "not-allowed"
+                : "pointer",
+            }}
+          >
+            {saving
+              ? "Saving..."
+              : "Create Prescription"}
+          </button>
+        </form>
+
+        {message && (
+          <p
+            style={{
+              marginTop: "15px",
+              fontWeight: "bold",
+            }}
+          >
+            {message}
+          </p>
+        )}
+      </section>
+
+      {/* PRESCRIPTION HISTORY */}
+
+      <section>
+        <h2>Prescription History</h2>
+
+        {loading ? (
+          <p>Loading prescriptions...</p>
+        ) : prescriptions.length === 0 ? (
+          <p>
+            No prescriptions found for this patient.
+          </p>
+        ) : (
+          <div>
+            {prescriptions.map((prescription) => (
               <div
+                key={prescription.id}
                 style={{
-                  background: "#fee2e2",
-                  color: "#991b1b",
-                  padding: "14px",
-                  borderRadius: "8px",
-                  marginBottom: "16px",
-                }}
-              >
-                {error}
-              </div>
-            )}
-
-            {/* Success */}
-
-            {message && (
-              <div
-                style={{
-                  background: "#dcfce7",
-                  color: "#166534",
-                  padding: "14px",
-                  borderRadius: "8px",
-                  marginBottom: "16px",
-                }}
-              >
-                {message}
-              </div>
-            )}
-
-            {/* Buttons */}
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                flexWrap: "wrap",
-              }}
-            >
-              <button
-                type="submit"
-                disabled={saving}
-                style={{
-                  background: "#173f91",
-                  color: "white",
-                  border: "none",
+                  marginBottom: "20px",
+                  padding: "20px",
+                  border: "1px solid #ddd",
                   borderRadius: "10px",
-                  padding: "14px 26px",
-                  fontSize: "17px",
-                  cursor: saving
-                    ? "not-allowed"
-                    : "pointer",
-                  opacity: saving ? 0.7 : 1,
                 }}
               >
-                {saving
-                  ? "Saving..."
-                  : editingId
-                  ? "Update EMR"
-                  : "Create EMR"}
-              </button>
+                <h3 style={{ marginTop: 0 }}>
+                  {prescription.medication_name}
+                </h3>
 
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
+                <p>
+                  <strong>Dosage:</strong>{" "}
+                  {prescription.dosage}
+                </p>
+
+                <p>
+                  <strong>Frequency:</strong>{" "}
+                  {prescription.frequency}
+                </p>
+
+                <p>
+                  <strong>Duration:</strong>{" "}
+                  {prescription.duration}
+                </p>
+
+                <p>
+                  <strong>Instructions:</strong>{" "}
+                  {prescription.instructions ||
+                    "None"}
+                </p>
+
+                <p
                   style={{
-                    background: "#64748b",
-                    color: "white",
+                    fontSize: "13px",
+                    color: "#666",
+                  }}
+                >
+                  Created:{" "}
+                  {prescription.created_at
+                    ? new Date(
+                        prescription.created_at
+                      ).toLocaleString()
+                    : "Date not available"}
+                </p>
+
+                {/* DOWNLOAD PDF BUTTON */}
+
+                <button
+                  onClick={() =>
+                    handleDownloadPDF(
+                      prescription
+                    )
+                  }
+                  style={{
+                    marginTop: "10px",
+                    padding: "10px 16px",
                     border: "none",
-                    borderRadius: "10px",
-                    padding: "14px 26px",
-                    fontSize: "17px",
+                    borderRadius: "6px",
+                    background: "#16a34a",
+                    color: "white",
                     cursor: "pointer",
                   }}
                 >
-                  Cancel Edit
+                  Download Prescription PDF
                 </button>
-              )}
-            </div>
-          </form>
-        </section>
-
-        {/* EMR History */}
-
-        <section
-          style={{
-            background: "white",
-            border: "1px solid #dbe3ef",
-            borderRadius: "18px",
-            padding: "34px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "30px",
-              marginBottom: "24px",
-            }}
-          >
-            EMR History
-          </h2>
-
-          {loading ? (
-            <p>Loading EMR records...</p>
-          ) : emrRecords.length === 0 ? (
-            <p
-              style={{
-                color: "#64748b",
-              }}
-            >
-              No EMR records yet.
-            </p>
-          ) : (
-            <div>
-              {emrRecords.map((record) => (
-                <div
-                  key={record.id}
-                  style={{
-                    border: "1px solid #dbe3ef",
-                    borderRadius: "12px",
-                    padding: "22px",
-                    marginBottom: "18px",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: "21px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    Diagnosis
-                  </h3>
-
-                  <p
-                    style={{
-                      marginBottom: "20px",
-                    }}
-                  >
-                    {record.diagnosis}
-                  </p>
-
-                  <h3
-                    style={{
-                      fontSize: "21px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    Treatment Notes
-                  </h3>
-
-                  <p
-                    style={{
-                      whiteSpace: "pre-wrap",
-                      marginBottom: "18px",
-                    }}
-                  >
-                    {record.treatment_notes}
-                  </p>
-
-                  <p
-                    style={{
-                      color: "#64748b",
-                      fontSize: "14px",
-                      marginBottom: "18px",
-                    }}
-                  >
-                    Created:{" "}
-                    {record.created_at
-                      ? new Date(
-                          record.created_at
-                        ).toLocaleString()
-                      : "Date not available"}
-                  </p>
-
-                  {/* Edit Button */}
-
-                  <button
-                    onClick={() => handleEdit(record)}
-                    style={{
-                      background: "#173f91",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      padding: "10px 18px",
-                      fontSize: "15px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Edit EMR
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

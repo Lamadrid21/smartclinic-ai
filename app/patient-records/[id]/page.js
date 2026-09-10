@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import AppLayout from "@/components/AppLayout";
 
 export default function PatientDetails() {
   const params = useParams();
@@ -61,7 +62,9 @@ export default function PatientDetails() {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/immutability
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function loadAll() {
@@ -522,15 +525,12 @@ export default function PatientDetails() {
 
   if (loading && !patient) {
     return (
-      <main
-        style={{
-          padding: "40px",
-          fontFamily:
-            "Arial, sans-serif",
-        }}
-      >
-        <p>Loading patient...</p>
-      </main>
+      <AppLayout title="Patient Details" subtitle="Medical history and patient information" activeNav="patients">
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
+          <p className="text-slate-400 text-sm">Loading patient records...</p>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -578,18 +578,12 @@ export default function PatientDetails() {
   // ==========================================
 
   return (
-    <main
-      style={{
-        padding: "40px",
-        maxWidth: "1200px",
-        margin: "0 auto",
-        fontFamily:
-          "Arial, sans-serif",
-        background:
-          "#f5f7fb",
-        minHeight: "100vh",
-      }}
+    <AppLayout
+      title="Patient Details"
+      subtitle="Medical history, appointments, and records"
+      activeNav="patients"
     >
+      <div style={{ padding: "20px 0" }}>
       {/* BACK BUTTON */}
 
       <button
@@ -604,7 +598,7 @@ export default function PatientDetails() {
           border:
             "1px solid #ccc",
           borderRadius: "6px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           cursor: "pointer",
         }}
       >
@@ -645,7 +639,7 @@ export default function PatientDetails() {
             border:
               "1px solid #86efac",
             borderRadius: "8px",
-            color: "#166534",
+            color: "#34d399",
           }}
         >
           {successMessage}
@@ -660,7 +654,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "30px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -758,7 +752,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -770,7 +764,7 @@ export default function PatientDetails() {
 
         <p>
           View and manage this
-          patient's EMR.
+          patient&apos;s EMR.
         </p>
 
         <button
@@ -802,7 +796,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -847,7 +841,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -892,7 +886,7 @@ export default function PatientDetails() {
               border:
                 "1px solid #ccc",
               borderRadius: "6px",
-              background: "white",
+              background: "rgba(15,23,42,0.6)",
               cursor: uploading
                 ? "not-allowed"
                 : "pointer",
@@ -903,7 +897,7 @@ export default function PatientDetails() {
             style={{
               marginTop: "8px",
               fontSize: "13px",
-              color: "#666",
+              color: "#94a3b8",
             }}
           >
             Maximum file size: 10 MB
@@ -912,7 +906,7 @@ export default function PatientDetails() {
           {uploading && (
             <p
               style={{
-                color: "#2563eb",
+                color: "#60a5fa",
                 fontWeight: "bold",
               }}
             >
@@ -1021,7 +1015,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -1296,7 +1290,7 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "white",
+          background: "rgba(15,23,42,0.6)",
           border:
             "1px solid #ddd",
           borderRadius: "12px",
@@ -1382,6 +1376,7 @@ export default function PatientDetails() {
           </div>
         )}
       </section>
-    </main>
+      </div>
+    </AppLayout>
   );
 }
