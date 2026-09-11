@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import AppLayout from "@/components/AppLayout";
 
-export default function PatientDetails() {
+export default function PatientDetailsPage() {
   const params = useParams();
   const router = useRouter();
-
   const id = params.id;
 
   const [patient, setPatient] = useState(null);
@@ -16,15 +14,11 @@ export default function PatientDetails() {
   const [medicalFiles, setMedicalFiles] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // ==========================================
-  // MEDICAL HISTORY FORM
-  // ==========================================
-
+  // Medical history form
   const [diagnosis, setDiagnosis] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -32,14 +26,12 @@ export default function PatientDetails() {
   const [allergies, setAllergies] = useState("");
   const [notes, setNotes] = useState("");
 
-  // ==========================================
-  // ERROR HELPER
-  // ==========================================
+  // Medical document upload
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   function getErrorMessage(error) {
-    if (!error) {
-      return "Unknown error";
-    }
+    if (!error) return "Unknown error";
 
     if (typeof error === "string") {
       return error;
@@ -53,36 +45,29 @@ export default function PatientDetails() {
     );
   }
 
-  // ==========================================
-  // LOAD ALL DATA
-  // ==========================================
-
   useEffect(() => {
-    if (!id) {
-      return;
-    }
+    if (!id) return;
 
-    // eslint-disable-next-line react-hooks/immutability
     loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function loadAll() {
     setLoading(true);
     setErrorMessage("");
 
-    await Promise.all([
-      loadPatient(),
-      loadMedicalHistory(),
-      loadMedicalFiles(),
-    ]);
-
-    setLoading(false);
+    try {
+      await Promise.all([
+        loadPatient(),
+        loadMedicalHistory(),
+        loadMedicalFiles(),
+      ]);
+    } catch (error) {
+      console.error("LOAD ERROR:", error);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   }
-
-  // ==========================================
-  // LOAD PATIENT
-  // ==========================================
 
   async function loadPatient() {
     const { data, error } = await supabase
@@ -93,97 +78,41 @@ export default function PatientDetails() {
 
     if (error) {
       console.error("PATIENT ERROR:", error);
-
-      setErrorMessage(
-        `Patient error: ${getErrorMessage(error)}`
-      );
-
-      return;
+      throw error;
     }
 
     setPatient(data);
   }
-
-  // ==========================================
-  // LOAD MEDICAL HISTORY
-  // ==========================================
 
   async function loadMedicalHistory() {
     const { data, error } = await supabase
       .from("medical_history")
       .select("*")
       .eq("patient_id", id)
-      .order("id", {
-        ascending: false,
-      });
+      .order("id", { ascending: false });
 
     if (error) {
-      console.error(
-        "MEDICAL HISTORY ERROR:",
-        error
-      );
-
-      setErrorMessage(
-        `Medical history error: ${getErrorMessage(error)}`
-      );
-
-      return;
+      console.error("MEDICAL HISTORY ERROR:", error);
+      throw error;
     }
 
     setMedicalHistory(data || []);
   }
 
-  // ==========================================
-  // LOAD MEDICAL FILES
-  // ==========================================
-
   async function loadMedicalFiles() {
-    console.log(
-      "Loading medical files for patient:",
-      id
-    );
-
-    // IMPORTANT:
-    // We use "id" for ordering.
-    //
-    // DO NOT use:
-    // .order("created_at")
-    //
-    // because your medical_files table
-    // does not have a created_at column.
-
     const { data, error } = await supabase
       .from("medical_files")
       .select("*")
       .eq("patient_id", id)
-      .order("id", {
-        ascending: false,
-      });
+      .order("id", { ascending: false });
 
     if (error) {
-      console.error(
-        "MEDICAL FILES ERROR:",
-        error
-      );
-
-      setErrorMessage(
-        `Medical files error: ${getErrorMessage(error)}`
-      );
-
-      return;
+      console.error("MEDICAL FILES ERROR:", error);
+      throw error;
     }
-
-    console.log(
-      "Medical files loaded:",
-      data
-    );
 
     setMedicalFiles(data || []);
   }
-
-  // ==========================================
-  // ADD MEDICAL HISTORY
-  // ==========================================
 
   async function handleAddMedicalHistory(e) {
     e.preventDefault();
@@ -192,240 +121,154 @@ export default function PatientDetails() {
     setSuccessMessage("");
 
     if (
-      !diagnosis.trim() &&
-      !symptoms.trim() &&
-      !treatment.trim() &&
-      !medications.trim() &&
-      !allergies.trim() &&
-      !notes.trim()
+      !diagnosis &&
+      !symptoms &&
+      !treatment &&
+      !medications &&
+      !allergies &&
+      !notes
     ) {
       setErrorMessage(
-        "Please enter at least one medical history field."
+        "Please enter at least one medical history detail."
       );
-
       return;
     }
-
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      setErrorMessage(
-        "You are not logged in. Please log in again."
-      );
-
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("medical_history")
-      .insert([
-        {
-          patient_id: id,
-          diagnosis: diagnosis.trim(),
-          symptoms: symptoms.trim(),
-          treatment: treatment.trim(),
-          medications: medications.trim(),
-          allergies: allergies.trim(),
-          notes: notes.trim(),
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error(
-        "ADD MEDICAL HISTORY ERROR:",
-        error
-      );
-
-      setErrorMessage(
-        `Medical history error: ${getErrorMessage(error)}`
-      );
-
-      return;
-    }
-
-    setMedicalHistory((current) => [
-      data,
-      ...current,
-    ]);
-
-    setDiagnosis("");
-    setSymptoms("");
-    setTreatment("");
-    setMedications("");
-    setAllergies("");
-    setNotes("");
-
-    setSuccessMessage(
-      "Medical history added successfully."
-    );
-  }
-
-  // ==========================================
-  // UPLOAD MEDICAL FILE
-  // ==========================================
-
-  async function handleFileUpload(e) {
-    const selectedFile = e.target.files?.[0];
-
-    if (!selectedFile) {
-      return;
-    }
-
-    setErrorMessage("");
-    setSuccessMessage("");
-    setUploading(true);
 
     try {
-      // Maximum file size: 10 MB
-      const maxFileSize =
-        10 * 1024 * 1024;
-
-      if (selectedFile.size > maxFileSize) {
-        setErrorMessage(
-          "File is too large. Maximum size is 10 MB."
-        );
-
-        e.target.value = "";
-        setUploading(false);
-
-        return;
-      }
-
-      // ==========================================
-      // CHECK LOGIN SESSION
-      // ==========================================
-
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError) {
-        console.error(
-          "SESSION ERROR:",
-          sessionError
-        );
-
-        setErrorMessage(
-          `Session error: ${getErrorMessage(sessionError)}`
-        );
-
-        e.target.value = "";
-        setUploading(false);
-
-        return;
-      }
-
-      if (!session) {
+      if (sessionError || !session) {
         setErrorMessage(
           "You are not logged in. Please log in again."
         );
+        return;
+      }
 
-        e.target.value = "";
-        setUploading(false);
+      const { data, error } = await supabase
+        .from("medical_history")
+        .insert({
+          patient_id: id,
+          diagnosis: diagnosis || null,
+          symptoms: symptoms || null,
+          treatment: treatment || null,
+          medications: medications || null,
+          allergies: allergies || null,
+          notes: notes || null,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error(
+          "ADD MEDICAL HISTORY ERROR:",
+          error
+        );
+
+        setErrorMessage(
+          `Unable to add medical history: ${getErrorMessage(error)}`
+        );
 
         return;
       }
 
-      // ==========================================
-      // FILE EXTENSION
-      // ==========================================
+      setMedicalHistory((current) => [data, ...current]);
+
+      setDiagnosis("");
+      setSymptoms("");
+      setTreatment("");
+      setMedications("");
+      setAllergies("");
+      setNotes("");
+
+      setSuccessMessage(
+        "Medical history added successfully."
+      );
+    } catch (error) {
+      console.error("MEDICAL HISTORY ERROR:", error);
+
+      setErrorMessage(
+        `Medical history error: ${getErrorMessage(error)}`
+      );
+    }
+  }
+
+  async function handleFileUpload() {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!selectedFile) {
+      setErrorMessage("Please choose a file first.");
+      return;
+    }
+
+    // 10 MB limit
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      setErrorMessage("File size must not exceed 10 MB.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        setErrorMessage(
+          "You are not logged in. Please log in again."
+        );
+        return;
+      }
 
       const fileExtension =
-        selectedFile.name.includes(".")
-          ? selectedFile.name
-              .split(".")
-              .pop()
-              .toLowerCase()
-          : "";
+        selectedFile.name
+          .split(".")
+          .pop()
+          ?.toLowerCase() || "file";
 
-      // ==========================================
-      // UNIQUE FILE NAME
-      // ==========================================
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(2, 10)}.${fileExtension}`;
 
-      const uniqueFileName =
-        `${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2)}` +
-        (fileExtension
-          ? `.${fileExtension}`
-          : "");
+      const filePath = `${id}/${fileName}`;
 
-      // ==========================================
-      // PATIENT FOLDER
-      // ==========================================
-
-      const filePath =
-        `${id}/${uniqueFileName}`;
-
-      console.log(
-        "Uploading medical file:",
-        {
-          patientId: id,
-          originalName: selectedFile.name,
-          filePath: filePath,
-          fileType: selectedFile.type,
-          fileSize: selectedFile.size,
-        }
-      );
-
-      // ==========================================
-      // UPLOAD TO SUPABASE STORAGE
-      // ==========================================
-
-      const {
-        error: uploadError,
-      } = await supabase.storage
+      // Upload to private Supabase Storage bucket
+      const { error: uploadError } = await supabase.storage
         .from("medical-files")
-        .upload(
-          filePath,
-          selectedFile
-        );
+        .upload(filePath, selectedFile);
 
       if (uploadError) {
         console.error(
-          "FILE UPLOAD ERROR:",
+          "STORAGE UPLOAD ERROR:",
           uploadError
         );
 
         setErrorMessage(
-          `File upload error: ${getErrorMessage(uploadError)}`
+          `Unable to upload file: ${getErrorMessage(uploadError)}`
         );
-
-        e.target.value = "";
-        setUploading(false);
 
         return;
       }
 
-      // ==========================================
-      // SAVE FILE INFORMATION TO DATABASE
-      // ==========================================
-
-      // IMPORTANT:
-      // We do NOT insert created_at because
-      // your medical_files table does not have it.
-
+      // Save file information in database
       const {
-        data: fileData,
+        data: insertedFile,
         error: databaseError,
       } = await supabase
         .from("medical_files")
-        .insert([
-          {
-            patient_id: id,
-            file_name: selectedFile.name,
-            file_path: filePath,
-            file_type:
-              selectedFile.type ||
-              "Unknown",
-          },
-        ])
+        .insert({
+          patient_id: id,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          file_type:
+            selectedFile.type ||
+            "application/octet-stream",
+        })
         .select()
         .single();
 
@@ -435,829 +278,988 @@ export default function PatientDetails() {
           databaseError
         );
 
-        // Delete uploaded file if database insert fails
+        // Remove uploaded file if database insert fails
         await supabase.storage
           .from("medical-files")
           .remove([filePath]);
 
         setErrorMessage(
-          `Medical file database error: ${getErrorMessage(databaseError)}`
+          `File upload failed: ${getErrorMessage(databaseError)}`
         );
-
-        e.target.value = "";
-        setUploading(false);
 
         return;
       }
 
-      // ==========================================
-      // ADD FILE TO SCREEN
-      // ==========================================
-
       setMedicalFiles((current) => [
-        fileData,
+        insertedFile,
         ...current,
       ]);
 
-      setSuccessMessage(
-        "Medical file uploaded successfully."
+      // Clear selected file after successful upload
+      setSelectedFile(null);
+
+      const fileInput = document.getElementById(
+        "medical-file-input"
       );
 
-      // Clear file input
-      e.target.value = "";
-    } catch (error) {
-      console.error(
-        "MEDICAL FILE ERROR:",
-        error
+      if (fileInput) {
+        fileInput.value = "";
+      }
+
+      setSuccessMessage(
+        "Medical document uploaded successfully."
       );
+    } catch (error) {
+      console.error("UPLOAD ERROR:", error);
 
       setErrorMessage(
-        `Medical file error: ${getErrorMessage(error)}`
+        `Upload error: ${getErrorMessage(error)}`
       );
-
-      e.target.value = "";
+    } finally {
+      setUploading(false);
     }
-
-    setUploading(false);
   }
 
-  // ==========================================
-  // VIEW MEDICAL FILE
-  // ==========================================
+  function handleCancelUpload() {
+    setSelectedFile(null);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const fileInput = document.getElementById(
+      "medical-file-input"
+    );
+
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  }
 
   async function handleViewFile(file) {
     setErrorMessage("");
+    setSuccessMessage("");
 
-    const {
-      data,
-      error,
-    } = await supabase.storage
-      .from("medical-files")
-      .createSignedUrl(
-        file.file_path,
-        60 * 5
+    try {
+      const { data, error } = await supabase.storage
+        .from("medical-files")
+        .createSignedUrl(file.file_path, 300);
+
+      if (error) {
+        console.error(
+          "VIEW FILE ERROR:",
+          error
+        );
+
+        setErrorMessage(
+          `Unable to view file: ${getErrorMessage(error)}`
+        );
+
+        return;
+      }
+
+      if (!data?.signedUrl) {
+        setErrorMessage(
+          "Unable to create file viewing link."
+        );
+        return;
+      }
+
+      window.open(data.signedUrl, "_blank");
+
+      setSuccessMessage(
+        "Medical document opened."
       );
-
-    if (error) {
+    } catch (error) {
       console.error(
-        "SIGNED URL ERROR:",
+        "VIEW FILE ERROR:",
         error
       );
 
       setErrorMessage(
-        `Unable to open file: ${getErrorMessage(error)}`
+        `View error: ${getErrorMessage(error)}`
+      );
+    }
+  }
+
+  async function handleDownloadFile(file) {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("medical-files")
+        .download(file.file_path);
+
+      if (error) {
+        console.error(
+          "DOWNLOAD FILE ERROR:",
+          error
+        );
+
+        setErrorMessage(
+          `Unable to download file: ${getErrorMessage(error)}`
+        );
+
+        return;
+      }
+
+      if (!data) {
+        setErrorMessage(
+          "Unable to download file."
+        );
+        return;
+      }
+
+      const url =
+        window.URL.createObjectURL(data);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+      link.download =
+        file.file_name ||
+        "medical-document";
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      setSuccessMessage(
+        "Medical document downloaded successfully."
+      );
+    } catch (error) {
+      console.error(
+        "DOWNLOAD FILE ERROR:",
+        error
       );
 
+      setErrorMessage(
+        `Download error: ${getErrorMessage(error)}`
+      );
+    }
+  }
+
+  async function handleDeleteFile(file) {
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${file.file_name}"?`
+    );
+
+    if (!confirmed) {
       return;
     }
 
-    if (data?.signedUrl) {
-      window.open(
-        data.signedUrl,
-        "_blank"
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        setErrorMessage(
+          "You are not logged in. Please log in again."
+        );
+
+        return;
+      }
+
+      // Delete file from Supabase Storage
+      const { error: storageError } =
+        await supabase.storage
+          .from("medical-files")
+          .remove([file.file_path]);
+
+      if (storageError) {
+        console.error(
+          "STORAGE DELETE ERROR:",
+          storageError
+        );
+
+        setErrorMessage(
+          `Unable to delete file: ${getErrorMessage(
+            storageError
+          )}`
+        );
+
+        return;
+      }
+
+      // Delete file record from database
+      const { error: databaseError } =
+        await supabase
+          .from("medical_files")
+          .delete()
+          .eq("id", file.id)
+          .eq("patient_id", id);
+
+      if (databaseError) {
+        console.error(
+          "DATABASE DELETE ERROR:",
+          databaseError
+        );
+
+        setErrorMessage(
+          `File was removed from storage, but database deletion failed: ${getErrorMessage(
+            databaseError
+          )}`
+        );
+
+        return;
+      }
+
+      setMedicalFiles((current) =>
+        current.filter(
+          (currentFile) =>
+            currentFile.id !== file.id
+        )
+      );
+
+      setSuccessMessage(
+        "Medical document deleted successfully."
+      );
+    } catch (error) {
+      console.error(
+        "DELETE FILE ERROR:",
+        error
+      );
+
+      setErrorMessage(
+        `Delete error: ${getErrorMessage(error)}`
       );
     }
   }
 
-  // ==========================================
-  // LOADING
-  // ==========================================
-
-  if (loading && !patient) {
+  if (loading) {
     return (
-      <AppLayout title="Patient Details" subtitle="Medical history and patient information" activeNav="patients">
-        <div className="flex flex-col items-center justify-center py-24">
-          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading patient records...</p>
-        </div>
-      </AppLayout>
+      <main
+        style={{
+          padding: "40px",
+          maxWidth: "1200px",
+          margin: "0 auto",
+        }}
+      >
+        <h1 style={{ color: "#111827" }}>
+          Loading patient...
+        </h1>
+      </main>
     );
   }
-
-  // ==========================================
-  // PATIENT NOT FOUND
-  // ==========================================
 
   if (!patient) {
     return (
       <main
         style={{
           padding: "40px",
-          fontFamily:
-            "Arial, sans-serif",
+          maxWidth: "1200px",
+          margin: "0 auto",
         }}
       >
-        <h1>
+        <h1 style={{ color: "#111827" }}>
           Patient not found
         </h1>
 
         <button
           onClick={() =>
-            router.push(
-              "/patient-records"
-            )
+            router.push("/patient-records")
           }
           style={{
+            marginTop: "20px",
             padding: "10px 16px",
             border: "none",
-            borderRadius: "6px",
-            background:
-              "#2563eb",
+            borderRadius: "8px",
+            backgroundColor: "#2563eb",
             color: "white",
             cursor: "pointer",
           }}
         >
-          ← Back to Patient Records
+          Back to Patient Records
         </button>
       </main>
     );
   }
 
-  // ==========================================
-  // PAGE
-  // ==========================================
-
   return (
-    <AppLayout
-      title="Patient Details"
-      subtitle="Medical history, appointments, and records"
-      activeNav="patients"
+    <main
+      style={{
+        padding: "40px",
+        maxWidth: "1200px",
+        margin: "0 auto",
+        color: "#111827",
+      }}
     >
-      <div style={{ padding: "20px 0" }}>
       {/* BACK BUTTON */}
-
       <button
         onClick={() =>
-          router.push(
-            "/patient-records"
-          )
+          router.push("/patient-records")
         }
         style={{
-          marginBottom: "20px",
           padding: "10px 16px",
-          border:
-            "1px solid #ccc",
-          borderRadius: "6px",
-          background: "rgba(15,23,42,0.6)",
+          border: "1px solid #d1d5db",
+          borderRadius: "8px",
+          backgroundColor: "white",
+          color: "#111827",
           cursor: "pointer",
+          marginBottom: "20px",
+          fontWeight: "600",
         }}
       >
         ← Back to Patient Records
       </button>
 
-      {/* ERROR MESSAGE */}
+      <h1
+        style={{
+          fontSize: "32px",
+          fontWeight: "700",
+          marginBottom: "20px",
+          color: "#111827",
+        }}
+      >
+        Patient Details
+      </h1>
 
+      {/* ERROR MESSAGE */}
       {errorMessage && (
         <div
           style={{
-            marginBottom: "20px",
-            padding: "15px",
-            background:
-              "#fee2e2",
-            border:
-              "1px solid #fca5a5",
-            borderRadius: "8px",
+            backgroundColor: "#fee2e2",
+            border: "1px solid #fecaca",
             color: "#991b1b",
+            padding: "14px",
+            borderRadius: "8px",
+            marginBottom: "15px",
           }}
         >
-          <strong>
-            Error:
-          </strong>{" "}
           {errorMessage}
         </div>
       )}
 
       {/* SUCCESS MESSAGE */}
-
       {successMessage && (
         <div
           style={{
-            marginBottom: "20px",
-            padding: "15px",
-            background:
-              "#dcfce7",
-            border:
-              "1px solid #86efac",
+            backgroundColor: "#dcfce7",
+            border: "1px solid #bbf7d0",
+            color: "#166534",
+            padding: "14px",
             borderRadius: "8px",
-            color: "#34d399",
+            marginBottom: "15px",
           }}
         >
           {successMessage}
         </div>
       )}
 
-      {/* ======================================
-          PATIENT INFORMATION
-      ====================================== */}
-
+      {/* PATIENT INFORMATION */}
       <section
         style={{
-          marginBottom: "30px",
-          padding: "30px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
           borderRadius: "12px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow:
+            "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <h1
+        <h2
           style={{
-            marginTop: 0,
-            marginBottom: "30px",
+            color: "#111827",
+            fontSize: "24px",
+            marginBottom: "18px",
           }}
         >
           Patient Information
-        </h1>
+        </h2>
 
         <div
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(4, 1fr)",
-            gap: "25px",
+              "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "15px",
           }}
         >
           <div>
-            <strong>Name</strong>
+            <strong>Patient ID:</strong>
+            <div>
+              {patient.patient_number || "N/A"}
+            </div>
+          </div>
 
-            <p>
-              {patient.first_name}{" "}
+          <div>
+            <strong>Name:</strong>
+            <div>
+              {patient.first_name || ""}{" "}
               {patient.middle_name || ""}{" "}
-              {patient.last_name}
-            </p>
+              {patient.last_name || ""}
+            </div>
           </div>
 
           <div>
-            <strong>
-              Patient ID
-            </strong>
-
-            <p>
-              {patient.patient_number ||
-                "N/A"}
-            </p>
+            <strong>Date of Birth:</strong>
+            <div>
+              {patient.date_of_birth || "N/A"}
+            </div>
           </div>
 
           <div>
-            <strong>
-              Date of Birth
-            </strong>
-
-            <p>
-              {patient.date_of_birth ||
-                "N/A"}
-            </p>
+            <strong>Gender:</strong>
+            <div>
+              {patient.gender || "N/A"}
+            </div>
           </div>
 
           <div>
-            <strong>
-              Gender
-            </strong>
-
-            <p>
-              {patient.gender ||
-                "N/A"}
-            </p>
+            <strong>Contact Number:</strong>
+            <div>
+              {patient.contact_number || "N/A"}
+            </div>
           </div>
 
           <div>
-            <strong>
-              Contact
-            </strong>
-
-            <p>
-              {patient.contact_number ||
-                "N/A"}
-            </p>
+            <strong>Email:</strong>
+            <div>
+              {patient.email || "N/A"}
+            </div>
           </div>
+        </div>
 
-          <div>
-            <strong>
-              Email
-            </strong>
+        {/* EMR AND PRESCRIPTIONS */}
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+            marginTop: "24px",
+          }}
+        >
+          <button
+            onClick={() =>
+              router.push(
+                `/patient-records/${id}/emr`
+              )
+            }
+            style={{
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: "#2563eb",
+              color: "white",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            EMR
+          </button>
 
-            <p>
-              {patient.email ||
-                "N/A"}
-            </p>
-          </div>
+          <button
+            onClick={() =>
+              router.push(
+                `/patient-records/${id}/prescriptions`
+              )
+            }
+            style={{
+              padding: "12px 20px",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: "#7c3aed",
+              color: "white",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            Prescription Management
+          </button>
         </div>
       </section>
 
-      {/* ======================================
-          EMR
-      ====================================== */}
-
+      {/* MEDICAL DOCUMENTS */}
       <section
         style={{
-          marginBottom: "30px",
-          padding: "25px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
           borderRadius: "12px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow:
+            "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <h2>
-          Electronic Medical Record
-        </h2>
-
-        <p>
-          View and manage this
-          patient&apos;s EMR.
-        </p>
-
-        <button
-          onClick={() =>
-            router.push(
-              `/patient-records/${id}/emr`
-            )
-          }
+        <h2
           style={{
-            padding:
-              "12px 20px",
-            border: "none",
-            borderRadius: "6px",
-            background:
-              "#2563eb",
-            color: "white",
-            cursor: "pointer",
+            color: "#111827",
+            fontSize: "24px",
+            marginBottom: "8px",
           }}
         >
-          Open EMR
-        </button>
-      </section>
-
-      {/* ======================================
-          PRESCRIPTIONS
-      ====================================== */}
-
-      <section
-        style={{
-          marginBottom: "30px",
-          padding: "25px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
-          borderRadius: "12px",
-        }}
-      >
-        <h2>
-          Prescription Management
+          Medical Documents
         </h2>
 
-        <p>
-          Create and view
-          prescriptions for this
-          patient.
-        </p>
-
-        <button
-          onClick={() =>
-            router.push(
-              `/patient-records/${id}/prescriptions`
-            )
-          }
+        <p
           style={{
-            padding:
-              "12px 20px",
-            border: "none",
-            borderRadius: "6px",
-            background:
-              "#16a34a",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Open Prescriptions
-        </button>
-      </section>
-
-      {/* ======================================
-          MEDICAL FILES
-      ====================================== */}
-
-      <section
-        style={{
-          marginBottom: "30px",
-          padding: "25px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
-          borderRadius: "12px",
-        }}
-      >
-        <h2>
-          Medical Files
-        </h2>
-
-        <p>
-          Upload and view
-          medical files for this
-          patient.
-        </p>
-
-        {/* UPLOAD FILE */}
-
-        <div
-          style={{
+            color: "#4b5563",
             marginBottom: "20px",
           }}
         >
-          <label
+          Upload, view, download, and delete
+          medical documents for this patient.
+        </p>
+
+        {/* UPLOAD AREA */}
+        <div
+          style={{
+            border: "1px solid #d1d5db",
+            borderRadius: "10px",
+            padding: "20px",
+            marginBottom: "24px",
+            backgroundColor: "#f9fafb",
+          }}
+        >
+          <h3
             style={{
-              display: "block",
+              color: "#111827",
+              fontSize: "18px",
               marginBottom: "8px",
-              fontWeight: "bold",
             }}
           >
-            Upload Medical Record
-          </label>
-
-          <input
-            type="file"
-            onChange={
-              handleFileUpload
-            }
-            disabled={uploading}
-            style={{
-              display: "block",
-              padding: "8px",
-              border:
-                "1px solid #ccc",
-              borderRadius: "6px",
-              background: "rgba(15,23,42,0.6)",
-              cursor: uploading
-                ? "not-allowed"
-                : "pointer",
-            }}
-          />
+            Upload File
+          </h3>
 
           <p
             style={{
-              marginTop: "8px",
-              fontSize: "13px",
-              color: "#94a3b8",
+              color: "#6b7280",
+              marginBottom: "14px",
             }}
           >
             Maximum file size: 10 MB
           </p>
 
-          {uploading && (
+          <input
+            id="medical-file-input"
+            type="file"
+            onChange={(e) =>
+              setSelectedFile(
+                e.target.files?.[0] || null
+              )
+            }
+            style={{
+              display: "block",
+              marginBottom: "14px",
+              color: "#111827",
+            }}
+          />
+
+          {selectedFile && (
             <p
               style={{
-                color: "#60a5fa",
-                fontWeight: "bold",
+                color: "#111827",
+                marginBottom: "14px",
               }}
             >
-              Uploading file...
+              Selected file:{" "}
+              <strong>
+                {selectedFile.name}
+              </strong>
             </p>
           )}
+
+          {/* UPLOAD + CANCEL BUTTONS */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleFileUpload}
+              disabled={!selectedFile || uploading}
+              style={{
+                padding: "11px 20px",
+                border: "none",
+                borderRadius: "8px",
+                backgroundColor:
+                  !selectedFile || uploading
+                    ? "#9ca3af"
+                    : "#16a34a",
+                color: "white",
+                cursor:
+                  !selectedFile || uploading
+                    ? "not-allowed"
+                    : "pointer",
+                fontWeight: "600",
+              }}
+            >
+              {uploading
+                ? "Uploading..."
+                : "Upload File"}
+            </button>
+
+            {selectedFile && !uploading && (
+              <button
+                type="button"
+                onClick={handleCancelUpload}
+                style={{
+                  padding: "11px 20px",
+                  border: "none",
+                  borderRadius: "8px",
+                  backgroundColor: "#6b7280",
+                  color: "white",
+                  cursor: "pointer",
+                  fontWeight: "600",
+                }}
+              >
+                Cancel Upload
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* MEDICAL FILE LIST */}
+        {/* UPLOADED DOCUMENTS */}
+        <h3
+          style={{
+            color: "#111827",
+            fontSize: "20px",
+            marginBottom: "15px",
+          }}
+        >
+          Uploaded Documents
+        </h3>
 
-        {medicalFiles.length ===
-        0 ? (
-          <p>
-            No medical files
-            uploaded.
+        {medicalFiles.length === 0 ? (
+          <p
+            style={{
+              color: "#6b7280",
+            }}
+          >
+            No medical documents uploaded yet.
           </p>
         ) : (
-          <div>
-            {medicalFiles.map(
-              (medicalFile) => (
-                <div
-                  key={
-                    medicalFile.id
-                  }
-                  style={{
-                    marginBottom:
-                      "15px",
-                    padding:
-                      "15px",
-                    border:
-                      "1px solid #ddd",
-                    borderRadius:
-                      "8px",
-                  }}
-                >
-                  <strong>
-                    {
-                      medicalFile.file_name
-                    }
-                  </strong>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            {medicalFiles.map((file) => (
+              <div
+                key={file.id}
+                style={{
+                  border:
+                    "1px solid #e5e7eb",
+                  borderRadius: "10px",
+                  padding: "16px",
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  gap: "15px",
+                  flexWrap: "wrap",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontWeight: "600",
+                      color: "#111827",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {file.file_name}
+                  </div>
 
                   <div
                     style={{
-                      marginTop:
-                        "8px",
-                      color:
-                        "#6b7c93",
+                      fontSize: "13px",
+                      color: "#6b7280",
                     }}
                   >
-                    File Type:{" "}
-                    {medicalFile.file_type ||
+                    {file.file_type ||
                       "Unknown file type"}
                   </div>
+                </div>
 
-                  <div
-                    style={{
-                      marginTop:
-                        "5px",
-                      color:
-                        "#6b7c93",
-                      fontSize:
-                        "13px",
-                    }}
-                  >
-                    File ID:{" "}
-                    {medicalFile.id}
-                  </div>
-
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexWrap: "wrap",
+                  }}
+                >
                   <button
+                    type="button"
                     onClick={() =>
-                      handleViewFile(
-                        medicalFile
-                      )
+                      handleViewFile(file)
                     }
                     style={{
-                      marginTop:
-                        "12px",
-                      padding:
-                        "8px 14px",
-                      border:
-                        "none",
-                      borderRadius:
-                        "6px",
-                      background:
+                      padding: "9px 14px",
+                      border: "none",
+                      borderRadius: "7px",
+                      backgroundColor:
                         "#2563eb",
-                      color:
-                        "white",
-                      cursor:
-                        "pointer",
+                      color: "white",
+                      cursor: "pointer",
+                      fontWeight: "600",
                     }}
                   >
                     View File
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDownloadFile(file)
+                    }
+                    style={{
+                      padding: "9px 14px",
+                      border: "none",
+                      borderRadius: "7px",
+                      backgroundColor:
+                        "#16a34a",
+                      color: "white",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Download
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleDeleteFile(file)
+                    }
+                    style={{
+                      padding: "9px 14px",
+                      border: "none",
+                      borderRadius: "7px",
+                      backgroundColor:
+                        "#dc2626",
+                      color: "white",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         )}
       </section>
 
-      {/* ======================================
-          ADD MEDICAL HISTORY
-      ====================================== */}
-
+      {/* ADD MEDICAL HISTORY */}
       <section
         style={{
-          marginBottom: "30px",
-          padding: "25px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
           borderRadius: "12px",
+          padding: "24px",
+          marginBottom: "24px",
+          boxShadow:
+            "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <h2>
+        <h2
+          style={{
+            color: "#111827",
+            fontSize: "24px",
+            marginBottom: "18px",
+          }}
+        >
           Add Medical History
         </h2>
 
-        <form
-          onSubmit={
-            handleAddMedicalHistory
-          }
-        >
-          {/* DIAGNOSIS */}
-
+        <form onSubmit={handleAddMedicalHistory}>
           <div
             style={{
-              marginBottom:
-                "15px",
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: "15px",
             }}
           >
-            <label>
-              <strong>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#111827",
+                  marginBottom: "6px",
+                }}
+              >
                 Diagnosis
-              </strong>
-            </label>
+              </label>
 
-            <input
-              type="text"
-              value={diagnosis}
-              onChange={(e) =>
-                setDiagnosis(
-                  e.target.value
-                )
-              }
-              placeholder="Enter diagnosis"
-              style={{
-                width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
-                border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-              }}
-            />
-          </div>
+              <input
+                type="text"
+                value={diagnosis}
+                onChange={(e) =>
+                  setDiagnosis(e.target.value)
+                }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border:
+                    "1px solid #d1d5db",
+                  borderRadius: "7px",
+                  color: "#111827",
+                }}
+              />
+            </div>
 
-          {/* SYMPTOMS */}
-
-          <div
-            style={{
-              marginBottom:
-                "15px",
-            }}
-          >
-            <label>
-              <strong>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#111827",
+                  marginBottom: "6px",
+                }}
+              >
                 Symptoms
-              </strong>
-            </label>
+              </label>
 
-            <textarea
-              value={symptoms}
-              onChange={(e) =>
-                setSymptoms(
-                  e.target.value
-                )
-              }
-              placeholder="Enter symptoms"
-              rows={3}
-              style={{
-                width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
-                border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-                resize:
-                  "vertical",
-              }}
-            />
-          </div>
+              <input
+                type="text"
+                value={symptoms}
+                onChange={(e) =>
+                  setSymptoms(e.target.value)
+                }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border:
+                    "1px solid #d1d5db",
+                  borderRadius: "7px",
+                  color: "#111827",
+                }}
+              />
+            </div>
 
-          {/* TREATMENT */}
-
-          <div
-            style={{
-              marginBottom:
-                "15px",
-            }}
-          >
-            <label>
-              <strong>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#111827",
+                  marginBottom: "6px",
+                }}
+              >
                 Treatment
-              </strong>
-            </label>
+              </label>
 
-            <textarea
-              value={treatment}
-              onChange={(e) =>
-                setTreatment(
-                  e.target.value
-                )
-              }
-              placeholder="Enter treatment"
-              rows={3}
-              style={{
-                width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
-                border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-                resize:
-                  "vertical",
-              }}
-            />
-          </div>
+              <input
+                type="text"
+                value={treatment}
+                onChange={(e) =>
+                  setTreatment(e.target.value)
+                }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border:
+                    "1px solid #d1d5db",
+                  borderRadius: "7px",
+                  color: "#111827",
+                }}
+              />
+            </div>
 
-          {/* MEDICATIONS */}
-
-          <div
-            style={{
-              marginBottom:
-                "15px",
-            }}
-          >
-            <label>
-              <strong>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#111827",
+                  marginBottom: "6px",
+                }}
+              >
                 Medications
-              </strong>
-            </label>
+              </label>
 
-            <textarea
-              value={medications}
-              onChange={(e) =>
-                setMedications(
-                  e.target.value
-                )
-              }
-              placeholder="Enter medications"
-              rows={3}
-              style={{
-                width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
-                border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-                resize:
-                  "vertical",
-              }}
-            />
-          </div>
+              <input
+                type="text"
+                value={medications}
+                onChange={(e) =>
+                  setMedications(e.target.value)
+                }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border:
+                    "1px solid #d1d5db",
+                  borderRadius: "7px",
+                  color: "#111827",
+                }}
+              />
+            </div>
 
-          {/* ALLERGIES */}
-
-          <div
-            style={{
-              marginBottom:
-                "15px",
-            }}
-          >
-            <label>
-              <strong>
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "600",
+                  color: "#111827",
+                  marginBottom: "6px",
+                }}
+              >
                 Allergies
-              </strong>
-            </label>
+              </label>
 
-            <textarea
-              value={allergies}
-              onChange={(e) =>
-                setAllergies(
-                  e.target.value
-                )
-              }
-              placeholder="Enter allergies"
-              rows={3}
-              style={{
-                width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
-                border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-                resize:
-                  "vertical",
-              }}
-            />
+              <input
+                type="text"
+                value={allergies}
+                onChange={(e) =>
+                  setAllergies(e.target.value)
+                }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border:
+                    "1px solid #d1d5db",
+                  borderRadius: "7px",
+                  color: "#111827",
+                }}
+              />
+            </div>
           </div>
 
-          {/* NOTES */}
-
-          <div
-            style={{
-              marginBottom:
-                "20px",
-            }}
-          >
-            <label>
-              <strong>
-                Notes
-              </strong>
+          <div style={{ marginTop: "15px" }}>
+            <label
+              style={{
+                display: "block",
+                fontWeight: "600",
+                color: "#111827",
+                marginBottom: "6px",
+              }}
+            >
+              Notes
             </label>
 
             <textarea
               value={notes}
               onChange={(e) =>
-                setNotes(
-                  e.target.value
-                )
+                setNotes(e.target.value)
               }
-              placeholder="Enter notes"
-              rows={4}
+              rows={5}
               style={{
                 width: "100%",
-                padding:
-                  "12px",
-                marginTop:
-                  "6px",
+                padding: "10px",
                 border:
-                  "1px solid #ccc",
-                borderRadius:
-                  "6px",
-                resize:
-                  "vertical",
+                  "1px solid #d1d5db",
+                borderRadius: "7px",
+                color: "#111827",
+                resize: "vertical",
               }}
             />
           </div>
@@ -1265,16 +1267,14 @@ export default function PatientDetails() {
           <button
             type="submit"
             style={{
-              padding:
-                "12px 20px",
+              marginTop: "18px",
+              padding: "11px 20px",
               border: "none",
-              borderRadius:
-                "6px",
-              background:
-                "#2563eb",
+              borderRadius: "8px",
+              backgroundColor: "#2563eb",
               color: "white",
-              cursor:
-                "pointer",
+              cursor: "pointer",
+              fontWeight: "600",
             }}
           >
             Add Medical History
@@ -1282,101 +1282,89 @@ export default function PatientDetails() {
         </form>
       </section>
 
-      {/* ======================================
-          MEDICAL HISTORY
-      ====================================== */}
-
+      {/* MEDICAL HISTORY */}
       <section
         style={{
-          marginBottom: "30px",
-          padding: "25px",
-          background: "rgba(15,23,42,0.6)",
-          border:
-            "1px solid #ddd",
+          backgroundColor: "#ffffff",
+          border: "1px solid #e5e7eb",
           borderRadius: "12px",
+          padding: "24px",
+          marginBottom: "40px",
+          boxShadow:
+            "0 2px 8px rgba(0,0,0,0.05)",
         }}
       >
-        <h2>
+        <h2
+          style={{
+            color: "#111827",
+            fontSize: "24px",
+            marginBottom: "18px",
+          }}
+        >
           Medical History
         </h2>
 
-        {medicalHistory.length ===
-        0 ? (
-          <p>
-            No medical history
-            found.
+        {medicalHistory.length === 0 ? (
+          <p
+            style={{
+              color: "#6b7280",
+            }}
+          >
+            No medical history records yet.
           </p>
         ) : (
-          <div>
-            {medicalHistory.map(
-              (record) => (
-                <div
-                  key={record.id}
-                  style={{
-                    marginBottom:
-                      "20px",
-                    padding:
-                      "20px",
-                    border:
-                      "1px solid #ddd",
-                    borderRadius:
-                      "10px",
-                  }}
-                >
-                  <p>
-                    <strong>
-                      Diagnosis:
-                    </strong>{" "}
-                    {record.diagnosis ||
-                      "None"}
-                  </p>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+            }}
+          >
+            {medicalHistory.map((history) => (
+              <div
+                key={history.id}
+                style={{
+                  border:
+                    "1px solid #e5e7eb",
+                  borderRadius: "10px",
+                  padding: "18px",
+                  backgroundColor: "#f9fafb",
+                }}
+              >
+                <p style={{ color: "#111827" }}>
+                  <strong>Diagnosis:</strong>{" "}
+                  {history.diagnosis || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Symptoms:
-                    </strong>{" "}
-                    {record.symptoms ||
-                      "None"}
-                  </p>
+                <p style={{ color: "#111827" }}>
+                  <strong>Symptoms:</strong>{" "}
+                  {history.symptoms || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Treatment:
-                    </strong>{" "}
-                    {record.treatment ||
-                      "None"}
-                  </p>
+                <p style={{ color: "#111827" }}>
+                  <strong>Treatment:</strong>{" "}
+                  {history.treatment || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Medications:
-                    </strong>{" "}
-                    {record.medications ||
-                      "None"}
-                  </p>
+                <p style={{ color: "#111827" }}>
+                  <strong>Medications:</strong>{" "}
+                  {history.medications || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Allergies:
-                    </strong>{" "}
-                    {record.allergies ||
-                      "None"}
-                  </p>
+                <p style={{ color: "#111827" }}>
+                  <strong>Allergies:</strong>{" "}
+                  {history.allergies || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Notes:
-                    </strong>{" "}
-                    {record.notes ||
-                      "None"}
-                  </p>
-                </div>
-              )
-            )}
+                <p style={{ color: "#111827" }}>
+                  <strong>Notes:</strong>{" "}
+                  {history.notes || "N/A"}
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </section>
-      </div>
-    </AppLayout>
+    </main>
   );
 }
