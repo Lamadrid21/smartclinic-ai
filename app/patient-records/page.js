@@ -18,6 +18,18 @@ export default function PatientRecordsPage() {
   const [editingPatient, setEditingPatient] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newPatient, setNewPatient] = useState({
+    patient_number: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    date_of_birth: "",
+    gender: "",
+    contact_number: "",
+    email: "",
+  });
+
   useEffect(() => {
     loadPatients();
     loadArchivedPatients();
@@ -234,6 +246,7 @@ export default function PatientRecordsPage() {
   // START EDIT
   // =========================
   function startEdit(patient) {
+    setShowAddForm(false);
     setEditingPatient({
       id: patient.id,
 
@@ -481,15 +494,86 @@ export default function PatientRecordsPage() {
     }
   }
 
+  // =========================
+  // ADD NEW PATIENT
+  // =========================
+  function handleNewPatientChange(event) {
+    const { name, value } = event.target;
+    setNewPatient((previous) => ({ ...previous, [name]: value }));
+  }
+
+  function resetNewPatient() {
+    setNewPatient({
+      patient_number: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      date_of_birth: "",
+      gender: "",
+      contact_number: "",
+      email: "",
+    });
+    setShowAddForm(false);
+  }
+
+  async function addPatient() {
+    if (!newPatient.first_name || !newPatient.last_name) {
+      alert("First Name and Last Name are required.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const { data, error } = await supabase
+        .from("patients")
+        .insert({
+          patient_number: newPatient.patient_number || null,
+          first_name: newPatient.first_name,
+          middle_name: newPatient.middle_name || null,
+          last_name: newPatient.last_name,
+          date_of_birth: newPatient.date_of_birth || null,
+          gender: newPatient.gender || null,
+          contact_number: newPatient.contact_number || null,
+          email: newPatient.email || null,
+          is_archived: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Add patient error:", error);
+        alert("Failed to add patient: " + error.message);
+        return;
+      }
+
+      if (!data) {
+        alert("Patient was not created. Please check your Supabase RLS policies.");
+        return;
+      }
+
+      alert("Patient added successfully.");
+      resetNewPatient();
+      await loadPatients();
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong while adding the patient.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <AppLayout
       title="Patient Records"
       subtitle="Search, view, edit, archive, and restore patient records"
       activeNav="patients"
     >
-      {/* SEARCH */}
-      <div className="mb-6">
-        <div className="relative">
+      {/* SEARCH + ADD BUTTON */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="relative flex-1">
           <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
@@ -501,6 +585,18 @@ export default function PatientRecordsPage() {
             className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-blue-500/50 transition-colors"
           />
         </div>
+        <button
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            setEditingPatient(null);
+          }}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 text-sm font-semibold hover:bg-blue-600/20 transition-colors whitespace-nowrap"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Add Patient
+        </button>
       </div>
 
       {/* ACTIVE PATIENTS TABLE */}
@@ -622,6 +718,67 @@ export default function PatientRecordsPage() {
           </div>
         )}
       </div>
+
+      {/* ADD PATIENT PANEL */}
+      {showAddForm && (
+        <div className="glass-card rounded-2xl p-6 sm:p-8 mb-8">
+          <h2 className="text-lg font-bold text-white mb-6">Add New Patient</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { name: "patient_number", label: "Patient Number", type: "text", placeholder: "e.g. P-0001" },
+              { name: "first_name", label: "First Name *", type: "text", placeholder: "e.g. Juan" },
+              { name: "middle_name", label: "Middle Name", type: "text", placeholder: "e.g. Santos" },
+              { name: "last_name", label: "Last Name *", type: "text", placeholder: "e.g. Dela Cruz" },
+              { name: "date_of_birth", label: "Date of Birth", type: "date", placeholder: "" },
+              { name: "contact_number", label: "Contact Number", type: "text", placeholder: "e.g. 09171234567" },
+              { name: "email", label: "Email", type: "email", placeholder: "e.g. juan@email.com" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">{field.label}</label>
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={newPatient[field.name]}
+                  onChange={handleNewPatientChange}
+                  placeholder={field.placeholder}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 placeholder-slate-600 outline-none focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+            ))}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">Gender</label>
+              <select
+                name="gender"
+                value={newPatient.gender}
+                onChange={handleNewPatientChange}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-slate-200 outline-none focus:border-blue-500/50 transition-colors"
+              >
+                <option value="" className="bg-slate-900">Select gender</option>
+                <option value="Male" className="bg-slate-900">Male</option>
+                <option value="Female" className="bg-slate-900">Female</option>
+                <option value="Other" className="bg-slate-900">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mt-6">
+            <button
+              onClick={addPatient}
+              disabled={saving}
+              className={`px-5 py-2.5 rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400 text-sm font-semibold hover:bg-blue-600/20 transition-colors ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {saving ? "Saving..." : "Add Patient"}
+            </button>
+            <button
+              onClick={resetNewPatient}
+              disabled={saving}
+              className="px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-300 text-sm font-semibold hover:bg-white/[0.08] transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* EDIT PATIENT PANEL */}
       {editingPatient && (
