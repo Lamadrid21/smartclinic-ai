@@ -1,32 +1,19 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "smartclinic-ai",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "SmartClinic AI - clinic management system with a separated frontend (Next.js) and backend (Express + Supabase) architecture",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.112.2",
-    "@tensorflow/tfjs": "^4.22.0",
-    "groq-sdk": "^1.6.0",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8",
-    "next": "16.3.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "resend": "^6.20.0",
-    "xlsx": "^0.18.5"
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "dev": "concurrently -k -n BACKEND,FRONTEND -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "start:frontend": "npm run start --prefix frontend",
+    "start:backend": "npm run start --prefix backend"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.0",
-    "tailwindcss": "^4"
+    "concurrently": "^9.1.0"
   }
 }
