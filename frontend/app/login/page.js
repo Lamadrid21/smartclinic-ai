@@ -1,13 +1,23 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
+import { ROLES, setUserRole } from "@/lib/auth-role";
 
-export default function Login() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialRole = searchParams?.get("role") || ROLES.PATIENT;
+
+  const [selectedRole, setSelectedRole] = useState(
+    [ROLES.PATIENT, ROLES.DOCTOR, ROLES.ADMIN].includes(initialRole)
+      ? initialRole
+      : ROLES.PATIENT
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,6 +25,14 @@ export default function Login() {
   const [captchaPassed, setCaptchaPassed] = useState(false);
 
   const recaptchaRef = useRef(null);
+
+  useEffect(() => {
+    const roleParam = searchParams?.get("role");
+    if (roleParam && [ROLES.PATIENT, ROLES.DOCTOR, ROLES.ADMIN].includes(roleParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedRole(roleParam);
+    }
+  }, [searchParams]);
 
   /**
    * Sends the Google reCAPTCHA token to the backend, which verifies it
@@ -85,7 +103,7 @@ export default function Login() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -98,6 +116,8 @@ export default function Login() {
       setLoading(false);
       return;
     }
+
+    await setUserRole(selectedRole, authData?.user);
 
     router.push("/dashboard");
   }
@@ -119,6 +139,8 @@ export default function Login() {
       return;
     }
 
+    await setUserRole(selectedRole);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -133,6 +155,35 @@ export default function Login() {
       setLoading(false);
     }
   }
+
+  const roleMeta = {
+    [ROLES.PATIENT]: {
+      title: "Patient Portal",
+      subtitle: "Access appointments, digital prescriptions & health records",
+      badge: "👤 Patient Access",
+      emailPlaceholder: "patient@example.com",
+      accent: "from-blue-600 to-cyan-500",
+      cta: "Sign In as Patient",
+    },
+    [ROLES.DOCTOR]: {
+      title: "Doctor Portal",
+      subtitle: "Manage daily queue, EMR charts, vital signs & prescriptions",
+      badge: "🩺 Medical Staff",
+      emailPlaceholder: "dr.smith@smartclinic.ai",
+      accent: "from-emerald-600 to-teal-500",
+      cta: "Sign In as Doctor",
+    },
+    [ROLES.ADMIN]: {
+      title: "Clinic Administration",
+      subtitle: "Clinic analytics, doctor monitor, revenue & system audit",
+      badge: "⚙️ Administrator",
+      emailPlaceholder: "admin@smartclinic.ai",
+      accent: "from-purple-600 to-indigo-500",
+      cta: "Sign In as Admin",
+    },
+  };
+
+  const currentMeta = roleMeta[selectedRole];
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 sm:px-6 py-12 relative overflow-hidden">
@@ -149,15 +200,64 @@ export default function Login() {
               </div>
             </div>
           </Link>
-          <h1 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Welcome back
+          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            SmartClinic <span className="text-cyan-400">AI</span>
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm text-slate-400">
-            Sign in to access your SmartClinic dashboard
+          <p className="mt-1 text-xs text-slate-400">
+            Intelligent Medical & Patient Care Suite
           </p>
         </div>
 
+        {/* Role Selector Tabs */}
+        <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-white/10 mb-4 shadow-xl">
+          <button
+            type="button"
+            onClick={() => setSelectedRole(ROLES.PATIENT)}
+            className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+              selectedRole === ROLES.PATIENT
+                ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span className="text-base">👤</span>
+            <span>Patient</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedRole(ROLES.DOCTOR)}
+            className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+              selectedRole === ROLES.DOCTOR
+                ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span className="text-base">🩺</span>
+            <span>Doctor</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedRole(ROLES.ADMIN)}
+            className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
+              selectedRole === ROLES.ADMIN
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span className="text-base">⚙️</span>
+            <span>Admin</span>
+          </button>
+        </div>
+
         <div className="glass-card p-6 sm:p-8 rounded-3xl">
+          <div className="mb-5 pb-4 border-b border-white/10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/5 border border-white/10 text-slate-300 mb-2">
+              {currentMeta.badge}
+            </div>
+            <h2 className="text-xl font-bold text-white tracking-tight">{currentMeta.title}</h2>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{currentMeta.subtitle}</p>
+          </div>
           {errorMsg && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
               {errorMsg}
@@ -171,7 +271,7 @@ export default function Login() {
               </label>
               <input
                 type="email"
-                placeholder="doctor@smartclinic.ai"
+                placeholder={currentMeta.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -204,9 +304,9 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+              className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2 disabled:opacity-50 text-white bg-gradient-to-r ${currentMeta.accent} shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all`}
             >
-              {loading ? "Signing in..." : "Sign In to Clinic"}
+              {loading ? "Signing in..." : currentMeta.cta}
             </button>
           </form>
 
@@ -230,12 +330,29 @@ export default function Login() {
 
           <p className="mt-6 text-center text-xs text-slate-400">
             Don&apos;t have an account yet?{" "}
-            <Link href="/register" className="text-blue-400 hover:text-blue-300 font-semibold">
-              Register now
+            <Link
+              href={`/register?role=${selectedRole}`}
+              className="text-blue-400 hover:text-blue-300 font-semibold"
+            >
+              Create {selectedRole === ROLES.PATIENT ? "Patient" : "Staff"} Account
             </Link>
           </p>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#090d16]">
+          <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -58,6 +58,7 @@ function AppointmentsContent() {
   // backend endpoint — no LLM cost).
   useEffect(() => {
     if (!selectedDoctor) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSpecialtyHint(null);
       return;
     }

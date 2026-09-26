@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { ROLES, ROLE_BADGES, getUserRole } from "@/lib/auth-role";
 
 export default function AppLayout({
   children,
@@ -17,12 +18,14 @@ export default function AppLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [userRole, setUserRoleState] = useState(ROLES.PATIENT);
 
   useEffect(() => {
     async function loadUser() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (currentUser) {
         setUser(currentUser);
+        setUserRoleState(getUserRole(currentUser));
         const { data: profile } = await supabase
           .from("profiles")
           .select("full_name, avatar_url")
@@ -39,83 +42,182 @@ export default function AppLayout({
     router.push("/login");
   }
 
-  const navItems = [
-    {
-      id: "dashboard",
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />
-        </svg>
-      ),
-    },
-    {
-      id: "appointments",
-      name: "Book Appointment",
-      href: "/appointments",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect width="18" height="18" x="3" y="4" rx="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><path d="M12 14v4" /><path d="M10 16h4" />
-        </svg>
-      ),
-    },
-    {
-      id: "appointments-manage",
-      name: "Appointments List",
-      href: "/appointments/manage",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
-        </svg>
-      ),
-    },
-    {
-      id: "patients",
-      name: "Patient Records",
-      href: "/patient-records",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      ),
-    },
-    {
-      id: "reports",
-      name: "Reports & Analytics",
-      href: "/reports",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" />
-        </svg>
-      ),
-    },
-    {
-      id: "ai",
-      name: "SmartClinic AI",
-      href: "/ai-assistant",
-      badge: "AI",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
-        </svg>
-      ),
-    },
-    {
-      id: "profile",
-      name: "My Profile",
-      href: "/profile",
-      icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />
-        </svg>
-      ),
-    },
-  ];
+  function getNavItems() {
+    if (userRole === ROLES.PATIENT) {
+      return [
+        {
+          id: "dashboard",
+          name: "Patient Dashboard",
+          href: "/dashboard",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+          ),
+        },
+        {
+          id: "appointments",
+          name: "Book Consultation",
+          href: "/appointments",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect width="18" height="18" x="3" y="4" rx="2" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><path d="M12 14v4" /><path d="M10 16h4" />
+            </svg>
+          ),
+        },
+        {
+          id: "appointments-manage",
+          name: "My Appointments",
+          href: "/appointments/manage",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
+            </svg>
+          ),
+        },
+        {
+          id: "my-records",
+          name: "My Medical Passport",
+          href: "/patient-records/my-records",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          ),
+        },
+        {
+          id: "ai",
+          name: "Patient AI Guide",
+          href: "/ai-assistant",
+          badge: "Triage",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+            </svg>
+          ),
+        },
+      ];
+    }
+
+    if (userRole === ROLES.DOCTOR) {
+      return [
+        {
+          id: "dashboard",
+          name: "Clinical Dashboard",
+          href: "/dashboard",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+          ),
+        },
+        {
+          id: "appointments-manage",
+          name: "Patient Queue",
+          href: "/appointments/manage",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
+            </svg>
+          ),
+        },
+        {
+          id: "patients",
+          name: "Patient Records (EMR)",
+          href: "/patient-records",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          ),
+        },
+        {
+          id: "ai",
+          name: "Clinical AI Co-Pilot",
+          href: "/ai-assistant",
+          badge: "SOAP AI",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+            </svg>
+          ),
+        },
+        {
+          id: "reports",
+          name: "Clinical Reports",
+          href: "/reports",
+          icon: (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+          ),
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "dashboard",
+        name: "Admin Dashboard",
+        href: "/dashboard",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+        ),
+      },
+      {
+        id: "appointments-manage",
+        name: "Clinic Appointments",
+        href: "/appointments/manage",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M8 6h13" /><path d="M8 12h13" /><path d="M8 18h13" /><path d="M3 6h.01" /><path d="M3 12h.01" /><path d="M3 18h.01" />
+          </svg>
+        ),
+      },
+      {
+        id: "patients",
+        name: "Patient Directory",
+        href: "/patient-records",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        ),
+      },
+      {
+        id: "reports",
+        name: "Financials & Analytics",
+        href: "/reports",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" />
+          </svg>
+        ),
+      },
+      {
+        id: "ai",
+        name: "AI Logs & Usage",
+        href: "/ai-assistant",
+        badge: "Admin",
+        icon: (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+          </svg>
+        ),
+      },
+    ];
+  }
+
+  const navItems = getNavItems();
+  const currentBadge = ROLE_BADGES[userRole] || ROLE_BADGES[ROLES.PATIENT];
 
   const currentActive =
     activeNav ||
-    (pathname.startsWith("/patient-records")
+    (pathname.startsWith("/patient-records/my-records")
+      ? "my-records"
+      : pathname.startsWith("/patient-records")
       ? "patients"
       : pathname === "/appointments"
       ? "appointments"
@@ -166,8 +268,19 @@ export default function AppLayout({
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        {/* Active Portal Badge */}
+        <div className="px-3 pt-3 pb-1">
+          <div className={`flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r border text-xs font-semibold ${currentBadge.color}`}>
+            <span className="flex items-center gap-1.5 truncate">
+              <span>{currentBadge.icon}</span>
+              <span className="truncate">{currentBadge.label} Portal</span>
+            </span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 font-bold uppercase tracking-wider flex-shrink-0">Active</span>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+          <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Navigation
           </div>
           {navItems.map((item) => {

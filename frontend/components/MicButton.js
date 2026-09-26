@@ -100,6 +100,7 @@ export default function MicButton({
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSupported(false);
     }
 
@@ -447,7 +448,7 @@ export default function MicButton({
           }}
           title={livePreview}
         >
-          🗣️ "{livePreview}"
+          🗣️ &quot;{livePreview}&quot;
         </span>
       )}
 

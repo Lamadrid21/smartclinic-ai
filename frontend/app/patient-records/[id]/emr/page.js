@@ -46,13 +46,23 @@ export default function PrescriptionsPage() {
   const [followUp, setFollowUp] = useState("");
 
   useEffect(() => {
-    if (patientId) {
-      loadPatient();
-      loadPrescriptions();
-      loadVitals();
-      loadConsultationNotes();
+    if (!patientId) {
+      return;
     }
+
+    // eslint-disable-next-line react-hooks/immutability
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId]);
+
+  async function loadAll() {
+    await Promise.all([
+      loadPatient(),
+      loadPrescriptions(),
+      loadVitals(),
+      loadConsultationNotes(),
+    ]);
+  }
 
   async function loadPatient() {
     const { data, error } = await supabase

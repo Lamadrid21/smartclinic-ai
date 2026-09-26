@@ -1,11 +1,22 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
+import { ROLES, setUserRole } from "@/lib/auth-role";
 
-export default function Register() {
+function RegisterContent() {
+  const searchParams = useSearchParams();
+  const initialRole = searchParams?.get("role");
+
+  const [selectedRole, setSelectedRole] = useState(
+    [ROLES.PATIENT, ROLES.DOCTOR, ROLES.ADMIN].includes(initialRole)
+      ? initialRole
+      : ROLES.PATIENT
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,6 +25,14 @@ export default function Register() {
   const [captchaPassed, setCaptchaPassed] = useState(false);
 
   const recaptchaRef = useRef(null);
+
+  useEffect(() => {
+    const roleParam = searchParams?.get("role");
+    if (roleParam && [ROLES.PATIENT, ROLES.DOCTOR, ROLES.ADMIN].includes(roleParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedRole(roleParam);
+    }
+  }, [searchParams]);
 
   async function registerUser(e) {
     if (e) e.preventDefault();
@@ -81,9 +100,14 @@ export default function Register() {
     }
 
     // ---- CAPTCHA passed → proceed with existing Supabase signup ----
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role: selectedRole,
+        },
+      },
     });
 
     // reCAPTCHA tokens are single-use, so reset the widget after every attempt.
@@ -95,9 +119,39 @@ export default function Register() {
       return;
     }
 
+    if (authData?.user) {
+      await setUserRole(selectedRole, authData.user);
+    }
+
     setSuccessMsg("Account created! Check your email inbox for the verification link.");
     setLoading(false);
   }
+
+  const roleMeta = {
+    [ROLES.PATIENT]: {
+      title: "Register Patient Account",
+      subtitle: "Create your account to book appointments and access records",
+      emailPlaceholder: "patient@example.com",
+      accent: "from-blue-600 to-cyan-500",
+      cta: "Create Patient Account",
+    },
+    [ROLES.DOCTOR]: {
+      title: "Register Clinical Staff",
+      subtitle: "Create your provider account to access clinic systems",
+      emailPlaceholder: "dr.smith@smartclinic.ai",
+      accent: "from-emerald-600 to-teal-500",
+      cta: "Create Staff Account",
+    },
+    [ROLES.ADMIN]: {
+      title: "Register Administrator",
+      subtitle: "Create an administrator account for clinic management",
+      emailPlaceholder: "admin@smartclinic.ai",
+      accent: "from-purple-600 to-indigo-500",
+      cta: "Create Admin Account",
+    },
+  };
+
+  const currentMeta = roleMeta[selectedRole] || roleMeta[ROLES.PATIENT];
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 sm:px-6 py-12 relative overflow-hidden">
@@ -114,15 +168,48 @@ export default function Register() {
               </div>
             </div>
           </Link>
-          <h1 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Create an Account
+          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            SmartClinic <span className="text-cyan-400">AI</span>
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm text-slate-400">
-            Register your clinical staff account
+          <p className="mt-1 text-xs text-slate-400">
+            Intelligent Medical & Patient Care Suite
           </p>
         </div>
 
+        {/* Role Selector Tabs */}
+        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-white/10 mb-4 shadow-xl max-w-[320px] mx-auto">
+          <button
+            type="button"
+            onClick={() => setSelectedRole(ROLES.PATIENT)}
+            className={`py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+              selectedRole === ROLES.PATIENT
+                ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span className="text-sm">👤</span>
+            Patient
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedRole(ROLES.DOCTOR)}
+            className={`py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+              selectedRole === ROLES.DOCTOR
+                ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <span className="text-sm">🩺</span>
+            Doctor / Staff
+          </button>
+        </div>
+
         <div className="glass-card p-6 sm:p-8 rounded-3xl">
+          <div className="mb-5 pb-4 border-b border-white/10">
+            <h2 className="text-xl font-bold text-white tracking-tight">{currentMeta.title}</h2>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{currentMeta.subtitle}</p>
+          </div>
           {errorMsg && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
               {errorMsg}
@@ -142,7 +229,7 @@ export default function Register() {
               </label>
               <input
                 type="email"
-                placeholder="doctor@smartclinic.ai"
+                placeholder={currentMeta.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -170,20 +257,28 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
+              className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mt-2 disabled:opacity-50 text-white bg-gradient-to-r ${currentMeta.accent} shadow-lg shadow-blue-500/20 hover:brightness-110 transition-all`}
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? "Creating Account..." : currentMeta.cta}
             </button>
           </form>
 
           <p className="mt-6 text-center text-xs text-slate-400">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+            <Link href={`/login?role=${selectedRole}`} className="text-blue-400 hover:text-blue-300 font-semibold">
               Sign In
             </Link>
           </p>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function Register() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

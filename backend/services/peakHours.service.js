@@ -54,9 +54,12 @@ export async function predictPeakHours(appointments) {
     // Eagerly importing TFJS at module load makes every server boot extremely
     // heavy and can crash other local services on the same machine.
     const tf = await import("@tensorflow/tfjs");
+    // Active clinic hours: 8am-12pm (morning) and 2pm-6pm (afternoon, 14:00-17:00).
+    // Exclude lunch break (12:00 PM and 1:00 PM / hours 12 and 13).
+    const operatingHours = [8, 9, 10, 11, 14, 15, 16, 17];
     const hourCounts = {};
 
-    for (let hour = 8; hour <= 17; hour++) {
+    for (const hour of operatingHours) {
       hourCounts[hour] = 0;
     }
 
@@ -64,7 +67,7 @@ export async function predictPeakHours(appointments) {
       const startTime = String(appointment.start_time);
       const hour = parseInt(startTime.split(":")[0], 10);
 
-      if (Number.isInteger(hour) && hour >= 8 && hour <= 17) {
+      if (operatingHours.includes(hour)) {
         hourCounts[hour]++;
       }
     }
@@ -72,7 +75,7 @@ export async function predictPeakHours(appointments) {
     const trainingInputs = [];
     const trainingOutputs = [];
 
-    for (let hour = 8; hour <= 17; hour++) {
+    for (const hour of operatingHours) {
       trainingInputs.push([hour]);
       trainingOutputs.push([hourCounts[hour]]);
     }
@@ -117,7 +120,7 @@ export async function predictPeakHours(appointments) {
 
     const predictionInputs = [];
 
-    for (let hour = 8; hour <= 17; hour++) {
+    for (const hour of operatingHours) {
       predictionInputs.push([hour]);
     }
 
@@ -128,8 +131,8 @@ export async function predictPeakHours(appointments) {
 
     const predictions = [];
 
-    for (let i = 0; i < 10; i++) {
-      const hour = i + 8;
+    for (let i = 0; i < operatingHours.length; i++) {
+      const hour = operatingHours[i];
       const predictedValue = Math.max(0, Math.round(predictionValues[i]));
 
       predictions.push({
