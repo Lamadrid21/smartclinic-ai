@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
-import { ROLES, setUserRole } from "@/lib/auth-role";
+import { ROLES, getUserRole, setUserRole } from "@/lib/auth-role";
 
 function LoginContent() {
   const router = useRouter();
@@ -22,6 +22,7 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const [captchaPassed, setCaptchaPassed] = useState(false);
 
   const recaptchaRef = useRef(null);
@@ -33,6 +34,30 @@ function LoginContent() {
       setSelectedRole(roleParam);
     }
   }, [searchParams]);
+
+  // Check server-side failed login status: CAPTCHA is required after 10 failed attempts
+  useEffect(() => {
+    async function checkLoginStatus() {
+      try {
+        const url = email
+          ? `/api/auth/login-status?email=${encodeURIComponent(email)}`
+          : "/api/auth/login-status";
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.captchaRequired) {
+            setShowCaptcha(true);
+          } else {
+            setShowCaptcha(false);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not check login status:", err);
+      }
+    }
+
+    checkLoginStatus();
+  }, [email]);
 
   /**
    * Sends the Google reCAPTCHA token to the backend, which verifies it
@@ -50,12 +75,9 @@ function LoginContent() {
       const res = await fetch("/api/auth/verify-captcha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: captchaToken }),
+        body: JSON.stringify({ token: captchaToken, email }),
       });
 
-      // Defensively parse the response: if the proxy ever returns a non-JSON
-      // 500 (e.g. the backend was briefly unreachable), treat it as a CAPTCHA
-      // failure instead of throwing an uncaught "Unexpected token" error.
       let data = null;
       try {
         data = await res.json();
@@ -89,18 +111,21 @@ function LoginContent() {
       return;
     }
 
-    if (!captchaPassed) {
-      setErrorMsg("Please complete the CAPTCHA.");
-      return;
-    }
+    if (showCaptcha) {
+      if (!captchaPassed) {
+        setErrorMsg("Please complete the CAPTCHA.");
+        return;
+      }
 
-    setLoading(true);
+      setLoading(true);
 
-    // ---- Server-side CAPTCHA verification before any login attempt ----
-    const captchaOk = await verifyCaptchaWithBackend();
-    if (!captchaOk) {
-      setLoading(false);
-      return;
+      const captchaOk = await verifyCaptchaWithBackend();
+      if (!captchaOk) {
+        setLoading(false);
+        return;
+      }
+    } else {
+      setLoading(true);
     }
 
     const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -108,16 +133,47 @@ function LoginContent() {
       password,
     });
 
-    // reCAPTCHA tokens are single-use, so reset after every attempt.
-    recaptchaRef.current?.reset();
+    // reCAPTCHA tokens are single-use, so reset after attempt
+    if (showCaptcha) {
+      recaptchaRef.current?.reset();
+    }
 
     if (error) {
+      // Record failed attempt on the server
+      try {
+        const failRes = await fetch("/api/auth/record-login-failure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        if (failRes.ok) {
+          const failData = await failRes.json();
+          if (failData?.captchaRequired) {
+            setShowCaptcha(true);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not record login failure:", err);
+      }
+
       setErrorMsg(error.message);
       setLoading(false);
       return;
     }
 
-    await setUserRole(selectedRole, authData?.user);
+    // Login successful — reset server-side failed login attempts counter
+    try {
+      await fetch("/api/auth/record-login-success", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+    } catch (err) {
+      console.warn("Could not record login success:", err);
+    }
+
+    const actualRole = getUserRole(authData?.user);
+    await setUserRole(actualRole, authData?.user);
 
     router.push("/dashboard");
   }
@@ -125,21 +181,22 @@ function LoginContent() {
   async function loginWithGoogle() {
     setErrorMsg("");
 
-    if (!captchaPassed) {
-      setErrorMsg("Please complete the CAPTCHA.");
-      return;
+    if (showCaptcha) {
+      if (!captchaPassed) {
+        setErrorMsg("Please complete the CAPTCHA.");
+        return;
+      }
+
+      setLoading(true);
+
+      const captchaOk = await verifyCaptchaWithBackend();
+      if (!captchaOk) {
+        setLoading(false);
+        return;
+      }
+    } else {
+      setLoading(true);
     }
-
-    setLoading(true);
-
-    // ---- Server-side CAPTCHA verification before the OAuth redirect ----
-    const captchaOk = await verifyCaptchaWithBackend();
-    if (!captchaOk) {
-      setLoading(false);
-      return;
-    }
-
-    await setUserRole(selectedRole);
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -148,7 +205,9 @@ function LoginContent() {
       },
     });
 
-    recaptchaRef.current?.reset();
+    if (showCaptcha) {
+      recaptchaRef.current?.reset();
+    }
 
     if (error) {
       setErrorMsg(error.message);
@@ -169,7 +228,7 @@ function LoginContent() {
       title: "Doctor Portal",
       subtitle: "Manage daily queue, EMR charts, vital signs & prescriptions",
       badge: "🩺 Medical Staff",
-      emailPlaceholder: "dr.smith@smartclinic.ai",
+      emailPlaceholder: "doctor@example.com",
       accent: "from-emerald-600 to-teal-500",
       cta: "Sign In as Doctor",
     },
@@ -177,7 +236,7 @@ function LoginContent() {
       title: "Clinic Administration",
       subtitle: "Clinic analytics, doctor monitor, revenue & system audit",
       badge: "⚙️ Administrator",
-      emailPlaceholder: "admin@smartclinic.ai",
+      emailPlaceholder: "admin@example.com",
       accent: "from-purple-600 to-indigo-500",
       cta: "Sign In as Admin",
     },
@@ -298,8 +357,10 @@ function LoginContent() {
               />
             </div>
 
-            {/* GOOGLE reCAPTCHA - required; verified by the backend before login. */}
-            <ReCaptcha ref={recaptchaRef} onChange={setCaptchaPassed} />
+            {/* GOOGLE reCAPTCHA - shown only after 10 consecutive failed login attempts */}
+            {showCaptcha && (
+              <ReCaptcha ref={recaptchaRef} onChange={setCaptchaPassed} />
+            )}
 
             <button
               type="submit"

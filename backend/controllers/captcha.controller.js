@@ -1,5 +1,37 @@
 import config from "../config/env.js";
 
+// Server-side in-memory tracking of consecutive failed login attempts.
+// Keyed by IP address and/or normalized email.
+const failedAttemptsMap = new Map();
+
+function getClientKey(req, customEmail = "") {
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    "unknown-ip";
+
+  const rawEmail =
+    customEmail ||
+    req.body?.email ||
+    req.query?.email ||
+    "";
+
+  const normalizedEmail = String(rawEmail).toLowerCase().trim();
+
+  return normalizedEmail ? `${ip}:${normalizedEmail}` : ip;
+}
+
+// Clean up stale attempt records older than 2 hours.
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, record] of failedAttemptsMap.entries()) {
+    if (now - record.lastAttempt > 2 * 60 * 60 * 1000) {
+      failedAttemptsMap.delete(key);
+    }
+  }
+}, 15 * 60 * 1000);
+
 /**
  * Verify a Google reCAPTCHA v2 token server-side.
  * Never trusts the client — always checks with Google's siteverify endpoint.
@@ -36,6 +68,88 @@ async function verifyWithGoogle(token) {
   }
 
   return response.json();
+}
+
+/**
+ * GET or POST /api/auth/login-status
+ * Query or Body: { email }
+ *
+ * Response:
+ *   { success: true, failedAttempts: number, captchaRequired: boolean }
+ */
+export function getLoginStatus(req, res) {
+  const key = getClientKey(req);
+  const record = failedAttemptsMap.get(key);
+  const count = record ? record.count : 0;
+
+  return res.json({
+    success: true,
+    failedAttempts: count,
+    captchaRequired: count >= 10,
+  });
+}
+
+/**
+ * POST /api/auth/record-login-failure
+ * Body: { email }
+ *
+ * Increments the consecutive failed login attempt counter on the server.
+ * Response:
+ *   { success: true, failedAttempts: number, captchaRequired: boolean }
+ */
+export function recordLoginFailure(req, res) {
+  const key = getClientKey(req);
+  const now = Date.now();
+  const record = failedAttemptsMap.get(key) || { count: 0, lastAttempt: now };
+
+  record.count += 1;
+  record.lastAttempt = now;
+  failedAttemptsMap.set(key, record);
+
+  // Also record on pure IP if email was provided
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    "unknown-ip";
+  if (key !== ip) {
+    const ipRecord = failedAttemptsMap.get(ip) || { count: 0, lastAttempt: now };
+    ipRecord.count += 1;
+    ipRecord.lastAttempt = now;
+    failedAttemptsMap.set(ip, ipRecord);
+  }
+
+  return res.json({
+    success: true,
+    failedAttempts: record.count,
+    captchaRequired: record.count >= 10,
+  });
+}
+
+/**
+ * POST /api/auth/record-login-success
+ * Body: { email }
+ *
+ * Resets the consecutive failed login attempt counter on the server.
+ * Response:
+ *   { success: true, failedAttempts: 0, captchaRequired: false }
+ */
+export function recordLoginSuccess(req, res) {
+  const key = getClientKey(req);
+  failedAttemptsMap.delete(key);
+
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    "unknown-ip";
+  failedAttemptsMap.delete(ip);
+
+  return res.json({
+    success: true,
+    failedAttempts: 0,
+    captchaRequired: false,
+  });
 }
 
 /**

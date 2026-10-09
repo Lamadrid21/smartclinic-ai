@@ -7,6 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import AppLayout from "@/components/AppLayout";
+import { ROLES, getUserRole } from "@/lib/auth-role";
 
 export default function ReportsPage() {
 const router = useRouter();
@@ -33,6 +34,18 @@ loadReports();
 async function loadReports() {
 try {
 setLoading(true);
+
+const { data: { user: currentUser } } = await supabase.auth.getUser();
+if (!currentUser) {
+  router.push("/login");
+  return;
+}
+
+const role = getUserRole(currentUser);
+if (role === ROLES.PATIENT) {
+  router.push("/dashboard");
+  return;
+}
 
 
   const [
@@ -196,20 +209,6 @@ String(appointment.status || "")
 .toLowerCase() === "cancelled"
 ).length;
 
-const totalFees = reportAppointments.reduce(
-(total, appointment) => {
-const fee = Number(
-appointment.consultation_fee || 0
-);
-
-
-  return total + fee;
-},
-0
-
-
-);
-
 function formatCurrency(value) {
 return "PHP " + Number(value || 0).toFixed(2);
 }
@@ -293,7 +292,6 @@ autoTable(doc, {
       "Patient",
       "Doctor",
       "Status",
-      "Fee",
       "Waiting",
     ],
   ],
@@ -309,9 +307,6 @@ autoTable(doc, {
         appointment.doctor_id
       ),
       appointment.status || "N/A",
-      formatCurrency(
-        appointment.consultation_fee
-      ),
       appointment.waiting_time
         ? appointment.waiting_time +
           " min"
@@ -362,13 +357,6 @@ doc.text(
   finalY + 21
 );
 
-doc.text(
-  "Total Consultation Fees: " +
-    formatCurrency(totalFees),
-  14,
-  finalY + 28
-);
-
 const fileName =
   reportType === "daily"
     ? "daily-report-" +
@@ -414,10 +402,6 @@ const excelData =
         ),
       Status:
         appointment.status || "",
-      ConsultationFee:
-        Number(
-          appointment.consultation_fee || 0
-        ),
       WaitingTime:
         appointment.waiting_time || "",
       CreatedAt:
@@ -434,7 +418,6 @@ excelData.push({
   DoctorID: "",
   DoctorName: "TOTAL",
   Status: "",
-  ConsultationFee: totalFees,
   WaitingTime: "",
   CreatedAt: "",
 });
@@ -453,7 +436,6 @@ worksheet["!cols"] = [
   { wch: 15 },
   { wch: 28 },
   { wch: 15 },
-  { wch: 20 },
   { wch: 15 },
   { wch: 25 },
 ];
@@ -708,13 +690,6 @@ fontWeight: "600",
                 cancelledAppointments
               }
             />
-
-            <SummaryCard
-              title="Total Fees"
-              value={formatCurrency(
-                totalFees
-              )}
-            />
           </div>
 
           <div
@@ -833,12 +808,6 @@ fontWeight: "600",
                     <th
                       style={headerStyle}
                     >
-                      Fee
-                    </th>
-
-                    <th
-                      style={headerStyle}
-                    >
                       Waiting
                     </th>
                   </tr>
@@ -901,16 +870,6 @@ fontWeight: "600",
                         >
                           {appointment.status ||
                             "N/A"}
-                        </td>
-
-                        <td
-                          style={
-                            cellStyle
-                          }
-                        >
-                          {formatCurrency(
-                            appointment.consultation_fee
-                          )}
                         </td>
 
                         <td

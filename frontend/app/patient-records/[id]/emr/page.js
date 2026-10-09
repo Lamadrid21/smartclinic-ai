@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { jsPDF } from "jspdf";
 import { supabase } from "@/lib/supabase";
+import AppLayout from "@/components/AppLayout";
 import DictationField from "@/components/DictationField";
 
 export default function PrescriptionsPage() {
@@ -474,450 +475,479 @@ export default function PrescriptionsPage() {
   }
 
   return (
-    <main
-      style={{
-        padding: "40px",
-        maxWidth: "1000px",
-        margin: "0 auto",
-        fontFamily: "Arial, sans-serif",
-      }}
+    <AppLayout
+      title="Electronic Medical Record (EMR)"
+      subtitle="Vitals, consultation notes, and prescription management"
+      activeNav="patients"
     >
-      {/* BACK BUTTON */}
+      <div style={{ padding: "10px 0" }}>
+        {/* BACK BUTTON */}
 
-      <button
-        onClick={() =>
-          router.push(`/patient-records/${patientId}`)
-        }
-        style={{
-          marginBottom: "25px",
-          padding: "10px 16px",
-          border: "1px solid #ccc",
-          borderRadius: "6px",
-          background: "#fff",
-          cursor: "pointer",
-        }}
-      >
-        ← Back to Patient
-      </button>
-
-      {/* PATIENT INFORMATION */}
-
-      {patient && (
-        <div
+        <button
+          onClick={() =>
+            router.push(`/patient-records/${patientId}`)
+          }
           style={{
-            marginBottom: "30px",
-            padding: "20px",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            background: "#f8f9fa",
+            marginBottom: "20px",
+            padding: "10px 16px",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: "8px",
+            background: "rgba(255, 255, 255, 0.06)",
+            color: "#f1f5f9",
+            cursor: "pointer",
           }}
         >
-          <h1 style={{ marginTop: 0 }}>
-            Prescriptions
-          </h1>
+          ← Back to Patient
+        </button>
 
-          <p>
-            <strong>Patient:</strong>{" "}
-            {patient.first_name}{" "}
-            {patient.middle_name || ""}{" "}
-            {patient.last_name}
-          </p>
+        {/* PATIENT INFORMATION */}
 
-          <p>
-            <strong>Patient Number:</strong>{" "}
-            {patient.patient_number}
-          </p>
-        </div>
-      )}
-
-      {/* FEATURE #5: PATIENT VITALS */}
-      <section style={{ marginBottom: "40px", padding: "25px", border: "1px solid #ddd", borderRadius: "10px" }}>
-        <h2>Vital Signs</h2>
-        <form onSubmit={handleSaveVitals} style={{ marginBottom: "25px", borderBottom: "1px solid #ddd", paddingBottom: "22px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }}>
-            <div>
-              <label><strong>Heart Rate (bpm)</strong></label>
-              <input type="number" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>BP Systolic</strong></label>
-              <input type="number" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>BP Diastolic</strong></label>
-              <input type="number" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>Temperature (°C)</strong></label>
-              <input type="number" step="0.1" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>Weight (kg)</strong></label>
-              <input type="number" step="0.1" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>Height (cm)</strong></label>
-              <input type="number" step="0.1" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>Respiratory Rate</strong></label>
-              <input type="number" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-            <div>
-              <label><strong>O₂ Saturation (%)</strong></label>
-              <input type="number" step="0.1" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-            </div>
-          </div>
-          <DictationField
-            label="Notes"
-            value={vitalNotes}
-            onChange={setVitalNotes}
-            placeholder="Optional notes"
-            rows={2}
-            style={{ marginTop: "15px" }}
-          />
-          <button type="submit" disabled={saving} style={{ marginTop: "15px", padding: "12px 20px", border: "none", borderRadius: "6px", background: "#2563eb", color: "white", cursor: saving ? "not-allowed" : "pointer" }}>
-            {saving ? "Saving..." : "Save Vitals"}
-          </button>
-        </form>
-
-        {vitals.length === 0 ? (
-          <p>No vital signs recorded.</p>
-        ) : (
-          <div>
-            {vitals.map((v) => (
-              <div key={v.id} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px" }}>
-                <p style={{ margin: 0 }}>
-                  ❤️ <strong>{v.heart_rate || "—"}</strong> bpm · BP <strong>{v.blood_pressure_systolic || "—"}/{v.blood_pressure_diastolic || "—"}</strong> · 🌡️ <strong>{v.temperature ? `${v.temperature}°C` : "—"}</strong> · ⚖️ <strong>{v.weight_kg ? `${v.weight_kg} kg` : "—"}</strong> · 📏 <strong>{v.height_cm ? `${v.height_cm} cm` : "—"}</strong> · RR <strong>{v.respiratory_rate || "—"}</strong> · SpO₂ <strong>{v.oxygen_saturation ? `${v.oxygen_saturation}%` : "—"}</strong>
-                </p>
-                <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#666" }}>
-                  {v.recorded_at ? new Date(v.recorded_at).toLocaleString() : ""}
-                  {v.recorded_by ? ` · by ${v.recorded_by}` : ""}
-                  {v.notes ? ` — ${v.notes}` : ""}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* FEATURE #5: CONSULTATION NOTES */}
-      <section style={{ marginBottom: "40px", padding: "25px", border: "1px solid #ddd", borderRadius: "10px" }}>
-        <h2>Consultation Notes</h2>
-        <form onSubmit={handleSaveConsultationNotes} style={{ marginBottom: "25px", borderBottom: "1px solid #ddd", paddingBottom: "22px" }}>
-          <DictationField
-            label="Chief Complaint *"
-            value={chiefComplaint}
-            onChange={setChiefComplaint}
-            placeholder="e.g. Persistent headache for 3 days"
-            inputType="input"
-          />
-          <DictationField
-            label="History of Present Illness"
-            value={hpi}
-            onChange={setHpi}
-            placeholder="Onset, duration, progression..."
-            rows={3}
-          />
-          <DictationField
-            label="Physical Examination"
-            value={physicalExam}
-            onChange={setPhysicalExam}
-            placeholder="Findings..."
-            rows={3}
-          />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
-            <div>
-              <DictationField
-                label="Assessment"
-                value={assessment}
-                onChange={setAssessment}
-                placeholder="Diagnosis / impression"
-                rows={2}
-                style={{ marginBottom: 0 }}
-              />
-            </div>
-            <div>
-              <DictationField
-                label="Plan"
-                value={plan}
-                onChange={setPlan}
-                placeholder="Treatment plan"
-                rows={2}
-                style={{ marginBottom: 0 }}
-              />
-            </div>
-          </div>
-          <div style={{ marginBottom: "15px" }}>
-            <label><strong>Follow-up</strong></label>
-            <input type="text" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
-          </div>
-          <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "6px", background: "#7c3aed", color: "white", cursor: saving ? "not-allowed" : "pointer" }}>
-            {saving ? "Saving..." : "Save Consultation Notes"}
-          </button>
-        </form>
-
-        {consultationNotes.length === 0 ? <p>No consultation notes recorded.</p> : (
-          <div>
-            {consultationNotes.map((n) => (
-              <div key={n.id} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px" }}>
-                <p style={{ margin: 0 }}><strong>{n.chief_complaint}</strong></p>
-                {n.history_of_present_illness && <p style={{ margin: "6px 0 0", fontSize: "13px" }}><strong>HPI:</strong> {n.history_of_present_illness}</p>}
-                {n.physical_examination && <p style={{ margin: "4px 0 0", fontSize: "13px" }}><strong>PE:</strong> {n.physical_examination}</p>}
-                {n.assessment && <p style={{ margin: "4px 0 0", fontSize: "13px" }}><strong>Assessment:</strong> {n.assessment}</p>}
-                {n.plan && <p style={{ margin: "4px 0 0", fontSize: "13px" }}><strong>Plan:</strong> {n.plan}</p>}
-                {n.follow_up && <p style={{ margin: "4px 0 0", fontSize: "13px" }}><strong>Follow-up:</strong> {n.follow_up}</p>}
-                <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#666" }}>
-                  {n.consultation_date ? new Date(n.consultation_date).toLocaleString() : ""}
-                  {n.created_by ? ` · by ${n.created_by}` : ""}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* CREATE PRESCRIPTION */}
-
-      <section
-        style={{
-          marginBottom: "40px",
-          padding: "25px",
-          border: "1px solid #ddd",
-          borderRadius: "10px",
-        }}
-      >
-        <h2>Create Prescription</h2>
-
-        <form onSubmit={handleCreatePrescription}>
-          {/* MEDICATION NAME */}
-
-          <div style={{ marginBottom: "15px" }}>
-            <label>
-              <strong>Medication Name *</strong>
-            </label>
-
-            <input
-              type="text"
-              value={medicationName}
-              onChange={(e) =>
-                setMedicationName(e.target.value)
-              }
-              placeholder="e.g. Amoxicillin"
-              style={{
-                width: "100%",
-                padding: "12px",
-                marginTop: "6px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-              }}
-            />
-          </div>
-
-          {/* DOSAGE */}
-
-          <div style={{ marginBottom: "15px" }}>
-            <label>
-              <strong>Dosage *</strong>
-            </label>
-
-            <input
-              type="text"
-              value={dosage}
-              onChange={(e) =>
-                setDosage(e.target.value)
-              }
-              placeholder="e.g. 500 mg"
-              style={{
-                width: "100%",
-                padding: "12px",
-                marginTop: "6px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-              }}
-            />
-          </div>
-
-          {/* FREQUENCY */}
-
-          <div style={{ marginBottom: "15px" }}>
-            <label>
-              <strong>Frequency *</strong>
-            </label>
-
-            <input
-              type="text"
-              value={frequency}
-              onChange={(e) =>
-                setFrequency(e.target.value)
-              }
-              placeholder="e.g. 3 times daily"
-              style={{
-                width: "100%",
-                padding: "12px",
-                marginTop: "6px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-              }}
-            />
-          </div>
-
-          {/* DURATION */}
-
-          <div style={{ marginBottom: "15px" }}>
-            <label>
-              <strong>Duration *</strong>
-            </label>
-
-            <input
-              type="text"
-              value={duration}
-              onChange={(e) =>
-                setDuration(e.target.value)
-              }
-              placeholder="e.g. 7 days"
-              style={{
-                width: "100%",
-                padding: "12px",
-                marginTop: "6px",
-                border: "1px solid #ccc",
-                borderRadius: "6px",
-              }}
-            />
-          </div>
-
-          {/* INSTRUCTIONS */}
-
-          <DictationField
-            label="Instructions"
-            value={instructions}
-            onChange={setInstructions}
-            placeholder="e.g. Take after meals."
-            rows={4}
-            micLabel="🎤 Dictate Instructions"
-          />
-
-          {/* CREATE BUTTON */}
-
-          <button
-            type="submit"
-            disabled={saving}
+        {patient && (
+          <div
             style={{
-              padding: "12px 20px",
-              border: "none",
-              borderRadius: "6px",
-              background: "#2563eb",
-              color: "white",
-              cursor: saving
-                ? "not-allowed"
-                : "pointer",
+              marginBottom: "30px",
+              padding: "24px",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "16px",
+              background: "rgba(15, 23, 42, 0.75)",
             }}
           >
-            {saving
-              ? "Saving..."
-              : "Create Prescription"}
-          </button>
-        </form>
+            <h1 style={{ marginTop: 0, marginBottom: "15px", color: "#f1f5f9", fontSize: "22px" }}>
+              Patient EMR Overview
+            </h1>
 
-        {message && (
-          <p
-            style={{
-              marginTop: "15px",
-              fontWeight: "bold",
-            }}
-          >
-            {message}
-          </p>
+            <p style={{ margin: "4px 0", color: "#f1f5f9" }}>
+              <strong style={{ color: "#94a3b8" }}>Patient:</strong>{" "}
+              {patient.first_name}{" "}
+              {patient.middle_name || ""}{" "}
+              {patient.last_name}
+            </p>
+
+            <p style={{ margin: "4px 0", color: "#f1f5f9" }}>
+              <strong style={{ color: "#94a3b8" }}>Patient Number:</strong>{" "}
+              {patient.patient_number}
+            </p>
+          </div>
         )}
-      </section>
 
-      {/* PRESCRIPTION HISTORY */}
+        {/* FEATURE #5: PATIENT VITALS */}
+        <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
+          <h2 style={{ color: "#f1f5f9" }}>Vital Signs</h2>
+          <form onSubmit={handleSaveVitals} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }}>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>Heart Rate (bpm)</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>BP Systolic</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>BP Diastolic</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>Temperature (°C)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>Weight (kg)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>Height (cm)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>Respiratory Rate</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+              <div>
+                <label style={{ color: "#f1f5f9" }}><strong>O₂ Saturation (%)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              </div>
+            </div>
+            <DictationField
+              label="Notes"
+              value={vitalNotes}
+              onChange={setVitalNotes}
+              placeholder="Additional details or observations"
+              rows={2}
+              style={{ marginTop: "15px" }}
+            />
+            <button type="submit" disabled={saving} style={{ marginTop: "15px", padding: "12px 20px", border: "none", borderRadius: "8px", background: "#2563eb", color: "white", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
+              {saving ? "Saving..." : "Save Vitals"}
+            </button>
+          </form>
 
-      <section>
-        <h2>Prescription History</h2>
+          {vitals.length === 0 ? (
+            <p style={{ color: "#94a3b8" }}>No vital signs recorded.</p>
+          ) : (
+            <div>
+              {vitals.map((v) => (
+                <div key={v.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
+                  <p style={{ margin: 0, color: "#f1f5f9" }}>
+                    ❤️ <strong>{v.heart_rate || "—"}</strong> bpm · BP <strong>{v.blood_pressure_systolic || "—"}/{v.blood_pressure_diastolic || "—"}</strong> · 🌡️ <strong>{v.temperature ? `${v.temperature}°C` : "—"}</strong> · ⚖️ <strong>{v.weight_kg ? `${v.weight_kg} kg` : "—"}</strong> · 📏 <strong>{v.height_cm ? `${v.height_cm} cm` : "—"}</strong> · RR <strong>{v.respiratory_rate || "—"}</strong> · SpO₂ <strong>{v.oxygen_saturation ? `${v.oxygen_saturation}%` : "—"}</strong>
+                  </p>
+                  <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#94a3b8" }}>
+                    {v.recorded_at ? new Date(v.recorded_at).toLocaleString() : ""}
+                    {v.recorded_by ? ` · by ${v.recorded_by}` : ""}
+                    {v.notes ? ` — ${v.notes}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-        {loading ? (
-          <p>Loading prescriptions...</p>
-        ) : prescriptions.length === 0 ? (
-          <p>
-            No prescriptions found for this patient.
-          </p>
-        ) : (
-          <div>
-            {prescriptions.map((prescription) => (
-              <div
-                key={prescription.id}
+        {/* FEATURE #5: CONSULTATION NOTES */}
+        <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
+          <h2 style={{ color: "#f1f5f9" }}>Consultation Notes</h2>
+          <form onSubmit={handleSaveConsultationNotes} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
+            <DictationField
+              label="Chief Complaint *"
+              value={chiefComplaint}
+              onChange={setChiefComplaint}
+              placeholder="e.g. Persistent headache for 3 days"
+              inputType="input"
+            />
+            <DictationField
+              label="History of Present Illness"
+              value={hpi}
+              onChange={setHpi}
+              placeholder="Onset, duration, progression..."
+              rows={3}
+            />
+            <DictationField
+              label="Physical Examination"
+              value={physicalExam}
+              onChange={setPhysicalExam}
+              placeholder="Findings..."
+              rows={3}
+            />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+              <div>
+                <DictationField
+                  label="Assessment"
+                  value={assessment}
+                  onChange={setAssessment}
+                  placeholder="Diagnosis / impression"
+                  rows={2}
+                  style={{ marginBottom: 0 }}
+                />
+              </div>
+              <div>
+                <DictationField
+                  label="Plan"
+                  value={plan}
+                  onChange={setPlan}
+                  placeholder="Treatment plan"
+                  rows={2}
+                  style={{ marginBottom: 0 }}
+                />
+              </div>
+            </div>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ color: "#f1f5f9" }}><strong>Follow-up</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+            </div>
+            <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#7c3aed", color: "white", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
+              {saving ? "Saving..." : "Save Consultation Notes"}
+            </button>
+          </form>
+
+          {consultationNotes.length === 0 ? <p style={{ color: "#94a3b8" }}>No consultation notes recorded.</p> : (
+            <div>
+              {consultationNotes.map((n) => (
+                <div key={n.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
+                  <p style={{ margin: 0, color: "#f1f5f9" }}><strong>{n.chief_complaint}</strong></p>
+                  {n.history_of_present_illness && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>HPI:</strong> {n.history_of_present_illness}</p>}
+                  {n.physical_examination && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>PE:</strong> {n.physical_examination}</p>}
+                  {n.assessment && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Assessment:</strong> {n.assessment}</p>}
+                  {n.plan && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Plan:</strong> {n.plan}</p>}
+                  {n.follow_up && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Follow-up:</strong> {n.follow_up}</p>}
+                  <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#94a3b8" }}>
+                    {n.consultation_date ? new Date(n.consultation_date).toLocaleString() : ""}
+                    {n.created_by ? ` · by ${n.created_by}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* CREATE PRESCRIPTION */}
+
+        <section
+          style={{
+            marginBottom: "30px",
+            padding: "25px",
+            background: "rgba(15, 23, 42, 0.75)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "16px",
+          }}
+        >
+          <h2 style={{ color: "#f1f5f9" }}>Create Prescription</h2>
+
+          <form onSubmit={handleCreatePrescription}>
+            {/* MEDICATION NAME */}
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ color: "#f1f5f9" }}>
+                <strong>Medication Name *</strong>
+              </label>
+
+              <input
+                type="text"
+                className="glass-input placeholder:text-slate-500"
+                value={medicationName}
+                onChange={(e) =>
+                  setMedicationName(e.target.value)
+                }
+                placeholder="e.g. Amoxicillin"
                 style={{
-                  marginBottom: "20px",
-                  padding: "20px",
-                  border: "1px solid #ddd",
-                  borderRadius: "10px",
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: "8px",
+                  background: "rgba(15, 23, 42, 0.6)",
+                  color: "#f1f5f9",
                 }}
-              >
-                <h3 style={{ marginTop: 0 }}>
-                  {prescription.medication_name}
-                </h3>
+              />
+            </div>
 
-                <p>
-                  <strong>Dosage:</strong>{" "}
-                  {prescription.dosage}
-                </p>
+            {/* DOSAGE */}
 
-                <p>
-                  <strong>Frequency:</strong>{" "}
-                  {prescription.frequency}
-                </p>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ color: "#f1f5f9" }}>
+                <strong>Dosage *</strong>
+              </label>
 
-                <p>
-                  <strong>Duration:</strong>{" "}
-                  {prescription.duration}
-                </p>
+              <input
+                type="text"
+                className="glass-input placeholder:text-slate-500"
+                value={dosage}
+                onChange={(e) =>
+                  setDosage(e.target.value)
+                }
+                placeholder="e.g. 500 mg"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: "8px",
+                  background: "rgba(15, 23, 42, 0.6)",
+                  color: "#f1f5f9",
+                }}
+              />
+            </div>
 
-                <p>
-                  <strong>Instructions:</strong>{" "}
-                  {prescription.instructions ||
-                    "None"}
-                </p>
+            {/* FREQUENCY */}
 
-                <p
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ color: "#f1f5f9" }}>
+                <strong>Frequency *</strong>
+              </label>
+
+              <input
+                type="text"
+                className="glass-input placeholder:text-slate-500"
+                value={frequency}
+                onChange={(e) =>
+                  setFrequency(e.target.value)
+                }
+                placeholder="e.g. 3 times daily"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: "8px",
+                  background: "rgba(15, 23, 42, 0.6)",
+                  color: "#f1f5f9",
+                }}
+              />
+            </div>
+
+            {/* DURATION */}
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ color: "#f1f5f9" }}>
+                <strong>Duration *</strong>
+              </label>
+
+              <input
+                type="text"
+                className="glass-input placeholder:text-slate-500"
+                value={duration}
+                onChange={(e) =>
+                  setDuration(e.target.value)
+                }
+                placeholder="e.g. 7 days"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginTop: "6px",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: "8px",
+                  background: "rgba(15, 23, 42, 0.6)",
+                  color: "#f1f5f9",
+                }}
+              />
+            </div>
+
+            {/* INSTRUCTIONS */}
+
+            <DictationField
+              label="Instructions"
+              value={instructions}
+              onChange={setInstructions}
+              placeholder="e.g. Take after meals."
+              rows={4}
+              micLabel="🎤 Dictate Instructions"
+            />
+
+            {/* CREATE BUTTON */}
+
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                padding: "12px 20px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#2563eb",
+                color: "white",
+                fontWeight: "600",
+                cursor: saving
+                  ? "not-allowed"
+                  : "pointer",
+              }}
+            >
+              {saving
+                ? "Saving..."
+                : "Create Prescription"}
+            </button>
+          </form>
+
+          {message && (
+            <div
+              style={{
+                marginTop: "15px",
+                padding: "12px 16px",
+                borderRadius: "8px",
+                background: "rgba(59, 130, 246, 0.15)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
+                color: "#93c5fd",
+                fontWeight: "600",
+              }}
+            >
+              {message}
+            </div>
+          )}
+        </section>
+
+        {/* PRESCRIPTION HISTORY */}
+
+        <section
+          style={{
+            marginBottom: "30px",
+            padding: "25px",
+            background: "rgba(15, 23, 42, 0.75)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "16px",
+          }}
+        >
+          <h2 style={{ color: "#f1f5f9" }}>Prescription History</h2>
+
+          {loading ? (
+            <p style={{ color: "#94a3b8" }}>Loading prescriptions...</p>
+          ) : prescriptions.length === 0 ? (
+            <p style={{ color: "#94a3b8" }}>
+              No prescriptions found for this patient.
+            </p>
+          ) : (
+            <div>
+              {prescriptions.map((prescription) => (
+                <div
+                  key={prescription.id}
                   style={{
-                    fontSize: "13px",
-                    color: "#666",
+                    marginBottom: "20px",
+                    padding: "20px",
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: "12px",
                   }}
                 >
-                  Created:{" "}
-                  {prescription.created_at
-                    ? new Date(
-                        prescription.created_at
-                      ).toLocaleString()
-                    : "Date not available"}
-                </p>
+                  <h3 style={{ marginTop: 0, color: "#f1f5f9" }}>
+                    {prescription.medication_name}
+                  </h3>
 
-                {/* DOWNLOAD PDF BUTTON */}
+                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>Dosage:</strong>{" "}
+                    {prescription.dosage}
+                  </p>
 
-                <button
-                  onClick={() =>
-                    handleDownloadPDF(
-                      prescription
-                    )
-                  }
-                  style={{
-                    marginTop: "10px",
-                    padding: "10px 16px",
-                    border: "none",
-                    borderRadius: "6px",
-                    background: "#16a34a",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  Download Prescription PDF
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>Frequency:</strong>{" "}
+                    {prescription.frequency}
+                  </p>
+
+                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>Duration:</strong>{" "}
+                    {prescription.duration}
+                  </p>
+
+                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>Instructions:</strong>{" "}
+                    {prescription.instructions ||
+                      "None"}
+                  </p>
+
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#94a3b8",
+                      margin: "8px 0 12px",
+                    }}
+                  >
+                    Created:{" "}
+                    {prescription.created_at
+                      ? new Date(
+                          prescription.created_at
+                        ).toLocaleString()
+                      : "Date not available"}
+                  </p>
+
+                  {/* DOWNLOAD PDF BUTTON */}
+
+                  <button
+                    onClick={() =>
+                      handleDownloadPDF(
+                        prescription
+                      )
+                    }
+                    style={{
+                      padding: "10px 16px",
+                      border: "none",
+                      borderRadius: "8px",
+                      background: "#16a34a",
+                      color: "white",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Download Prescription PDF
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </AppLayout>
   );
 }

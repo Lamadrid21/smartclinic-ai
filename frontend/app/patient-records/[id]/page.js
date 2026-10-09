@@ -831,9 +831,10 @@ export default function PatientDetails() {
           marginBottom: "20px",
           padding: "10px 16px",
           border:
-            "1px solid #ccc",
-          borderRadius: "6px",
-          background: "rgba(15,23,42,0.6)",
+            "1px solid rgba(255, 255, 255, 0.12)",
+          borderRadius: "8px",
+          background: "rgba(255, 255, 255, 0.06)",
+          color: "#f1f5f9",
           cursor: "pointer",
         }}
       >
@@ -848,11 +849,11 @@ export default function PatientDetails() {
             marginBottom: "20px",
             padding: "15px",
             background:
-              "#fee2e2",
+              "rgba(244, 63, 94, 0.15)",
             border:
-              "1px solid #fca5a5",
+              "1px solid rgba(244, 63, 94, 0.3)",
             borderRadius: "8px",
-            color: "#991b1b",
+            color: "#fda4af",
           }}
         >
           <strong>
@@ -870,11 +871,11 @@ export default function PatientDetails() {
             marginBottom: "20px",
             padding: "15px",
             background:
-              "#dcfce7",
+              "rgba(16, 185, 129, 0.15)",
             border:
-              "1px solid #86efac",
+              "1px solid rgba(16, 185, 129, 0.3)",
             borderRadius: "8px",
-            color: "#34d399",
+            color: "#6ee7b7",
           }}
         >
           {successMessage}
@@ -889,16 +890,17 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "30px",
-          background: "rgba(15,23,42,0.6)",
+          background: "rgba(15, 23, 42, 0.75)",
           border:
-            "1px solid #ddd",
-          borderRadius: "12px",
+            "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
         }}
       >
         <h1
           style={{
             marginTop: 0,
             marginBottom: "30px",
+            color: "#f1f5f9",
           }}
         >
           Patient Information
@@ -913,9 +915,9 @@ export default function PatientDetails() {
           }}
         >
           <div>
-            <strong>Name</strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>Name</strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px", fontWeight: "600" }}>
               {patient.first_name}{" "}
               {patient.middle_name || ""}{" "}
               {patient.last_name}
@@ -923,55 +925,55 @@ export default function PatientDetails() {
           </div>
 
           <div>
-            <strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>
               Patient ID
             </strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px" }}>
               {patient.patient_number ||
                 "N/A"}
             </p>
           </div>
 
           <div>
-            <strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>
               Date of Birth
             </strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px" }}>
               {patient.date_of_birth ||
                 "N/A"}
             </p>
           </div>
 
           <div>
-            <strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>
               Gender
             </strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px" }}>
               {patient.gender ||
                 "N/A"}
             </p>
           </div>
 
           <div>
-            <strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>
               Contact
             </strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px" }}>
               {patient.contact_number ||
                 "N/A"}
             </p>
           </div>
 
           <div>
-            <strong>
+            <strong style={{ color: "#94a3b8", fontSize: "13px" }}>
               Email
             </strong>
 
-            <p>
+            <p style={{ color: "#f1f5f9", margin: "4px 0 0", fontSize: "15px" }}>
               {patient.email ||
                 "N/A"}
             </p>
@@ -987,17 +989,17 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "rgba(15,23,42,0.6)",
+          background: "rgba(15, 23, 42, 0.75)",
           border:
-            "1px solid #ddd",
-          borderRadius: "12px",
+            "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
         }}
       >
-        <h2>
+        <h2 style={{ color: "#f1f5f9" }}>
           Electronic Medical Record
         </h2>
 
-        <p>
+        <p style={{ color: "#94a3b8" }}>
           View and manage this patient&apos;s EMR - including
           prescriptions, vital signs, and consultation notes.
         </p>
@@ -1012,10 +1014,11 @@ export default function PatientDetails() {
             padding:
               "12px 20px",
             border: "none",
-            borderRadius: "6px",
+            borderRadius: "8px",
             background:
               "#2563eb",
             color: "white",
+            fontWeight: "600",
             cursor: "pointer",
           }}
         >
@@ -1031,17 +1034,17 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "rgba(15,23,42,0.6)",
+          background: "rgba(15, 23, 42, 0.75)",
           border:
-            "1px solid #ddd",
-          borderRadius: "12px",
+            "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
         }}
       >
-        <h2>
+        <h2 style={{ color: "#f1f5f9" }}>
           Medical Files
         </h2>
 
-        <p>
+        <p style={{ color: "#94a3b8" }}>
           Upload and view
           medical files for this
           patient.
@@ -1059,6 +1062,7 @@ export default function PatientDetails() {
               display: "block",
               marginBottom: "8px",
               fontWeight: "bold",
+              color: "#f1f5f9",
             }}
           >
             Upload Medical Record
@@ -1074,9 +1078,10 @@ export default function PatientDetails() {
               display: "block",
               padding: "8px",
               border:
-                "1px solid #ccc",
-              borderRadius: "6px",
-              background: "rgba(15,23,42,0.6)",
+                "1px solid rgba(255, 255, 255, 0.12)",
+              borderRadius: "8px",
+              background: "rgba(15, 23, 42, 0.6)",
+              color: "#f1f5f9",
               cursor: uploading
                 ? "not-allowed"
                 : "pointer",
@@ -1109,7 +1114,7 @@ export default function PatientDetails() {
 
         {medicalFiles.length ===
         0 ? (
-          <p>
+          <p style={{ color: "#94a3b8" }}>
             No medical files
             uploaded.
           </p>
@@ -1126,13 +1131,15 @@ export default function PatientDetails() {
                       "15px",
                     padding:
                       "15px",
+                    background:
+                      "rgba(255, 255, 255, 0.03)",
                     border:
-                      "1px solid #ddd",
+                      "1px solid rgba(255, 255, 255, 0.08)",
                     borderRadius:
-                      "8px",
+                      "10px",
                   }}
                 >
-                  <strong>
+                  <strong style={{ color: "#f1f5f9" }}>
                     {
                       medicalFile.file_name
                     }
@@ -1143,7 +1150,7 @@ export default function PatientDetails() {
                       marginTop:
                         "8px",
                       color:
-                        "#6b7c93",
+                        "#94a3b8",
                     }}
                   >
                     File Type:{" "}
@@ -1156,7 +1163,7 @@ export default function PatientDetails() {
                       marginTop:
                         "5px",
                       color:
-                        "#6b7c93",
+                        "#94a3b8",
                       fontSize:
                         "13px",
                     }}
@@ -1200,33 +1207,33 @@ export default function PatientDetails() {
           PREVIOUS CONDITIONS
       ====================================== */}
 
-      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15,23,42,0.6)", border: "1px solid #ddd", borderRadius: "12px" }}>
-        <h2>Previous Illnesses / Conditions</h2>
-        <form onSubmit={handleAddCondition} style={{ marginBottom: "25px", borderBottom: "1px solid #ddd", paddingBottom: "22px" }}>
+      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
+        <h2 style={{ color: "#f1f5f9" }}>Previous Illnesses / Conditions</h2>
+        <form onSubmit={handleAddCondition} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Condition Name *</strong></label>
-              <input type="text" value={conditionName} onChange={(e) => setConditionName(e.target.value)} placeholder="e.g. Hypertension" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Condition Name *</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={conditionName} onChange={(e) => setConditionName(e.target.value)} placeholder="e.g. Hypertension" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Status</strong></label>
-              <select value={conditionStatus} onChange={(e) => setConditionStatus(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }}>
-                <option value="active">Active</option>
-                <option value="resolved">Resolved</option>
-                <option value="chronic">Chronic</option>
-                <option value="in_remission">In Remission</option>
+              <label style={{ color: "#f1f5f9" }}><strong>Status</strong></label>
+              <select className="glass-input" value={conditionStatus} onChange={(e) => setConditionStatus(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }}>
+                <option value="active" style={{ background: "#0f172a", color: "#f1f5f9" }}>Active</option>
+                <option value="resolved" style={{ background: "#0f172a", color: "#f1f5f9" }}>Resolved</option>
+                <option value="chronic" style={{ background: "#0f172a", color: "#f1f5f9" }}>Chronic</option>
+                <option value="in_remission" style={{ background: "#0f172a", color: "#f1f5f9" }}>In Remission</option>
               </select>
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Diagnosed Date</strong></label>
-              <input type="date" value={conditionDate} onChange={(e) => setConditionDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Diagnosed Date</strong></label>
+              <input type="date" className="glass-input" value={conditionDate} onChange={(e) => setConditionDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Severity</strong></label>
-              <select value={conditionSeverity} onChange={(e) => setConditionSeverity(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }}>
-                <option value="mild">Mild</option>
-                <option value="moderate">Moderate</option>
-                <option value="severe">Severe</option>
+              <label style={{ color: "#f1f5f9" }}><strong>Severity</strong></label>
+              <select className="glass-input" value={conditionSeverity} onChange={(e) => setConditionSeverity(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }}>
+                <option value="mild" style={{ background: "#0f172a", color: "#f1f5f9" }}>Mild</option>
+                <option value="moderate" style={{ background: "#0f172a", color: "#f1f5f9" }}>Moderate</option>
+                <option value="severe" style={{ background: "#0f172a", color: "#f1f5f9" }}>Severe</option>
               </select>
             </div>
           </div>
@@ -1237,13 +1244,13 @@ export default function PatientDetails() {
             placeholder="Additional details"
             rows={2}
           />
-          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "6px", background: "#2563eb", color: "white", cursor: "pointer" }}>Add Condition</button>
+          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#2563eb", color: "white", fontWeight: "600", cursor: "pointer" }}>Add Condition</button>
         </form>
-        {patientConditions.length === 0 ? <p>No previous conditions recorded.</p> : (
+        {patientConditions.length === 0 ? <p style={{ color: "#94a3b8" }}>No previous conditions recorded.</p> : (
           <div>
             {patientConditions.map((c) => (
-              <div key={c.id} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px" }}>
-                <p style={{ margin: 0 }}><strong>{c.condition_name}</strong> <span style={{ color: "#64748b", fontSize: "13px" }}>({c.status}, {c.severity})</span></p>
+              <div key={c.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
+                <p style={{ margin: 0, color: "#f1f5f9" }}><strong>{c.condition_name}</strong> <span style={{ color: "#94a3b8", fontSize: "13px" }}>({c.status}, {c.severity})</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#94a3b8" }}>{c.diagnosed_date ? `Diagnosed: ${c.diagnosed_date}` : "No date"}{c.notes ? ` — ${c.notes}` : ""}</p>
               </div>
             ))}
@@ -1255,36 +1262,36 @@ export default function PatientDetails() {
           LAB RESULTS
       ====================================== */}
 
-      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15,23,42,0.6)", border: "1px solid #ddd", borderRadius: "12px" }}>
-        <h2>Lab Results</h2>
-        <form onSubmit={handleAddLabResult} style={{ marginBottom: "25px", borderBottom: "1px solid #ddd", paddingBottom: "22px" }}>
+      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
+        <h2 style={{ color: "#f1f5f9" }}>Lab Results</h2>
+        <form onSubmit={handleAddLabResult} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Test Name *</strong></label>
-              <input type="text" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. CBC, Blood Sugar" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Test Name *</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. CBC, Blood Sugar" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Test Date</strong></label>
-              <input type="date" value={labTestDate} onChange={(e) => setLabTestDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Test Date</strong></label>
+              <input type="date" className="glass-input" value={labTestDate} onChange={(e) => setLabTestDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Result Value</strong></label>
-              <input type="text" value={labResultValue} onChange={(e) => setLabResultValue(e.target.value)} placeholder="e.g. 120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Result Value</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={labResultValue} onChange={(e) => setLabResultValue(e.target.value)} placeholder="e.g. 120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Unit</strong></label>
-              <input type="text" value={labUnit} onChange={(e) => setLabUnit(e.target.value)} placeholder="e.g. mg/dL" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Unit</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={labUnit} onChange={(e) => setLabUnit(e.target.value)} placeholder="e.g. mg/dL" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Reference Range</strong></label>
-              <input type="text" value={labReferenceRange} onChange={(e) => setLabReferenceRange(e.target.value)} placeholder="e.g. 70-110" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Reference Range</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={labReferenceRange} onChange={(e) => setLabReferenceRange(e.target.value)} placeholder="e.g. 70-110" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Status</strong></label>
-              <select value={labStatus} onChange={(e) => setLabStatus(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }}>
-                <option value="normal">Normal</option>
-                <option value="abnormal">Abnormal</option>
-                <option value="critical">Critical</option>
+              <label style={{ color: "#f1f5f9" }}><strong>Status</strong></label>
+              <select className="glass-input" value={labStatus} onChange={(e) => setLabStatus(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }}>
+                <option value="normal" style={{ background: "#0f172a", color: "#f1f5f9" }}>Normal</option>
+                <option value="abnormal" style={{ background: "#0f172a", color: "#f1f5f9" }}>Abnormal</option>
+                <option value="critical" style={{ background: "#0f172a", color: "#f1f5f9" }}>Critical</option>
               </select>
             </div>
           </div>
@@ -1295,14 +1302,14 @@ export default function PatientDetails() {
             placeholder="Additional details"
             rows={2}
           />
-          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "6px", background: "#2563eb", color: "white", cursor: "pointer" }}>Add Lab Result</button>
+          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#2563eb", color: "white", fontWeight: "600", cursor: "pointer" }}>Add Lab Result</button>
         </form>
         {/* LAB RESULTS LIST */}
-        {labResults.length === 0 ? <p>No lab results recorded.</p> : (
+        {labResults.length === 0 ? <p style={{ color: "#94a3b8" }}>No lab results recorded.</p> : (
           <div>
             {labResults.map((r) => (
-              <div key={r.id} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px" }}>
-                <p style={{ margin: 0 }}><strong>{r.test_name}</strong>{" "}<span style={{ color: "#64748b", fontSize: "13px" }}>{r.result_value ? `${r.result_value} ${r.unit || ""}` : "No result"}{r.reference_range ? ` (ref: ${r.reference_range})` : ""}</span></p>
+              <div key={r.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
+                <p style={{ margin: 0, color: "#f1f5f9" }}><strong>{r.test_name}</strong>{" "}<span style={{ color: "#94a3b8", fontSize: "13px" }}>{r.result_value ? `${r.result_value} ${r.unit || ""}` : "No result"}{r.reference_range ? ` (ref: ${r.reference_range})` : ""}</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#94a3b8" }}>{r.test_date ? `Date: ${r.test_date}` : ""}{r.status ? ` — ${r.status}` : ""}{r.notes ? ` — ${r.notes}` : ""}</p>
               </div>
             ))}
@@ -1314,29 +1321,29 @@ export default function PatientDetails() {
           PAST PROCEDURES
       ====================================== */}
 
-      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15,23,42,0.6)", border: "1px solid #ddd", borderRadius: "12px" }}>
-        <h2>Past Procedures</h2>
-        <form onSubmit={handleAddProcedure} style={{ marginBottom: "25px", borderBottom: "1px solid #ddd", paddingBottom: "22px" }}>
+      <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
+        <h2 style={{ color: "#f1f5f9" }}>Past Procedures</h2>
+        <form onSubmit={handleAddProcedure} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Procedure Name *</strong></label>
-              <input type="text" value={procedureName} onChange={(e) => setProcedureName(e.target.value)} placeholder="e.g. Appendectomy" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Procedure Name *</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={procedureName} onChange={(e) => setProcedureName(e.target.value)} placeholder="e.g. Appendectomy" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Procedure Date</strong></label>
-              <input type="date" value={procedureDate} onChange={(e) => setProcedureDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Procedure Date</strong></label>
+              <input type="date" className="glass-input" value={procedureDate} onChange={(e) => setProcedureDate(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Performed By</strong></label>
-              <input type="text" value={procedurePerformedBy} onChange={(e) => setProcedurePerformedBy(e.target.value)} placeholder="Doctor or facility" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }} />
+              <label style={{ color: "#f1f5f9" }}><strong>Performed By</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={procedurePerformedBy} onChange={(e) => setProcedurePerformedBy(e.target.value)} placeholder="Doctor or facility" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label><strong>Outcome</strong></label>
-              <select value={procedureOutcome} onChange={(e) => setProcedureOutcome(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid #ccc", borderRadius: "6px" }}>
-                <option value="successful">Successful</option>
-                <option value="complications">Complications</option>
-                <option value="pending">Pending</option>
-                <option value="other">Other</option>
+              <label style={{ color: "#f1f5f9" }}><strong>Outcome</strong></label>
+              <select className="glass-input" value={procedureOutcome} onChange={(e) => setProcedureOutcome(e.target.value)} style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }}>
+                <option value="successful" style={{ background: "#0f172a", color: "#f1f5f9" }}>Successful</option>
+                <option value="complications" style={{ background: "#0f172a", color: "#f1f5f9" }}>Complications</option>
+                <option value="pending" style={{ background: "#0f172a", color: "#f1f5f9" }}>Pending</option>
+                <option value="other" style={{ background: "#0f172a", color: "#f1f5f9" }}>Other</option>
               </select>
             </div>
           </div>
@@ -1347,14 +1354,14 @@ export default function PatientDetails() {
             placeholder="Additional details"
             rows={2}
           />
-          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "6px", background: "#2563eb", color: "white", cursor: "pointer" }}>Add Procedure</button>
+          <button type="submit" style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#2563eb", color: "white", fontWeight: "600", cursor: "pointer" }}>Add Procedure</button>
         </form>
         {/* PAST PROCEDURES LIST */}
-        {procedures.length === 0 ? <p>No procedures recorded.</p> : (
+        {procedures.length === 0 ? <p style={{ color: "#94a3b8" }}>No procedures recorded.</p> : (
           <div>
             {procedures.map((p) => (
-              <div key={p.id} style={{ marginBottom: "15px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px" }}>
-                <p style={{ margin: 0 }}><strong>{p.procedure_name}</strong> <span style={{ color: "#64748b", fontSize: "13px" }}>({p.outcome})</span></p>
+              <div key={p.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
+                <p style={{ margin: 0, color: "#f1f5f9" }}><strong>{p.procedure_name}</strong> <span style={{ color: "#94a3b8", fontSize: "13px" }}>({p.outcome})</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#94a3b8" }}>{p.procedure_date ? `Date: ${p.procedure_date}` : ""}{p.performed_by ? ` — By: ${p.performed_by}` : ""}{p.notes ? ` — ${p.notes}` : ""}</p>
               </div>
             ))}
@@ -1370,13 +1377,13 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "rgba(15,23,42,0.6)",
+          background: "rgba(15, 23, 42, 0.75)",
           border:
-            "1px solid #ddd",
-          borderRadius: "12px",
+            "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
         }}
       >
-        <h2>
+        <h2 style={{ color: "#f1f5f9" }}>
           Add Medical History
         </h2>
 
@@ -1393,7 +1400,7 @@ export default function PatientDetails() {
                 "15px",
             }}
           >
-            <label>
+            <label style={{ color: "#f1f5f9" }}>
               <strong>
                 Diagnosis
               </strong>
@@ -1401,6 +1408,7 @@ export default function PatientDetails() {
 
             <input
               type="text"
+              className="glass-input placeholder:text-slate-500"
               value={diagnosis}
               onChange={(e) =>
                 setDiagnosis(
@@ -1415,9 +1423,13 @@ export default function PatientDetails() {
                 marginTop:
                   "6px",
                 border:
-                  "1px solid #ccc",
+                  "1px solid rgba(255, 255, 255, 0.12)",
                 borderRadius:
-                  "6px",
+                  "8px",
+                background:
+                  "rgba(15, 23, 42, 0.6)",
+                color:
+                  "#f1f5f9",
               }}
             />
           </div>
@@ -1480,10 +1492,11 @@ export default function PatientDetails() {
                 "12px 20px",
               border: "none",
               borderRadius:
-                "6px",
+                "8px",
               background:
                 "#2563eb",
               color: "white",
+              fontWeight: "600",
               cursor:
                 "pointer",
             }}
@@ -1501,19 +1514,19 @@ export default function PatientDetails() {
         style={{
           marginBottom: "30px",
           padding: "25px",
-          background: "rgba(15,23,42,0.6)",
+          background: "rgba(15, 23, 42, 0.75)",
           border:
-            "1px solid #ddd",
-          borderRadius: "12px",
+            "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
         }}
       >
-        <h2>
+        <h2 style={{ color: "#f1f5f9" }}>
           Medical History
         </h2>
 
         {medicalHistory.length ===
         0 ? (
-          <p>
+          <p style={{ color: "#94a3b8" }}>
             No medical history
             found.
           </p>
@@ -1528,54 +1541,56 @@ export default function PatientDetails() {
                       "20px",
                     padding:
                       "20px",
+                    background:
+                      "rgba(255, 255, 255, 0.03)",
                     border:
-                      "1px solid #ddd",
+                      "1px solid rgba(255, 255, 255, 0.08)",
                     borderRadius:
                       "10px",
                   }}
                 >
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#f1f5f9" }}>
+                    <strong style={{ color: "#93c5fd" }}>
                       Diagnosis:
                     </strong>{" "}
                     {record.diagnosis ||
                       "None"}
                   </p>
 
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>
                       Symptoms:
                     </strong>{" "}
                     {record.symptoms ||
                       "None"}
                   </p>
 
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>
                       Treatment:
                     </strong>{" "}
                     {record.treatment ||
                       "None"}
                   </p>
 
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>
                       Medications:
                     </strong>{" "}
                     {record.medications ||
                       "None"}
                   </p>
 
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>
                       Allergies:
                     </strong>{" "}
                     {record.allergies ||
                       "None"}
                   </p>
 
-                  <p>
-                    <strong>
+                  <p style={{ margin: "0 0 6px", color: "#cbd5e1" }}>
+                    <strong style={{ color: "#94a3b8" }}>
                       Notes:
                     </strong>{" "}
                     {record.notes ||

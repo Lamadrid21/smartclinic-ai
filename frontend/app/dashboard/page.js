@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import AppLayout from "@/components/AppLayout";
 import PatientDashboard from "@/components/dashboard/PatientDashboard";
 import DoctorDashboard from "@/components/dashboard/DoctorDashboard";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
-import { ROLES, ROLE_LABELS, getUserRole, setUserRole } from "@/lib/auth-role";
+import { ROLES, ROLE_LABELS, getUserRole } from "@/lib/auth-role";
 
 function DashboardContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [activeRole, setActiveRole] = useState(ROLES.PATIENT);
@@ -40,26 +39,15 @@ function DashboardContent() {
 
       if (prof) setProfile(prof);
 
-      const roleParam = searchParams?.get("role");
-      if (roleParam && Object.values(ROLES).includes(roleParam)) {
-        setActiveRole(roleParam);
-        setUserRole(roleParam, currentUser);
-      } else {
-        const detected = getUserRole(currentUser);
-        setActiveRole(detected);
-      }
+      // Authenticated role from trusted metadata / heuristics — cannot be overridden by URL or client storage
+      const trustedRole = getUserRole(currentUser);
+      setActiveRole(trustedRole);
 
       setLoading(false);
     }
 
     initUser();
-  }, [router, searchParams]);
-
-  async function handleRoleChange(newRole) {
-    if (!Object.values(ROLES).includes(newRole)) return;
-    setActiveRole(newRole);
-    await setUserRole(newRole, user);
-  }
+  }, [router]);
 
   const roleMeta = {
     [ROLES.PATIENT]: {
@@ -83,51 +71,6 @@ function DashboardContent() {
       activeNav="dashboard"
       title={currentMeta.title}
       subtitle={currentMeta.subtitle}
-      actions={
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/80 border border-white/10 shadow-sm">
-          <button
-            type="button"
-            onClick={() => handleRoleChange(ROLES.PATIENT)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-              activeRole === ROLES.PATIENT
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
-            }`}
-            title="Switch to Patient View"
-          >
-            <span>👤</span>
-            <span className="hidden sm:inline">Patient</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleRoleChange(ROLES.DOCTOR)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-              activeRole === ROLES.DOCTOR
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/25"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
-            }`}
-            title="Switch to Doctor View"
-          >
-            <span>🩺</span>
-            <span className="hidden sm:inline">Doctor</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleRoleChange(ROLES.ADMIN)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-              activeRole === ROLES.ADMIN
-                ? "bg-purple-600 text-white shadow-md shadow-purple-500/25"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
-            }`}
-            title="Switch to Admin View"
-          >
-            <span>⚙️</span>
-            <span className="hidden sm:inline">Admin</span>
-          </button>
-        </div>
-      }
     >
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 space-y-4">

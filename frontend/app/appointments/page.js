@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/AppLayout";
+import { ROLES, getUserRole } from "@/lib/auth-role";
 
 function AppointmentsContent() {
   const router = useRouter();
@@ -392,7 +393,15 @@ function AppointmentsContent() {
     let appointmentId = rescheduleId;
 
     if (rescheduleId) {
-      const { error: updateError } = await supabase
+      const userRole = getUserRole(currentUser);
+      if (userRole === ROLES.DOCTOR) {
+        alert("Doctors do not have permission to edit or reschedule appointments.");
+        setBooking(false);
+        router.push("/appointments/manage");
+        return;
+      }
+
+      let updateQuery = supabase
         .from("appointments")
         .update({
           doctor_id: Number(selectedDoctor),
@@ -403,8 +412,13 @@ function AppointmentsContent() {
           consultation_fee: consultationFee,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", rescheduleId)
-        .eq("patient_id", profile.id);
+        .eq("id", rescheduleId);
+
+      if (userRole === ROLES.PATIENT && profile?.id) {
+        updateQuery = updateQuery.eq("patient_id", profile.id);
+      }
+
+      const { error: updateError } = await updateQuery;
 
       if (updateError) {
         alert(

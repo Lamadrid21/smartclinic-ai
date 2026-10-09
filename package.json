@@ -9,6 +9,7 @@
     "dev": "concurrently -k -n BACKEND,FRONTEND -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
+    "seed:demo": "node backend/scripts/seed-demo-accounts.mjs",
     "build:frontend": "npm run build --prefix frontend",
     "start:frontend": "npm run start --prefix frontend",
     "start:backend": "npm run start --prefix backend"

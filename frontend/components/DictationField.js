@@ -68,12 +68,18 @@ export default function DictationField({
     width: "100%",
     padding: "12px",
     marginTop: "6px",
-    border: flashing ? "2px solid #22c55e" : "1px solid #ccc",
-    borderRadius: "6px",
-    background: flashing ? "#f0fdf4" : "#fff",
+    border: flashing
+      ? "2px solid #22c55e"
+      : "1px solid rgba(255, 255, 255, 0.12)",
+    borderRadius: "8px",
+    background: flashing
+      ? "rgba(34, 197, 94, 0.15)"
+      : "rgba(15, 23, 42, 0.6)",
+    color: "#f1f5f9",
     outline: "none",
-    boxShadow: flashing ? "0 0 0 3px rgba(34,197,94,0.15)" : "none",
-    transition: "border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
+    boxShadow: flashing ? "0 0 0 3px rgba(34, 197, 94, 0.25)" : "none",
+    transition:
+      "border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease",
   };
 
   if (inputType === "textarea") {
@@ -82,7 +88,7 @@ export default function DictationField({
 
   return (
     <div style={{ marginBottom: "15px", ...style }}>
-      <label>
+      <label style={{ color: "#f1f5f9", fontSize: "14px" }}>
         <strong>{label}</strong>
       </label>
       <div style={{ marginBottom: "8px", marginTop: "4px" }}>
@@ -91,6 +97,7 @@ export default function DictationField({
 
       {inputType === "textarea" ? (
         <textarea
+          className="glass-input placeholder:text-slate-500"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -100,6 +107,7 @@ export default function DictationField({
       ) : (
         <input
           type="text"
+          className="glass-input placeholder:text-slate-500"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -114,7 +122,7 @@ export default function DictationField({
             margin: "6px 0 0",
             fontSize: "12px",
             fontWeight: "600",
-            color: "#16a34a",
+            color: "#4ade80",
           }}
         >
           ✅ Dictated &amp; written to this field: “{lastWritten}”

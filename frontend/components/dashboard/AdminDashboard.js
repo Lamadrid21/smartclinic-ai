@@ -50,6 +50,7 @@ export default function AdminDashboard({ user, profile }) {
     estimatedRevenue: "₱42,500",
   });
   const [doctorsList, setDoctorsList] = useState([]);
+  const [appointmentHistory, setAppointmentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [peakHoursData, setPeakHoursData] = useState([]);
   const [peakSummary, setPeakSummary] = useState({
@@ -132,6 +133,35 @@ export default function AdminDashboard({ user, profile }) {
       const { data: apptData } = await supabase
         .from("appointments")
         .select("start_time, status, appointment_date");
+
+      // Fetch appointment history (completed, cancelled, expired) for admin review
+      const { data: historyData } = await supabase
+        .from("appointments")
+        .select(`
+          id,
+          appointment_date,
+          start_time,
+          end_time,
+          reason,
+          status,
+          patient_id,
+          doctors (
+            name,
+            specialization
+          ),
+          patients (
+            first_name,
+            last_name,
+            patient_number
+          )
+        `)
+        .in("status", ["Completed", "Cancelled", "Expired"])
+        .order("appointment_date", { ascending: false })
+        .limit(20);
+
+      if (historyData) {
+        setAppointmentHistory(historyData);
+      }
 
       if (docData && docData.length > 0) {
         // Guarantee distinct rooms for every doctor
@@ -418,6 +448,84 @@ export default function AdminDashboard({ user, profile }) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Appointment History (Moved from Patient Queue to Admin Dashboard) */}
+      <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📋</span>
+            <div>
+              <h2 className="text-base font-bold text-white tracking-tight">Appointment History</h2>
+              <p className="text-[11px] text-slate-400">Past completed, cancelled, and expired patient consultations</p>
+            </div>
+          </div>
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+            {appointmentHistory.length} Records
+          </span>
+        </div>
+
+        {appointmentHistory.length === 0 ? (
+          <div className="p-6 text-center rounded-2xl bg-white/[0.02] border border-white/5 text-xs text-slate-400">
+            No past appointment history found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-white/10 text-slate-400 font-semibold">
+                  <th className="pb-3 pl-2">Patient</th>
+                  <th className="pb-3">Doctor</th>
+                  <th className="pb-3">Date & Time</th>
+                  <th className="pb-3">Reason</th>
+                  <th className="pb-3 text-right pr-2">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {appointmentHistory.map((appt, idx) => (
+                  <tr key={appt.id || idx} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="py-3.5 pl-2 font-medium text-white">
+                      <div>
+                        <div className="font-semibold text-slate-200">
+                          {appt.patients
+                            ? `${appt.patients.first_name || ""} ${appt.patients.last_name || ""}`.trim() || "Patient"
+                            : "Patient"}
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {appt.patients?.patient_number ? `ID: ${appt.patients.patient_number}` : ""}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 text-slate-300">
+                      <div className="font-medium text-slate-200">{appt.doctors?.name || "Dr. Staff"}</div>
+                      <div className="text-[10px] text-slate-400">{appt.doctors?.specialization || "General Med"}</div>
+                    </td>
+                    <td className="py-3.5 text-cyan-300 font-medium">
+                      <div>{appt.appointment_date || "N/A"}</div>
+                      <div className="text-[10px] text-slate-400">{appt.start_time ? String(appt.start_time).substring(0, 5) : ""}</div>
+                    </td>
+                    <td className="py-3.5 text-slate-300 max-w-[200px] truncate">
+                      {appt.reason || "General Consultation"}
+                    </td>
+                    <td className="py-3.5 text-right pr-2">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                          appt.status === "Completed"
+                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                            : appt.status === "Cancelled"
+                            ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                            : "bg-slate-500/15 text-slate-400 border-slate-500/30"
+                        }`}
+                      >
+                        {appt.status || "Completed"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

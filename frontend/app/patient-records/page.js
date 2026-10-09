@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/AppLayout";
+import { ROLES, getUserRole } from "@/lib/auth-role";
 
 export default function PatientRecordsPage() {
   const router = useRouter();
@@ -41,6 +42,21 @@ export default function PatientRecordsPage() {
   async function loadPatients() {
     try {
       setLoading(true);
+
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
+
+      const role = getUserRole(currentUser);
+      if (role === ROLES.PATIENT) {
+        router.push("/patient-records/my-records");
+        return;
+      }
 
       const { data, error } = await supabase
         .from("patients")

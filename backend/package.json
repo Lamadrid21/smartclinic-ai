@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "node --watch --max-old-space-size=1024 server.js",
-    "start": "node --max-old-space-size=1024 server.js"
+    "start": "node --max-old-space-size=1024 server.js",
+    "seed:demo": "node scripts/seed-demo-accounts.mjs"
   },
   "engines": {
     "node": ">=18.17.0"

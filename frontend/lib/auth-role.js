@@ -18,22 +18,15 @@ export const ROLE_BADGES = {
   [ROLES.ADMIN]: { label: "Admin", icon: "⚙️", color: "from-purple-500/20 to-indigo-500/20 border-purple-500/30 text-purple-300" },
 };
 
-const STORAGE_KEY = "smartclinic_active_role";
-
 /**
- * Resolves the role for a given user.
- * 1. Checks localStorage for an explicit override/selection
- * 2. Checks user.user_metadata?.role
- * 3. Checks if user email matches admin or doctor heuristics
- * 4. Defaults to 'patient'
+ * Resolves the trusted role for a given authenticated user.
+ * 1. Checks user.user_metadata?.role (trusted auth metadata)
+ * 2. Checks if user email matches admin or doctor heuristics for demo accounts
+ * 3. Defaults to 'patient'
+ * Never trusts client-side storage or spoofed browser state for role resolution.
  */
 export function getUserRole(user) {
-  if (typeof window !== "undefined") {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && Object.values(ROLES).includes(saved)) {
-      return saved;
-    }
-  }
+  if (!user) return ROLES.PATIENT;
 
   const metaRole = user?.user_metadata?.role;
   if (metaRole && Object.values(ROLES).includes(metaRole)) {
@@ -42,10 +35,18 @@ export function getUserRole(user) {
 
   // Heuristics for existing demo accounts
   const email = (user?.email || "").toLowerCase();
-  if (email.includes("admin") || email.includes("renzolamadrid14") || email.includes("godki21")) {
+  if (
+    email.includes("admin") ||
+    email.includes("renzolamadrid14") ||
+    email.includes("godki21")
+  ) {
     return ROLES.ADMIN;
   }
-  if (email.includes("doctor") || email.includes("dr.") || email.includes("kobileonor")) {
+  if (
+    email.includes("doctor") ||
+    email.includes("dr.") ||
+    email.includes("kobileonor")
+  ) {
     return ROLES.DOCTOR;
   }
 
@@ -53,14 +54,10 @@ export function getUserRole(user) {
 }
 
 /**
- * Updates the user's role in local storage and optionally in Supabase user metadata.
+ * Updates the user's role in Supabase user metadata.
  */
 export async function setUserRole(role, user = null) {
   if (!Object.values(ROLES).includes(role)) return;
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, role);
-  }
 
   if (user) {
     try {
@@ -72,3 +69,4 @@ export async function setUserRole(role, user = null) {
     }
   }
 }
+
