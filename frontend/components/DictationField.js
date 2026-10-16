@@ -75,7 +75,7 @@ export default function DictationField({
     background: flashing
       ? "rgba(34, 197, 94, 0.15)"
       : "rgba(15, 23, 42, 0.6)",
-    color: "#f1f5f9",
+    color: "var(--text-heading)",
     outline: "none",
     boxShadow: flashing ? "0 0 0 3px rgba(34, 197, 94, 0.25)" : "none",
     transition:
@@ -88,7 +88,7 @@ export default function DictationField({
 
   return (
     <div style={{ marginBottom: "15px", ...style }}>
-      <label style={{ color: "#f1f5f9", fontSize: "14px" }}>
+      <label style={{ color: "var(--text-heading)", fontSize: "14px" }}>
         <strong>{label}</strong>
       </label>
       <div style={{ marginBottom: "8px", marginTop: "4px" }}>

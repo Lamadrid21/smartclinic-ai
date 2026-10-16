@@ -333,14 +333,14 @@ export default function ManageAppointmentsPage() {
       case "Pending":
         return {
           backgroundColor: "#fff7ed",
-          color: "#c2410c",
+          color: "var(--warning-text)",
           border: "1px solid #fed7aa",
         };
 
       case "Confirmed":
         return {
           backgroundColor: "#ecfdf5",
-          color: "#047857",
+          color: "var(--success-text)",
           border: "1px solid #a7f3d0",
         };
 
@@ -353,23 +353,23 @@ export default function ManageAppointmentsPage() {
 
       case "Cancelled":
         return {
-          backgroundColor: "rgba(244,63,94,0.12)",
+          backgroundColor: "var(--danger-bg)",
           color: "#fda4af",
-          border: "1px solid #fecaca",
+          border: "1px solid var(--danger-border)",
         };
 
       case "Expired":
         return {
-          backgroundColor: "rgba(15,23,42,0.55)",
-          color: "#94a3b8",
-          border: "1px solid rgba(255,255,255,0.12)",
+          backgroundColor: "var(--surface-2)",
+          color: "var(--text-muted)",
+          border: "1px solid var(--card-border)",
         };
 
       default:
         return {
-          backgroundColor: "rgba(15,23,42,0.55)",
-          color: "#e2e8f0",
-          border: "1px solid rgba(255,255,255,0.12)",
+          backgroundColor: "var(--surface-2)",
+          color: "var(--text-body)",
+          border: "1px solid var(--card-border)",
         };
     }
   }
@@ -453,8 +453,8 @@ export default function ManageAppointmentsPage() {
           onClick={() => router.push("/dashboard")}
           style={{
             border: "none",
-            backgroundColor: "rgba(15,23,42,0.6)",
-            color: "#e2e8f0",
+            backgroundColor: "var(--card-bg)",
+            color: "var(--text-body)",
             padding: "10px 16px",
             borderRadius: "9px",
             fontSize: "14px",
@@ -477,7 +477,7 @@ export default function ManageAppointmentsPage() {
               fontSize: "32px",
               fontWeight: "800",
               margin: 0,
-              color: "#f1f5f9",
+              color: "var(--text-heading)",
             }}
           >
             {pageTitle}
@@ -487,7 +487,7 @@ export default function ManageAppointmentsPage() {
             style={{
               marginTop: "8px",
               marginBottom: 0,
-              color: "#94a3b8",
+              color: "var(--text-muted)",
               fontSize: "15px",
             }}
           >
@@ -506,17 +506,17 @@ export default function ManageAppointmentsPage() {
         >
           <div
             style={{
-              backgroundColor: "rgba(15,23,42,0.6)",
+              backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
               boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
-              border: "1px solid #eef0f4",
+              border: "1px solid var(--card-border)",
             }}
           >
             <p
               style={{
                 margin: 0,
-                color: "#94a3b8",
+                color: "var(--text-muted)",
                 fontSize: "13px",
                 fontWeight: "600",
               }}
@@ -528,7 +528,7 @@ export default function ManageAppointmentsPage() {
               style={{
                 margin: "8px 0 0",
                 fontSize: "28px",
-                color: "#f1f5f9",
+                color: "var(--text-heading)",
               }}
             >
               {activeAppointments.length}
@@ -537,17 +537,17 @@ export default function ManageAppointmentsPage() {
 
           <div
             style={{
-              backgroundColor: "rgba(15,23,42,0.6)",
+              backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
               boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
-              border: "1px solid #eef0f4",
+              border: "1px solid var(--card-border)",
             }}
           >
             <p
               style={{
                 margin: 0,
-                color: "#94a3b8",
+                color: "var(--text-muted)",
                 fontSize: "13px",
                 fontWeight: "600",
               }}
@@ -559,7 +559,7 @@ export default function ManageAppointmentsPage() {
               style={{
                 margin: "8px 0 0",
                 fontSize: "28px",
-                color: "#c2410c",
+                color: "var(--warning-text)",
               }}
             >
               {pendingCount}
@@ -568,17 +568,17 @@ export default function ManageAppointmentsPage() {
 
           <div
             style={{
-              backgroundColor: "rgba(15,23,42,0.6)",
+              backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
               boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
-              border: "1px solid #eef0f4",
+              border: "1px solid var(--card-border)",
             }}
           >
             <p
               style={{
                 margin: 0,
-                color: "#94a3b8",
+                color: "var(--text-muted)",
                 fontSize: "13px",
                 fontWeight: "600",
               }}
@@ -590,7 +590,7 @@ export default function ManageAppointmentsPage() {
               style={{
                 margin: "8px 0 0",
                 fontSize: "28px",
-                color: "#047857",
+                color: "var(--success-text)",
               }}
             >
               {confirmedCount}
@@ -600,11 +600,11 @@ export default function ManageAppointmentsPage() {
 
         <section
           style={{
-            backgroundColor: "rgba(15,23,42,0.6)",
+            backgroundColor: "var(--card-bg)",
             borderRadius: "16px",
             padding: "28px",
             boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
-            border: "1px solid #edf0f4",
+            border: "1px solid var(--card-border)",
           }}
         >
           <div
@@ -623,7 +623,7 @@ export default function ManageAppointmentsPage() {
                   margin: 0,
                   fontSize: "22px",
                   fontWeight: "750",
-                  color: "#f1f5f9",
+                  color: "var(--text-heading)",
                 }}
               >
                 Active Appointments
@@ -632,7 +632,7 @@ export default function ManageAppointmentsPage() {
               <p
                 style={{
                   margin: "6px 0 0",
-                  color: "#94a3b8",
+                  color: "var(--text-muted)",
                   fontSize: "14px",
                 }}
               >
@@ -646,8 +646,8 @@ export default function ManageAppointmentsPage() {
                 border: "none",
                 borderRadius: "9px",
                 padding: "11px 17px",
-                backgroundColor: "#2563eb",
-                color: "white",
+                backgroundColor: "var(--primary)",
+                color: "var(--on-primary)",
                 fontSize: "14px",
                 fontWeight: "650",
                 cursor: "pointer",
@@ -662,7 +662,7 @@ export default function ManageAppointmentsPage() {
               style={{
                 padding: "50px 20px",
                 textAlign: "center",
-                color: "#94a3b8",
+                color: "var(--text-muted)",
               }}
             >
               Loading appointments...
@@ -672,9 +672,9 @@ export default function ManageAppointmentsPage() {
               style={{
                 padding: "50px 20px",
                 textAlign: "center",
-                backgroundColor: "rgba(15,23,42,0.55)",
+                backgroundColor: "var(--surface-2)",
                 borderRadius: "12px",
-                border: "1px dashed #d1d5db",
+                border: "1px dashed var(--card-border)",
               }}
             >
               <div
@@ -689,7 +689,7 @@ export default function ManageAppointmentsPage() {
               <h3
                 style={{
                   margin: 0,
-                  color: "#f1f5f9",
+                  color: "var(--text-heading)",
                   fontSize: "18px",
                 }}
               >
@@ -698,7 +698,7 @@ export default function ManageAppointmentsPage() {
 
               <p
                 style={{
-                  color: "#94a3b8",
+                  color: "var(--text-muted)",
                   margin: "8px 0 18px",
                 }}
               >
@@ -711,8 +711,8 @@ export default function ManageAppointmentsPage() {
                   border: "none",
                   borderRadius: "9px",
                   padding: "11px 18px",
-                  backgroundColor: "#2563eb",
-                  color: "white",
+                  backgroundColor: "var(--primary)",
+                  color: "var(--on-primary)",
                   fontWeight: "600",
                   cursor: "pointer",
                 }}
@@ -731,10 +731,10 @@ export default function ManageAppointmentsPage() {
                 <div
                   key={appointment.id}
                   style={{
-                    border: "1px solid rgba(255,255,255,0.12)",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "14px",
                     padding: "22px",
-                    backgroundColor: "rgba(15,23,42,0.6)",
+                    backgroundColor: "var(--card-bg)",
                   }}
                 >
                   <div
@@ -753,7 +753,7 @@ export default function ManageAppointmentsPage() {
                           margin: 0,
                           fontSize: "20px",
                           fontWeight: "750",
-                          color: "#f1f5f9",
+                          color: "var(--text-heading)",
                         }}
                       >
                         {appointment.doctors?.name || "Doctor"}
@@ -762,7 +762,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: "5px 0 0",
-                          color: "#94a3b8",
+                          color: "var(--text-muted)",
                           fontSize: "14px",
                         }}
                       >
@@ -793,7 +793,7 @@ export default function ManageAppointmentsPage() {
                         "repeat(auto-fit, minmax(180px, 1fr))",
                       gap: "14px",
                       padding: "18px",
-                      backgroundColor: "rgba(15,23,42,0.55)",
+                      backgroundColor: "var(--surface-2)",
                       borderRadius: "11px",
                       marginBottom: "18px",
                     }}
@@ -802,7 +802,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: 0,
-                          color: "#94a3b8",
+                          color: "var(--text-muted)",
                           fontSize: "12px",
                           fontWeight: "600",
                         }}
@@ -813,7 +813,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: "5px 0 0",
-                          color: "#f1f5f9",
+                          color: "var(--text-heading)",
                           fontWeight: "650",
                         }}
                       >
@@ -827,7 +827,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: 0,
-                          color: "#94a3b8",
+                          color: "var(--text-muted)",
                           fontSize: "12px",
                           fontWeight: "600",
                         }}
@@ -838,7 +838,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: "5px 0 0",
-                          color: "#f1f5f9",
+                          color: "var(--text-heading)",
                           fontWeight: "650",
                         }}
                       >
@@ -856,7 +856,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: 0,
-                          color: "#94a3b8",
+                          color: "var(--text-muted)",
                           fontSize: "12px",
                           fontWeight: "600",
                         }}
@@ -867,7 +867,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: "5px 0 0",
-                          color: "#f1f5f9",
+                          color: "var(--text-heading)",
                           fontWeight: "650",
                         }}
                       >
@@ -881,7 +881,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: 0,
-                          color: "#94a3b8",
+                          color: "var(--text-muted)",
                           fontSize: "12px",
                           fontWeight: "600",
                         }}
@@ -892,7 +892,7 @@ export default function ManageAppointmentsPage() {
                       <p
                         style={{
                           margin: "5px 0 0",
-                          color: "#f1f5f9",
+                          color: "var(--text-heading)",
                           fontWeight: "650",
                         }}
                       >
@@ -911,7 +911,7 @@ export default function ManageAppointmentsPage() {
                     <p
                       style={{
                         margin: 0,
-                        color: "#94a3b8",
+                        color: "var(--text-muted)",
                         fontSize: "12px",
                         fontWeight: "600",
                       }}
@@ -922,7 +922,7 @@ export default function ManageAppointmentsPage() {
                     <p
                       style={{
                         margin: "6px 0 0",
-                        color: "#e2e8f0",
+                        color: "var(--text-body)",
                         lineHeight: "1.5",
                       }}
                     >
@@ -952,8 +952,8 @@ export default function ManageAppointmentsPage() {
                               padding: "10px 15px",
                               border: "none",
                               borderRadius: "8px",
-                              backgroundColor: "#16a34a",
-                              color: "white",
+                              backgroundColor: "var(--success)",
+                              color: "var(--on-primary)",
                               fontWeight: "650",
                               cursor: actionLoading
                                 ? "not-allowed"
@@ -976,8 +976,8 @@ export default function ManageAppointmentsPage() {
                               padding: "10px 15px",
                               border: "none",
                               borderRadius: "8px",
-                              backgroundColor: "#2563eb",
-                              color: "white",
+                              backgroundColor: "var(--primary)",
+                              color: "var(--on-primary)",
                               fontWeight: "650",
                               cursor: actionLoading
                                 ? "not-allowed"
@@ -1000,10 +1000,10 @@ export default function ManageAppointmentsPage() {
                               padding: "10px 15px",
                               border: "none",
                               borderRadius: "8px",
-                              backgroundColor: "rgba(15,23,42,0.55)",
-                              color: "#dc2626",
+                              backgroundColor: "var(--surface-2)",
+                              color: "var(--danger-text)",
                               border:
-                                "1px solid #fecaca",
+                                "1px solid var(--danger-border)",
                               fontWeight: "650",
                               cursor: actionLoading
                                 ? "not-allowed"
@@ -1028,8 +1028,8 @@ export default function ManageAppointmentsPage() {
                           padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
-                          backgroundColor: "#2563eb",
-                          color: "white",
+                          backgroundColor: "var(--primary)",
+                          color: "var(--on-primary)",
                           fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"
@@ -1053,10 +1053,10 @@ export default function ManageAppointmentsPage() {
                           padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
-                          backgroundColor: "rgba(15,23,42,0.55)",
-                          color: "#e2e8f0",
+                          backgroundColor: "var(--surface-2)",
+                          color: "var(--text-body)",
                           border:
-                            "1px solid #d1d5db",
+                            "1px solid var(--card-border)",
                           fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"
@@ -1081,10 +1081,10 @@ export default function ManageAppointmentsPage() {
                           padding: "10px 15px",
                           border: "none",
                           borderRadius: "8px",
-                          backgroundColor: "rgba(244,63,94,0.12)",
-                          color: "#dc2626",
+                          backgroundColor: "var(--danger-bg)",
+                          color: "var(--danger-text)",
                           border:
-                            "1px solid #fecaca",
+                            "1px solid var(--danger-border)",
                           fontWeight: "650",
                           cursor: actionLoading
                             ? "not-allowed"

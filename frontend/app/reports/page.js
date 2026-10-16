@@ -484,7 +484,7 @@ padding: "10px 16px",
 border: "none",
 borderRadius: "8px",
 backgroundColor: "rgba(226,232,240,0.15)",
-color: "#f1f5f9",
+color: "var(--text-heading)",
 cursor: "pointer",
 fontWeight: "600",
 }}
@@ -494,7 +494,7 @@ fontWeight: "600",
 
     <div
       style={{
-        backgroundColor: "rgba(15,23,42,0.6)",
+        backgroundColor: "var(--card-bg)",
         padding: "30px",
         borderRadius: "14px",
         boxShadow:
@@ -505,7 +505,7 @@ fontWeight: "600",
         style={{
           fontSize: "30px",
           fontWeight: "700",
-          color: "#f1f5f9",
+          color: "var(--text-heading)",
           marginBottom: "8px",
         }}
       >
@@ -514,7 +514,7 @@ fontWeight: "600",
 
       <p
         style={{
-          color: "#94a3b8",
+          color: "var(--text-muted)",
           marginBottom: "30px",
         }}
       >
@@ -580,7 +580,7 @@ fontWeight: "600",
       <div
         style={{
           padding: "20px",
-          backgroundColor: "rgba(15,23,42,0.55)",
+          backgroundColor: "var(--surface-2)",
           borderRadius: "10px",
           marginBottom: "25px",
         }}
@@ -592,7 +592,7 @@ fontWeight: "600",
                 display: "block",
                 fontWeight: "600",
                 marginBottom: "8px",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
               }}
             >
               Select Date
@@ -609,9 +609,9 @@ fontWeight: "600",
               style={{
                 padding: "11px",
                 border:
-                  "1px solid rgba(255,255,255,0.12)",
+                  "1px solid var(--card-border)",
                 borderRadius: "8px",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
                 backgroundColor:
                   "rgba(255,255,255,0.06)",
               }}
@@ -624,7 +624,7 @@ fontWeight: "600",
                 display: "block",
                 fontWeight: "600",
                 marginBottom: "8px",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
               }}
             >
               Select Month
@@ -641,9 +641,9 @@ fontWeight: "600",
               style={{
                 padding: "11px",
                 border:
-                  "1px solid rgba(255,255,255,0.12)",
+                  "1px solid var(--card-border)",
                 borderRadius: "8px",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
                 backgroundColor:
                   "rgba(255,255,255,0.06)",
               }}
@@ -707,8 +707,8 @@ fontWeight: "600",
                 border: "none",
                 borderRadius: "8px",
                 backgroundColor:
-                  "#dc2626",
-                color: "white",
+                  "var(--danger)",
+                color: "var(--on-primary)",
                 cursor: "pointer",
                 fontWeight: "600",
               }}
@@ -723,8 +723,8 @@ fontWeight: "600",
                 border: "none",
                 borderRadius: "8px",
                 backgroundColor:
-                  "#16a34a",
-                color: "white",
+                  "var(--success)",
+                color: "var(--on-primary)",
                 cursor: "pointer",
                 fontWeight: "600",
               }}
@@ -741,13 +741,13 @@ fontWeight: "600",
                 textAlign: "center",
                 backgroundColor:
                   "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: "1px solid var(--card-border)",
                 borderRadius: "10px",
               }}
             >
               <p
                 style={{
-                  color: "#94a3b8",
+                  color: "var(--text-muted)",
                 }}
               >
                 No appointments found
@@ -907,8 +907,8 @@ return (
 <div
 style={{
 padding: "20px",
-backgroundColor: "rgba(15,23,42,0.55)",
-border: "1px solid rgba(255,255,255,0.12)",
+backgroundColor: "var(--surface-2)",
+border: "1px solid var(--card-border)",
 borderRadius: "10px",
 }}
 >
@@ -916,7 +916,7 @@ borderRadius: "10px",
 style={{
 margin: 0,
 marginBottom: "8px",
-color: "#94a3b8",
+color: "var(--text-muted)",
 fontSize: "14px",
 }}
 >
@@ -926,7 +926,7 @@ fontSize: "14px",
   <h2
     style={{
       margin: 0,
-      color: "#f1f5f9",
+      color: "var(--text-heading)",
       fontSize: "24px",
     }}
   >
@@ -941,8 +941,8 @@ fontSize: "14px",
 const headerStyle = {
 textAlign: "left",
 padding: "13px",
-borderBottom: "1px solid rgba(255,255,255,0.08)",
-color: "#94a3b8",
+borderBottom: "1px solid var(--card-border)",
+color: "var(--text-muted)",
 fontSize: "12px",
 fontWeight: "600",
 whiteSpace: "nowrap",
@@ -951,6 +951,6 @@ whiteSpace: "nowrap",
 const cellStyle = {
 padding: "13px",
 borderBottom: "1px solid #eee",
-color: "#f1f5f9",
+color: "var(--text-heading)",
 whiteSpace: "nowrap",
 };

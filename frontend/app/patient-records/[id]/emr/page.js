@@ -490,10 +490,10 @@ export default function PrescriptionsPage() {
           style={{
             marginBottom: "20px",
             padding: "10px 16px",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            border: "1px solid var(--card-border)",
             borderRadius: "8px",
             background: "rgba(255, 255, 255, 0.06)",
-            color: "#f1f5f9",
+            color: "var(--text-heading)",
             cursor: "pointer",
           }}
         >
@@ -507,65 +507,65 @@ export default function PrescriptionsPage() {
             style={{
               marginBottom: "30px",
               padding: "24px",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
+              border: "1px solid var(--card-border)",
               borderRadius: "16px",
-              background: "rgba(15, 23, 42, 0.75)",
+              background: "var(--card-bg)",
             }}
           >
-            <h1 style={{ marginTop: 0, marginBottom: "15px", color: "#f1f5f9", fontSize: "22px" }}>
+            <h1 style={{ marginTop: 0, marginBottom: "15px", color: "var(--text-heading)", fontSize: "22px" }}>
               Patient EMR Overview
             </h1>
 
-            <p style={{ margin: "4px 0", color: "#f1f5f9" }}>
-              <strong style={{ color: "#94a3b8" }}>Patient:</strong>{" "}
+            <p style={{ margin: "4px 0", color: "var(--text-heading)" }}>
+              <strong style={{ color: "var(--text-muted)" }}>Patient:</strong>{" "}
               {patient.first_name}{" "}
               {patient.middle_name || ""}{" "}
               {patient.last_name}
             </p>
 
-            <p style={{ margin: "4px 0", color: "#f1f5f9" }}>
-              <strong style={{ color: "#94a3b8" }}>Patient Number:</strong>{" "}
+            <p style={{ margin: "4px 0", color: "var(--text-heading)" }}>
+              <strong style={{ color: "var(--text-muted)" }}>Patient Number:</strong>{" "}
               {patient.patient_number}
             </p>
           </div>
         )}
 
         {/* FEATURE #5: PATIENT VITALS */}
-        <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
-          <h2 style={{ color: "#f1f5f9" }}>Vital Signs</h2>
-          <form onSubmit={handleSaveVitals} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
+        <section style={{ marginBottom: "30px", padding: "25px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "16px" }}>
+          <h2 style={{ color: "var(--text-heading)" }}>Vital Signs</h2>
+          <form onSubmit={handleSaveVitals} style={{ marginBottom: "25px", borderBottom: "1px solid var(--card-border)", paddingBottom: "22px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }}>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>Heart Rate (bpm)</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>Heart Rate (bpm)</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>BP Systolic</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>BP Systolic</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>BP Diastolic</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>BP Diastolic</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>Temperature (°C)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>Temperature (°C)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>Weight (kg)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>Weight (kg)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>Height (cm)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>Height (cm)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>Respiratory Rate</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>Respiratory Rate</strong></label>
+                <input type="number" className="glass-input placeholder:text-slate-500" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
-                <label style={{ color: "#f1f5f9" }}><strong>O₂ Saturation (%)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+                <label style={{ color: "var(--text-heading)" }}><strong>O₂ Saturation (%)</strong></label>
+                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
             </div>
             <DictationField
@@ -576,21 +576,21 @@ export default function PrescriptionsPage() {
               rows={2}
               style={{ marginTop: "15px" }}
             />
-            <button type="submit" disabled={saving} style={{ marginTop: "15px", padding: "12px 20px", border: "none", borderRadius: "8px", background: "#2563eb", color: "white", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
+            <button type="submit" disabled={saving} style={{ marginTop: "15px", padding: "12px 20px", border: "none", borderRadius: "8px", background: "var(--primary)", color: "var(--on-primary)", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
               {saving ? "Saving..." : "Save Vitals"}
             </button>
           </form>
 
           {vitals.length === 0 ? (
-            <p style={{ color: "#94a3b8" }}>No vital signs recorded.</p>
+            <p style={{ color: "var(--text-muted)" }}>No vital signs recorded.</p>
           ) : (
             <div>
               {vitals.map((v) => (
-                <div key={v.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
-                  <p style={{ margin: 0, color: "#f1f5f9" }}>
+                <div key={v.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+                  <p style={{ margin: 0, color: "var(--text-heading)" }}>
                     ❤️ <strong>{v.heart_rate || "—"}</strong> bpm · BP <strong>{v.blood_pressure_systolic || "—"}/{v.blood_pressure_diastolic || "—"}</strong> · 🌡️ <strong>{v.temperature ? `${v.temperature}°C` : "—"}</strong> · ⚖️ <strong>{v.weight_kg ? `${v.weight_kg} kg` : "—"}</strong> · 📏 <strong>{v.height_cm ? `${v.height_cm} cm` : "—"}</strong> · RR <strong>{v.respiratory_rate || "—"}</strong> · SpO₂ <strong>{v.oxygen_saturation ? `${v.oxygen_saturation}%` : "—"}</strong>
                   </p>
-                  <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#94a3b8" }}>
+                  <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>
                     {v.recorded_at ? new Date(v.recorded_at).toLocaleString() : ""}
                     {v.recorded_by ? ` · by ${v.recorded_by}` : ""}
                     {v.notes ? ` — ${v.notes}` : ""}
@@ -602,9 +602,9 @@ export default function PrescriptionsPage() {
         </section>
 
         {/* FEATURE #5: CONSULTATION NOTES */}
-        <section style={{ marginBottom: "30px", padding: "25px", background: "rgba(15, 23, 42, 0.75)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "16px" }}>
-          <h2 style={{ color: "#f1f5f9" }}>Consultation Notes</h2>
-          <form onSubmit={handleSaveConsultationNotes} style={{ marginBottom: "25px", borderBottom: "1px solid rgba(255, 255, 255, 0.08)", paddingBottom: "22px" }}>
+        <section style={{ marginBottom: "30px", padding: "25px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "16px" }}>
+          <h2 style={{ color: "var(--text-heading)" }}>Consultation Notes</h2>
+          <form onSubmit={handleSaveConsultationNotes} style={{ marginBottom: "25px", borderBottom: "1px solid var(--card-border)", paddingBottom: "22px" }}>
             <DictationField
               label="Chief Complaint *"
               value={chiefComplaint}
@@ -649,25 +649,25 @@ export default function PrescriptionsPage() {
               </div>
             </div>
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ color: "#f1f5f9" }}><strong>Follow-up</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid rgba(255, 255, 255, 0.12)", borderRadius: "8px", background: "rgba(15, 23, 42, 0.6)", color: "#f1f5f9" }} />
+              <label style={{ color: "var(--text-heading)" }}><strong>Follow-up</strong></label>
+              <input type="text" className="glass-input placeholder:text-slate-500" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
-            <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#7c3aed", color: "white", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
+            <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#7c3aed", color: "var(--on-primary)", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
               {saving ? "Saving..." : "Save Consultation Notes"}
             </button>
           </form>
 
-          {consultationNotes.length === 0 ? <p style={{ color: "#94a3b8" }}>No consultation notes recorded.</p> : (
+          {consultationNotes.length === 0 ? <p style={{ color: "var(--text-muted)" }}>No consultation notes recorded.</p> : (
             <div>
               {consultationNotes.map((n) => (
-                <div key={n.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px" }}>
-                  <p style={{ margin: 0, color: "#f1f5f9" }}><strong>{n.chief_complaint}</strong></p>
-                  {n.history_of_present_illness && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>HPI:</strong> {n.history_of_present_illness}</p>}
-                  {n.physical_examination && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>PE:</strong> {n.physical_examination}</p>}
-                  {n.assessment && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Assessment:</strong> {n.assessment}</p>}
-                  {n.plan && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Plan:</strong> {n.plan}</p>}
-                  {n.follow_up && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#cbd5e1" }}><strong style={{ color: "#94a3b8" }}>Follow-up:</strong> {n.follow_up}</p>}
-                  <p style={{ margin: "6px 0 0", fontSize: "12px", color: "#94a3b8" }}>
+                <div key={n.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+                  <p style={{ margin: 0, color: "var(--text-heading)" }}><strong>{n.chief_complaint}</strong></p>
+                  {n.history_of_present_illness && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>HPI:</strong> {n.history_of_present_illness}</p>}
+                  {n.physical_examination && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>PE:</strong> {n.physical_examination}</p>}
+                  {n.assessment && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>Assessment:</strong> {n.assessment}</p>}
+                  {n.plan && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>Plan:</strong> {n.plan}</p>}
+                  {n.follow_up && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>Follow-up:</strong> {n.follow_up}</p>}
+                  <p style={{ margin: "6px 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
                     {n.consultation_date ? new Date(n.consultation_date).toLocaleString() : ""}
                     {n.created_by ? ` · by ${n.created_by}` : ""}
                   </p>
@@ -683,18 +683,18 @@ export default function PrescriptionsPage() {
           style={{
             marginBottom: "30px",
             padding: "25px",
-            background: "rgba(15, 23, 42, 0.75)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "var(--card-bg)",
+            border: "1px solid var(--card-border)",
             borderRadius: "16px",
           }}
         >
-          <h2 style={{ color: "#f1f5f9" }}>Create Prescription</h2>
+          <h2 style={{ color: "var(--text-heading)" }}>Create Prescription</h2>
 
           <form onSubmit={handleCreatePrescription}>
             {/* MEDICATION NAME */}
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ color: "#f1f5f9" }}>
+              <label style={{ color: "var(--text-heading)" }}>
                 <strong>Medication Name *</strong>
               </label>
 
@@ -710,10 +710,10 @@ export default function PrescriptionsPage() {
                   width: "100%",
                   padding: "12px",
                   marginTop: "6px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "8px",
-                  background: "rgba(15, 23, 42, 0.6)",
-                  color: "#f1f5f9",
+                  background: "var(--card-bg)",
+                  color: "var(--text-heading)",
                 }}
               />
             </div>
@@ -721,7 +721,7 @@ export default function PrescriptionsPage() {
             {/* DOSAGE */}
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ color: "#f1f5f9" }}>
+              <label style={{ color: "var(--text-heading)" }}>
                 <strong>Dosage *</strong>
               </label>
 
@@ -737,10 +737,10 @@ export default function PrescriptionsPage() {
                   width: "100%",
                   padding: "12px",
                   marginTop: "6px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "8px",
-                  background: "rgba(15, 23, 42, 0.6)",
-                  color: "#f1f5f9",
+                  background: "var(--card-bg)",
+                  color: "var(--text-heading)",
                 }}
               />
             </div>
@@ -748,7 +748,7 @@ export default function PrescriptionsPage() {
             {/* FREQUENCY */}
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ color: "#f1f5f9" }}>
+              <label style={{ color: "var(--text-heading)" }}>
                 <strong>Frequency *</strong>
               </label>
 
@@ -764,10 +764,10 @@ export default function PrescriptionsPage() {
                   width: "100%",
                   padding: "12px",
                   marginTop: "6px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "8px",
-                  background: "rgba(15, 23, 42, 0.6)",
-                  color: "#f1f5f9",
+                  background: "var(--card-bg)",
+                  color: "var(--text-heading)",
                 }}
               />
             </div>
@@ -775,7 +775,7 @@ export default function PrescriptionsPage() {
             {/* DURATION */}
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ color: "#f1f5f9" }}>
+              <label style={{ color: "var(--text-heading)" }}>
                 <strong>Duration *</strong>
               </label>
 
@@ -791,10 +791,10 @@ export default function PrescriptionsPage() {
                   width: "100%",
                   padding: "12px",
                   marginTop: "6px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "8px",
-                  background: "rgba(15, 23, 42, 0.6)",
-                  color: "#f1f5f9",
+                  background: "var(--card-bg)",
+                  color: "var(--text-heading)",
                 }}
               />
             </div>
@@ -819,8 +819,8 @@ export default function PrescriptionsPage() {
                 padding: "12px 20px",
                 border: "none",
                 borderRadius: "8px",
-                background: "#2563eb",
-                color: "white",
+                background: "var(--primary)",
+                color: "var(--on-primary)",
                 fontWeight: "600",
                 cursor: saving
                   ? "not-allowed"
@@ -856,17 +856,17 @@ export default function PrescriptionsPage() {
           style={{
             marginBottom: "30px",
             padding: "25px",
-            background: "rgba(15, 23, 42, 0.75)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "var(--card-bg)",
+            border: "1px solid var(--card-border)",
             borderRadius: "16px",
           }}
         >
-          <h2 style={{ color: "#f1f5f9" }}>Prescription History</h2>
+          <h2 style={{ color: "var(--text-heading)" }}>Prescription History</h2>
 
           {loading ? (
-            <p style={{ color: "#94a3b8" }}>Loading prescriptions...</p>
+            <p style={{ color: "var(--text-muted)" }}>Loading prescriptions...</p>
           ) : prescriptions.length === 0 ? (
-            <p style={{ color: "#94a3b8" }}>
+            <p style={{ color: "var(--text-muted)" }}>
               No prescriptions found for this patient.
             </p>
           ) : (
@@ -878,31 +878,31 @@ export default function PrescriptionsPage() {
                     marginBottom: "20px",
                     padding: "20px",
                     background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "12px",
                   }}
                 >
-                  <h3 style={{ marginTop: 0, color: "#f1f5f9" }}>
+                  <h3 style={{ marginTop: 0, color: "var(--text-heading)" }}>
                     {prescription.medication_name}
                   </h3>
 
-                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
-                    <strong style={{ color: "#94a3b8" }}>Dosage:</strong>{" "}
+                  <p style={{ margin: "4px 0", color: "var(--text-body)" }}>
+                    <strong style={{ color: "var(--text-muted)" }}>Dosage:</strong>{" "}
                     {prescription.dosage}
                   </p>
 
-                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
-                    <strong style={{ color: "#94a3b8" }}>Frequency:</strong>{" "}
+                  <p style={{ margin: "4px 0", color: "var(--text-body)" }}>
+                    <strong style={{ color: "var(--text-muted)" }}>Frequency:</strong>{" "}
                     {prescription.frequency}
                   </p>
 
-                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
-                    <strong style={{ color: "#94a3b8" }}>Duration:</strong>{" "}
+                  <p style={{ margin: "4px 0", color: "var(--text-body)" }}>
+                    <strong style={{ color: "var(--text-muted)" }}>Duration:</strong>{" "}
                     {prescription.duration}
                   </p>
 
-                  <p style={{ margin: "4px 0", color: "#cbd5e1" }}>
-                    <strong style={{ color: "#94a3b8" }}>Instructions:</strong>{" "}
+                  <p style={{ margin: "4px 0", color: "var(--text-body)" }}>
+                    <strong style={{ color: "var(--text-muted)" }}>Instructions:</strong>{" "}
                     {prescription.instructions ||
                       "None"}
                   </p>
@@ -910,7 +910,7 @@ export default function PrescriptionsPage() {
                   <p
                     style={{
                       fontSize: "13px",
-                      color: "#94a3b8",
+                      color: "var(--text-muted)",
                       margin: "8px 0 12px",
                     }}
                   >
@@ -934,8 +934,8 @@ export default function PrescriptionsPage() {
                       padding: "10px 16px",
                       border: "none",
                       borderRadius: "8px",
-                      background: "#16a34a",
-                      color: "white",
+                      background: "var(--success)",
+                      color: "var(--on-primary)",
                       fontWeight: "600",
                       cursor: "pointer",
                     }}

@@ -620,7 +620,7 @@ function AppointmentsContent() {
                 margin: 0,
                 fontSize: "32px",
                 fontWeight: "700",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
               }}
             >
               Appointments
@@ -655,7 +655,7 @@ function AppointmentsContent() {
             >
               <strong
                 style={{
-                  color: "#e2e8f0",
+                  color: "var(--text-body)",
                 }}
               >
                 📅{" "}
@@ -770,7 +770,7 @@ function AppointmentsContent() {
               style={{
                 border: "none",
                 backgroundColor: "transparent",
-                color: "#94a3b8",
+                color: "var(--text-muted)",
                 padding: "11px 18px",
                 borderRadius: "7px 7px 0 0",
                 fontWeight: "600",
@@ -794,7 +794,7 @@ function AppointmentsContent() {
         >
           <div
             style={{
-              backgroundColor: "rgba(15,23,42,0.6)",
+              backgroundColor: "var(--card-bg)",
               border: "1px solid #dce5ef",
               borderRadius: "10px",
               padding: "25px",
@@ -807,7 +807,7 @@ function AppointmentsContent() {
                 margin: 0,
                 fontSize: "20px",
                 fontWeight: "700",
-                color: "#e2e8f0",
+                color: "var(--text-body)",
               }}
             >
               {rescheduleId
@@ -836,7 +836,7 @@ function AppointmentsContent() {
                   display: "block",
                   fontSize: "12px",
                   fontWeight: "600",
-                  color: "#e2e8f0",
+                  color: "var(--text-body)",
                   marginBottom: "7px",
                 }}
               >
@@ -867,8 +867,8 @@ function AppointmentsContent() {
                     border: "1px solid #cbd5e1",
                     borderRadius: "7px",
                     fontSize: "13px",
-                    color: "#e2e8f0",
-                    backgroundColor: "rgba(15,23,42,0.6)",
+                    color: "var(--text-body)",
+                    backgroundColor: "var(--card-bg)",
                     outline: "none",
                   }}
                 >
@@ -902,7 +902,7 @@ function AppointmentsContent() {
                     display: "block",
                     fontSize: "12px",
                     fontWeight: "600",
-                    color: "#e2e8f0",
+                    color: "var(--text-body)",
                     marginBottom: "7px",
                   }}
                 >
@@ -923,8 +923,8 @@ function AppointmentsContent() {
                     border: "1px solid #cbd5e1",
                     borderRadius: "7px",
                     fontSize: "13px",
-                    color: "#e2e8f0",
-                    backgroundColor: "rgba(15,23,42,0.6)",
+                    color: "var(--text-body)",
+                    backgroundColor: "var(--card-bg)",
                   }}
                 />
               </div>
@@ -935,7 +935,7 @@ function AppointmentsContent() {
                     display: "block",
                     fontSize: "12px",
                     fontWeight: "600",
-                    color: "#e2e8f0",
+                    color: "var(--text-body)",
                     marginBottom: "7px",
                   }}
                 >
@@ -955,10 +955,10 @@ function AppointmentsContent() {
                   style={{
                     width: "100%",
                     padding: "11px 12px",
-                    border: "1px solid rgba(255,255,255,0.12)",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "8px",
                     fontSize: "13px",
-                    color: "#cbd5e1",
+                    color: "var(--text-body)",
                     backgroundColor:
                       !selectedDoctor ||
                       !selectedDate
@@ -1002,7 +1002,7 @@ function AppointmentsContent() {
                   display: "block",
                   fontSize: "12px",
                   fontWeight: "600",
-                  color: "#e2e8f0",
+                  color: "var(--text-body)",
                   marginBottom: "7px",
                 }}
               >
@@ -1023,7 +1023,7 @@ function AppointmentsContent() {
                   border: "1px solid #cbd5e1",
                   borderRadius: "7px",
                   fontSize: "13px",
-                  color: "#e2e8f0",
+                  color: "var(--text-body)",
                   resize: "vertical",
                   fontFamily: "inherit",
                 }}
@@ -1099,7 +1099,7 @@ function AppointmentsContent() {
                       gridTemplateColumns: "1fr 1fr",
                       gap: "7px 20px",
                       fontSize: "12px",
-                      color: "#94a3b8",
+                      color: "var(--text-muted)",
                     }}
                   >
                     <div>
@@ -1175,7 +1175,7 @@ function AppointmentsContent() {
                   !selectedTime
                     ? "#9ca3af"
                     : "#2563eb",
-                color: "white",
+                color: "var(--on-primary)",
                 fontSize: "13px",
                 fontWeight: "700",
                 cursor:
@@ -1204,7 +1204,7 @@ function AppointmentsContent() {
           >
             <div
               style={{
-                backgroundColor: "rgba(15,23,42,0.6)",
+                backgroundColor: "var(--card-bg)",
                 border: "1px solid #dce5ef",
                 borderRadius: "10px",
                 padding: "22px",
@@ -1217,7 +1217,7 @@ function AppointmentsContent() {
                   margin: 0,
                   fontSize: "17px",
                   fontWeight: "700",
-                  color: "#e2e8f0",
+                  color: "var(--text-body)",
                 }}
               >
                 Estimated Waiting Time
@@ -1248,7 +1248,7 @@ function AppointmentsContent() {
 
                   <strong
                     style={{
-                      color: "#e2e8f0",
+                      color: "var(--text-body)",
                     }}
                   >
                     {SHORTEST_WAITING_TIME} min
@@ -1300,7 +1300,7 @@ function AppointmentsContent() {
 
                   <strong
                     style={{
-                      color: "#e2e8f0",
+                      color: "var(--text-body)",
                     }}
                   >
                     {LONGEST_WAITING_TIME} min
@@ -1357,7 +1357,7 @@ export default function AppointmentsPage() {
             alignItems: "center",
             justifyContent: "center",
             background: "#090d16",
-            color: "#94a3b8",
+            color: "var(--text-muted)",
             fontSize: "14px",
             fontWeight: "600",
           }}

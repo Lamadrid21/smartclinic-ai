@@ -312,7 +312,7 @@ export default function MicButton({
         title="Your browser does not support speech-to-text."
         style={{
           fontSize: "12px",
-          color: "#94a3b8",
+          color: "var(--text-muted)",
           ...style,
         }}
       >
@@ -333,7 +333,7 @@ export default function MicButton({
           borderRadius: "6px",
           cursor: disabled ? "not-allowed" : "pointer",
           background: listening ? "#dc2626" : "#2563eb",
-          color: "#fff",
+          color: "var(--on-primary)",
           fontSize: "12px",
           fontWeight: "600",
           display: "inline-flex",
@@ -356,7 +356,7 @@ export default function MicButton({
             border: "1px solid #cbd5e1",
             borderRadius: "6px",
             cursor: disabled || listening ? "not-allowed" : "pointer",
-            background: "#f8fafc",
+            background: "var(--surface-2)",
             color: "#334155",
             fontSize: "12px",
             fontWeight: "600",
@@ -383,8 +383,8 @@ export default function MicButton({
               top: "calc(100% + 4px)",
               left: 0,
               zIndex: 10,
-              background: "rgba(15, 23, 42, 0.95)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
+              background: "var(--card-bg)",
+              border: "1px solid var(--card-border)",
               borderRadius: "8px",
               boxShadow: "0 10px 25px rgba(0, 0, 0, 0.5)",
               backdropFilter: "blur(12px)",
