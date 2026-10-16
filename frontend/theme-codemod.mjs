@@ -111,13 +111,25 @@ function transform(src) {
   return { out, counts };
 }
 
-// Anything matching these is a literal color still in the code
+// Anything matching these is a literal color still in the code.
+// Classes prefixed with dark: are ignored (they are the intended dark-mode half of a pair).
 const LITERAL_RES = [
   /#[0-9a-fA-F]{3,8}\b/,
   /\brgba?\(|\bhsla?\(/,
   /\b(?:color|background|backgroundColor|borderColor|border\w*)\s*:\s*["'](?:white|black|red|blue|green|gray|grey|orange|yellow)["']/,
-  /\btext-white\b|\btext-(?:slate|gray|zinc)-\d+\b|\bbg-slate-\d+|\bbg-\[#|\bborder-white/,
+  /(?<![:\w-])(?:text-(?:slate|gray|zinc)-\d+|bg-slate-\d+|bg-\[#[^\]]*\]|border-white)/,
 ];
+
+// text-white is fine on saturated backgrounds (primary buttons, avatars, active nav, badges)
+const SATURATED =
+  /\bbg-(?:blue|indigo|cyan|sky|emerald|green|rose|red|violet|purple|teal)-[5-9]00|bg-gradient|bg-linear|\bfrom-(?:blue|cyan|indigo|sky|emerald|rose)-[3-6]00|btn-primary|nav-item-active/;
+
+function isFlagged(rawLine) {
+  const line = rawLine.replace(/dark:[^\s"'`]+/g, "");
+  if (LITERAL_RES.some((re) => re.test(line))) return true;
+  if (/(?<![:\w-])text-white\b/.test(line) && !SATURATED.test(line)) return true;
+  return false;
+}
 
 function isComment(line) {
   const t = line.trim();
@@ -147,7 +159,7 @@ for (const root of ROOTS) {
 
     out.split("\n").forEach((line, i) => {
       if (isComment(line) || line.includes("eslint-disable")) return;
-      if (LITERAL_RES.some((re) => re.test(line))) {
+      if (isFlagged(line)) {
         leftovers.push(`${file}:${i + 1}  ${line.trim().slice(0, 110)}`);
       }
     });

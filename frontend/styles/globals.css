@@ -68,6 +68,11 @@
     color-scheme: light;
   }
 
+  /* Native controls (selects, date pickers, scrollbars) follow the theme */
+  html.dark {
+    color-scheme: dark;
+  }
+
   html,
   body {
     background-color: var(--background);

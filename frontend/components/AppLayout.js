@@ -60,12 +60,12 @@ export default function AppLayout({
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [userRole, setUserRoleState] = useState(ROLES.PATIENT);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Light is the default. Only an explicit "dark" choice turns dark mode on.
+  // Dark is the default. Only an explicit "light" choice turns light mode on.
   useEffect(() => {
     const saved = localStorage.getItem("smartclinic_theme");
-    const dark = saved === "dark";
+    const dark = saved !== "light";
     setIsDarkMode(dark);
     document.documentElement.classList.remove("light");
     document.documentElement.classList.toggle("dark", dark);
