@@ -19,6 +19,28 @@ export default function AppLayout({
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [userRole, setUserRoleState] = useState(ROLES.PATIENT);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("smartclinic_theme");
+    if (saved === "light") {
+      setIsLightMode(true);
+      document.documentElement.classList.add("light");
+    }
+  }, []);
+
+  function toggleTheme() {
+    const next = !isLightMode;
+    setIsLightMode(next);
+    if (next) {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("smartclinic_theme", "light");
+    } else {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("smartclinic_theme", "dark");
+    }
+  }
+
 
   useEffect(() => {
     async function loadUser() {
@@ -347,7 +369,17 @@ export default function AppLayout({
               {subtitle && <p className="text-xs text-slate-400 truncate">{subtitle}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-2.5">{actions}</div>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={toggleTheme}
+              title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-all flex items-center gap-1.5"
+            >
+              <span>{isLightMode ? "🌙" : "☀️"}</span>
+              <span className="hidden sm:inline">{isLightMode ? "Dark" : "Light"}</span>
+            </button>
+            {actions}
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-7 max-w-7xl w-full mx-auto">{children}</main>
