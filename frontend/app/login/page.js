@@ -18,8 +18,33 @@ function LoginContent() {
       : ROLES.PATIENT
   );
 
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("smartclinic_theme");
+    if (saved === "light") {
+      setIsLightMode(true);
+      document.documentElement.classList.add("light");
+    } else {
+      document.documentElement.classList.remove("light");
+    }
+  }, []);
+
+  function toggleTheme() {
+    const next = !isLightMode;
+    setIsLightMode(next);
+    if (next) {
+      document.documentElement.classList.add("light");
+      localStorage.setItem("smartclinic_theme", "light");
+    } else {
+      document.documentElement.classList.remove("light");
+      localStorage.setItem("smartclinic_theme", "dark");
+    }
+  }
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showCaptcha, setShowCaptcha] = useState(false);
@@ -251,7 +276,27 @@ function LoginContent() {
       </div>
 
       <div className="w-full max-w-[440px]">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          <div className="absolute right-0 top-0">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-all flex items-center gap-1.5 shadow-md"
+            >
+              {isLightMode ? (
+                <>
+                  <span className="text-amber-400">☀️</span>
+                  <span>Light</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-blue-400">🌙</span>
+                  <span>Dark</span>
+                </>
+              )}
+            </button>
+          </div>
           <Link href="/" className="inline-flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/25">
               <div className="w-full h-full bg-slate-900 rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
@@ -347,14 +392,23 @@ function LoginContent() {
                   Forgot password?
                 </Link>
               </div>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="glass-input w-full rounded-xl px-4 py-3 text-sm"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="glass-input w-full rounded-xl px-4 py-3 text-sm pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-medium"
+                >
+                  {showPassword ? "🙈 Hide" : "👁️ View"}
+                </button>
+              </div>
             </div>
 
             {/* GOOGLE reCAPTCHA - shown only after 10 consecutive failed login attempts */}

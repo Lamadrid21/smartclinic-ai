@@ -15,6 +15,13 @@ export default function DoctorDashboard({ user, profile }) {
 
   const doctorName = profile?.full_name || (user?.email?.includes("kobileonor") ? "Dr. Kobi Leonor, MD" : "Dr. Clinical Physician, MD");
 
+  const statusConfig = {
+    available: { label: "Available", color: "bg-emerald-500", text: "text-emerald-300" },
+    in_consultation: { label: "In Consultation", color: "bg-amber-500", text: "text-amber-300" },
+    away: { label: "On Break", color: "bg-orange-500", text: "text-orange-300" },
+    off_duty: { label: "Off Duty", color: "bg-slate-500", text: "text-slate-300" },
+  };
+
   useEffect(() => {
     async function loadDoctorData() {
       try {
