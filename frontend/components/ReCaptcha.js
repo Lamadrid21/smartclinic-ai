@@ -127,7 +127,7 @@ const ReCaptcha = forwardRef(function ReCaptcha({ onChange }, ref) {
   const useFallback = !siteKey || widgetFailed;
 
   return (
-    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10">
+    <div className="p-4 rounded-xl bg-white/[0.03] border border-[var(--card-border)]">
       {useFallback ? (
         <p className="text-xs text-amber-300/90 leading-relaxed">
           ⚠️ Google reCAPTCHA is not configured yet. Add{" "}
@@ -137,7 +137,7 @@ const ReCaptcha = forwardRef(function ReCaptcha({ onChange }, ref) {
         </p>
       ) : (
         <>
-          <p className="text-xs font-semibold text-slate-300 mb-2">
+          <p className="text-xs font-semibold text-body mb-2">
             🤖 Prove you are human
           </p>
           <div ref={containerRef} />

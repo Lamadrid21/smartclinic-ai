@@ -109,7 +109,7 @@ export default function Profile() {
       <AppLayout title="My Profile" subtitle="Loading..." activeNav="profile">
         <div className="flex flex-col items-center justify-center py-24">
           <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading profile...</p>
+          <p className="text-muted-c text-sm">Loading profile...</p>
         </div>
       </AppLayout>
     );
@@ -128,8 +128,8 @@ export default function Profile() {
                 {(fullName || user?.email || "U").charAt(0).toUpperCase()}
               </div>
             )}
-            <h2 className="mt-4 text-lg font-bold text-white">{fullName || "Clinic Staff"}</h2>
-            <p className="text-xs text-slate-400 mt-1">{user?.email}</p>
+            <h2 className="mt-4 text-lg font-bold text-heading">{fullName || "Clinic Staff"}</h2>
+            <p className="text-xs text-muted-c mt-1">{user?.email}</p>
             <label className="mt-4 inline-block cursor-pointer">
               <span className="btn-secondary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 12v6a2 2 0 01-2 2H4a2 2 0 01-2-2v-6"/><path d="M15.5 8.5L12 5l-3.5 3.5"/><path d="M12 5v12"/></svg>
@@ -142,18 +142,18 @@ export default function Profile() {
 
         {/* Edit Form */}
         <div className="glass-card p-6 rounded-2xl lg:col-span-2">
-          <h2 className="text-lg font-bold text-white mb-6">Personal Information</h2>
+          <h2 className="text-lg font-bold text-heading mb-6">Personal Information</h2>
           <div className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Full Name</label>
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">Full Name</label>
               <input className="glass-input w-full rounded-xl px-4 py-3 text-sm" placeholder="Dr. Juan Dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Phone Number</label>
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">Phone Number</label>
               <input className="glass-input w-full rounded-xl px-4 py-3 text-sm" placeholder="+63 9XX XXX XXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Email Address</label>
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">Email Address</label>
               <input className="glass-input w-full rounded-xl px-4 py-3 text-sm opacity-60 cursor-not-allowed" value={user?.email || ""} disabled />
             </div>
             <div className="flex items-center gap-3 pt-2">

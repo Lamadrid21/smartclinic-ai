@@ -113,10 +113,10 @@ export default function PatientDashboard({ user, profile }) {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
               <span>👤</span> Patient Portal Active
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-heading tracking-tight">
               Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">{patientName}</span> 👋
             </h1>
-            <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+            <p className="text-sm text-body max-w-xl leading-relaxed">
               Welcome to your personal health portal. Review your upcoming doctor visits, download verified digital prescriptions, and check symptom guidance.
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function PatientDashboard({ user, profile }) {
             </Link>
             <Link
               href="/patient-records/my-records"
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-slate-200 font-semibold text-sm transition-all"
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[var(--surface-2)] hover:bg-white/15 border border-[var(--card-border)] text-heading font-semibold text-sm transition-all"
             >
               <span>📋</span> Medical Passport
             </Link>
@@ -139,11 +139,11 @@ export default function PatientDashboard({ user, profile }) {
       </div>
       {/* Grid: Next Visit & Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass-card rounded-3xl p-6 relative overflow-hidden border border-white/10">
+        <div className="lg:col-span-2 glass-card rounded-3xl p-6 relative overflow-hidden border border-[var(--card-border)]">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
               <span className="text-xl">🩺</span>
-              <h2 className="text-base font-bold text-white tracking-tight">Next Scheduled Consultation</h2>
+              <h2 className="text-base font-bold text-heading tracking-tight">Next Scheduled Consultation</h2>
             </div>
             <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
               Confirmed Visit
@@ -151,14 +151,14 @@ export default function PatientDashboard({ user, profile }) {
           </div>
 
           {upcomingAppt ? (
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-white/10 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div className="p-5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--card-border)]">
                 <div className="flex items-center gap-3.5">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-500/30">
                     👨⚕️
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">
+                    <h3 className="font-bold text-heading text-base">
                       {upcomingAppt.doctors?.name || upcomingAppt.doctor_name || "Dr. Kobi Leonor, MD"}
                     </h3>
                     <p className="text-xs text-cyan-400 font-medium">
@@ -169,34 +169,34 @@ export default function PatientDashboard({ user, profile }) {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[11px] text-slate-400">Date</div>
-                  <div className="text-sm font-semibold text-white mt-0.5">{upcomingAppt.appointment_date || "2026-09-28"}</div>
+                <div className="p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--card-border)]">
+                  <div className="text-[11px] text-muted-c">Date</div>
+                  <div className="text-sm font-semibold text-heading mt-0.5">{upcomingAppt.appointment_date || "2026-09-28"}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[11px] text-slate-400">Time</div>
+                <div className="p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--card-border)]">
+                  <div className="text-[11px] text-muted-c">Time</div>
                   <div className="text-sm font-semibold text-cyan-300 mt-0.5">{upcomingAppt.appointment_time || upcomingAppt.time_slot || "09:30 AM"}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-white/5 border border-white/5 col-span-2 sm:col-span-1">
-                  <div className="text-[11px] text-slate-400">Reason</div>
-                  <div className="text-sm font-semibold text-slate-200 mt-0.5 truncate">{upcomingAppt.reason || "Routine Follow-up"}</div>
+                <div className="p-3 rounded-xl bg-[var(--surface-2)] border border-[var(--card-border)] col-span-2 sm:col-span-1">
+                  <div className="text-[11px] text-muted-c">Reason</div>
+                  <div className="text-sm font-semibold text-heading mt-0.5 truncate">{upcomingAppt.reason || "Routine Follow-up"}</div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between gap-3 pt-2">
-                <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                <span className="text-xs text-muted-c flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   Doctor: Ready
                 </span>
-                <Link href="/appointments/manage" className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-semibold text-slate-200 transition-colors">
+                <Link href="/appointments/manage" className="px-3.5 py-1.5 rounded-xl bg-[var(--surface-2)] hover:bg-white/15 border border-[var(--card-border)] text-xs font-semibold text-heading transition-colors">
                   Manage / Reschedule
                 </Link>
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 px-4 rounded-2xl bg-white/5 border border-white/5">
+            <div className="text-center py-8 px-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--card-border)]">
               <div className="text-3xl mb-2">📅</div>
-              <p className="text-sm font-semibold text-white">No upcoming appointments</p>
+              <p className="text-sm font-semibold text-heading">No upcoming appointments</p>
               <Link href="/appointments" className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors">
                 Book Now
               </Link>
@@ -205,23 +205,23 @@ export default function PatientDashboard({ user, profile }) {
         </div>
 
         {/* Health Stats */}
-        <div className="glass-card rounded-3xl p-6 flex flex-col justify-between border border-white/10">
+        <div className="glass-card rounded-3xl p-6 flex flex-col justify-between border border-[var(--card-border)]">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xl">🫀</span>
-              <h2 className="text-base font-bold text-white">Health Profile</h2>
+              <h2 className="text-base font-bold text-heading">Health Profile</h2>
             </div>
             <div className="space-y-3">
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between">
-                <div><div className="text-[11px] text-slate-400">Active Rx</div><div className="text-lg font-bold text-white">{prescriptions.length || 2}</div></div>
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--card-border)] flex items-center justify-between">
+                <div><div className="text-[11px] text-muted-c">Active Rx</div><div className="text-lg font-bold text-heading">{prescriptions.length || 2}</div></div>
                 <span className="text-2xl">💊</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between">
-                <div><div className="text-[11px] text-slate-400">Conditions</div><div className="text-lg font-bold text-white">{conditions.length}</div></div>
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--card-border)] flex items-center justify-between">
+                <div><div className="text-[11px] text-muted-c">Conditions</div><div className="text-lg font-bold text-heading">{conditions.length}</div></div>
                 <span className="text-2xl">📋</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between">
-                <div><div className="text-[11px] text-slate-400">BP</div><div className="text-lg font-bold text-emerald-400">118/76</div></div>
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--card-border)] flex items-center justify-between">
+                <div><div className="text-[11px] text-muted-c">BP</div><div className="text-lg font-bold text-emerald-400">118/76</div></div>
                 <span className="text-2xl">🩺</span>
               </div>
             </div>
@@ -234,11 +234,11 @@ export default function PatientDashboard({ user, profile }) {
 
       {/* Row 2: Digital Prescriptions & Mini AI */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+        <div className="glass-card rounded-3xl p-6 border border-[var(--card-border)] space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl">💊</span>
-              <h2 className="text-base font-bold text-white tracking-tight">My Digital Prescriptions</h2>
+              <h2 className="text-base font-bold text-heading tracking-tight">My Digital Prescriptions</h2>
             </div>
             <Link href="/patient-records/my-records" className="text-xs text-blue-400 hover:text-blue-300 font-semibold">
               View All
@@ -248,16 +248,16 @@ export default function PatientDashboard({ user, profile }) {
           <div className="space-y-2.5">
             {prescriptions.length > 0 ? (
               prescriptions.slice(0, 3).map((rx, idx) => (
-                <div key={rx.id || idx} className="p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500/30 transition-all">
+                <div key={rx.id || idx} className="p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--card-border)] hover:border-blue-500/30 transition-all">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="text-sm font-bold text-white">
+                      <div className="text-sm font-bold text-heading">
                         {rx.medication_name || rx.medication || "Amoxicillin 500mg"}
                       </div>
                       <div className="text-xs text-cyan-400 font-medium mt-0.5">
                         {rx.dosage_instructions || rx.dosage || "1 capsule 3x daily with meals"}
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-1">
+                      <div className="text-[11px] text-muted-c mt-1">
                         Prescribed by: {rx.doctors?.name || "Dr. Kobi Leonor, MD"}
                       </div>
                     </div>
@@ -268,7 +268,7 @@ export default function PatientDashboard({ user, profile }) {
                 </div>
               ))
             ) : (
-              <div className="p-4 rounded-2xl bg-white/5 text-center text-xs text-slate-400">
+              <div className="p-4 rounded-2xl bg-[var(--surface-2)] text-center text-xs text-muted-c">
                 No active prescriptions recorded.
               </div>
             )}
@@ -279,14 +279,14 @@ export default function PatientDashboard({ user, profile }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xl">✨</span>
-              <h2 className="text-base font-bold text-white tracking-tight">Ask Patient AI Guide</h2>
+              <h2 className="text-base font-bold text-heading tracking-tight">Ask Patient AI Guide</h2>
             </div>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
               Triage & Guidance
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-muted-c leading-relaxed">
             Have questions before your appointment? Ask about symptom preparations, clinic directions, or general health info.
           </p>
 
@@ -297,7 +297,7 @@ export default function PatientDashboard({ user, profile }) {
                 value={aiQuestion}
                 onChange={(e) => setAiQuestion(e.target.value)}
                 placeholder="e.g., What should I prepare before my consultation?"
-                className="w-full glass-input rounded-2xl px-4 py-3 text-xs text-white pr-24"
+                className="w-full glass-input rounded-2xl px-4 py-3 text-xs text-heading pr-24"
               />
               <button
                 type="submit"
@@ -310,12 +310,12 @@ export default function PatientDashboard({ user, profile }) {
           </form>
 
           {aiResponse && (
-            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-xs text-slate-200 leading-relaxed space-y-2">
+            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-xs text-heading leading-relaxed space-y-2">
               <div className="font-semibold text-cyan-300 flex items-center gap-1.5">
                 <span>🤖</span> AI Health Navigator:
               </div>
               <p>{aiResponse}</p>
-              <div className="text-[10px] text-slate-400 italic pt-1 border-t border-cyan-500/20">
+              <div className="text-[10px] text-muted-c italic pt-1 border-t border-cyan-500/20">
                 Note: AI responses are for general educational assistance and do not replace professional medical advice.
               </div>
             </div>

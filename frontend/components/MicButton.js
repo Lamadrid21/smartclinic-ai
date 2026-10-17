@@ -332,7 +332,7 @@ export default function MicButton({
           border: "none",
           borderRadius: "6px",
           cursor: disabled ? "not-allowed" : "pointer",
-          background: listening ? "#dc2626" : "#2563eb",
+          background: listening ? "var(--danger)" : "var(--primary)",
           color: "var(--on-primary)",
           fontSize: "12px",
           fontWeight: "600",
@@ -353,11 +353,11 @@ export default function MicButton({
           title="Choose the language you speak"
           style={{
             padding: "6px 10px",
-            border: "1px solid #cbd5e1",
+            border: "1px solid var(--card-border)",
             borderRadius: "6px",
             cursor: disabled || listening ? "not-allowed" : "pointer",
             background: "var(--surface-2)",
-            color: "#334155",
+            color: "var(--text-body)",
             fontSize: "12px",
             fontWeight: "600",
             display: "inline-flex",
@@ -386,7 +386,7 @@ export default function MicButton({
               background: "var(--card-bg)",
               border: "1px solid var(--card-border)",
               borderRadius: "8px",
-              boxShadow: "0 10px 25px rgba(0, 0, 0, 0.5)",
+              boxShadow: "var(--shadow-card)",
               backdropFilter: "blur(12px)",
               padding: "4px",
               display: "flex",
@@ -409,8 +409,8 @@ export default function MicButton({
                   border: "none",
                   borderRadius: "4px",
                   cursor: "pointer",
-                  background: chosenLang === locale.code ? "rgba(59, 130, 246, 0.25)" : "transparent",
-                  color: chosenLang === locale.code ? "#93c5fd" : "#cbd5e1",
+                  background: chosenLang === locale.code ? "var(--card-border)" : "transparent",
+                  color: chosenLang === locale.code ? "var(--text-link)" : "var(--card-border)",
                   fontSize: "12px",
                   textAlign: "left",
                 }}
@@ -427,7 +427,7 @@ export default function MicButton({
         <span
           style={{
             fontSize: "12px",
-            color: "#f87171",
+            color: "var(--danger-text)",
           }}
         >
           {error}
@@ -440,7 +440,7 @@ export default function MicButton({
         <span
           style={{
             fontSize: "12px",
-            color: "#64748b",
+            color: "var(--text-muted)",
             fontStyle: "italic",
             maxWidth: "260px",
             overflow: "hidden",
@@ -459,9 +459,9 @@ export default function MicButton({
           style={{
             fontSize: "12px",
             fontWeight: "600",
-            color: justWritten ? "#16a34a" : "#94a3b8",
-            background: justWritten ? "#dcfce7" : "#f1f5f9",
-            border: `1px solid ${justWritten ? "#86efac" : "#e2e8f0"}`,
+            color: justWritten ? "var(--success)" : "var(--text-muted)",
+            background: justWritten ? "var(--success-bg)" : "var(--surface-2)",
+            border: `1px solid ${justWritten ? "var(--success-text)" : "var(--card-border)"}`,
             borderRadius: "999px",
             padding: "2px 10px",
             maxWidth: "260px",

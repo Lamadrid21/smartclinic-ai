@@ -229,10 +229,10 @@ export default function AdminDashboard({ user, profile }) {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
               <span>⚙️</span> Clinic Administrator Center
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-heading tracking-tight">
               Executive Overview & Intelligence
             </h1>
-            <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+            <p className="text-sm text-body max-w-xl leading-relaxed">
               Real-time monitoring of all clinic facilities, doctor presence, appointment traffic, and automated AI triage logs.
             </p>
           </div>
@@ -246,7 +246,7 @@ export default function AdminDashboard({ user, profile }) {
             </Link>
             <Link
               href="/patient-records"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-slate-200 font-semibold text-xs transition-all"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--surface-2)] hover:bg-white/15 border border-[var(--card-border)] text-heading font-semibold text-xs transition-all"
             >
               <span>🗂️</span> Master Patient Directory
             </Link>
@@ -255,41 +255,41 @@ export default function AdminDashboard({ user, profile }) {
       </div>
       {/* Executive KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-4 border border-[var(--card-border)] flex items-center justify-between">
           <div>
-            <div className="text-xs text-slate-400">Total Patients</div>
-            <div className="text-xl font-bold text-white mt-1">142</div>
+            <div className="text-xs text-muted-c">Total Patients</div>
+            <div className="text-xl font-bold text-heading mt-1">142</div>
           </div>
           <span className="text-2xl">👤</span>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-4 border border-[var(--card-border)] flex items-center justify-between">
           <div>
-            <div className="text-xs text-slate-400">Active Doctors</div>
+            <div className="text-xs text-muted-c">Active Doctors</div>
             <div className="text-xl font-bold text-emerald-400 mt-1">5 On Duty</div>
           </div>
           <span className="text-2xl">🩺</span>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-4 border border-[var(--card-border)] flex items-center justify-between">
           <div>
-            <div className="text-xs text-slate-400">Today Visits</div>
+            <div className="text-xs text-muted-c">Today Visits</div>
             <div className="text-xl font-bold text-cyan-400 mt-1">28 Booked</div>
           </div>
           <span className="text-2xl">📅</span>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+        <div className="glass-card rounded-2xl p-4 border border-[var(--card-border)] flex items-center justify-between">
           <div>
-            <div className="text-xs text-slate-400">Completion Rate</div>
+            <div className="text-xs text-muted-c">Completion Rate</div>
             <div className="text-xl font-bold text-purple-400 mt-1">94%</div>
           </div>
           <span className="text-2xl">📈</span>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between col-span-2 sm:col-span-1">
+        <div className="glass-card rounded-2xl p-4 border border-[var(--card-border)] flex items-center justify-between col-span-2 sm:col-span-1">
           <div>
-            <div className="text-xs text-slate-400">Est. Daily Rev</div>
+            <div className="text-xs text-muted-c">Est. Daily Rev</div>
             <div className="text-xl font-bold text-emerald-300 mt-1">₱42,500</div>
           </div>
           <span className="text-2xl">💰</span>
@@ -305,13 +305,13 @@ export default function AdminDashboard({ user, profile }) {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white tracking-tight">AI Peak Traffic & Patient Flow Forecast</h2>
+                <h2 className="text-base font-bold text-heading tracking-tight">AI Peak Traffic & Patient Flow Forecast</h2>
                 <span className="flex h-2 w-2 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-muted-c">
                 {lastCalculated
                   ? `Live inference updated at ${lastCalculated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })} • Auto-refresh active`
                   : "Calibrating neural queue prediction..."}
@@ -335,7 +335,7 @@ export default function AdminDashboard({ user, profile }) {
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-xs text-muted-c leading-relaxed">
           Peak consultation volume projected at <strong className="text-cyan-300">{peakSummary.peakHour} ({peakSummary.peakPercentage}% capacity)</strong> with afternoon peak around <strong className="text-purple-300">{peakSummary.afternoonPeak}</strong>. Doctor allocation and triage queue are dynamically optimized.
         </p>
 
@@ -346,11 +346,11 @@ export default function AdminDashboard({ user, profile }) {
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all ${
                 item.traffic >= 88
                   ? "bg-purple-950/40 border border-purple-500/40 shadow-sm shadow-purple-500/10"
-                  : "bg-white/5 border border-white/5"
+                  : "bg-[var(--surface-2)] border border-[var(--card-border)]"
               }`}
             >
-              <span className="text-[10px] text-slate-400 font-semibold">{item.hour}</span>
-              <div className="w-full bg-slate-800/90 h-20 rounded-lg relative overflow-hidden flex items-end">
+              <span className="text-[10px] text-muted-c font-semibold">{item.hour}</span>
+              <div className="w-full bg-[var(--card-bg)] h-20 rounded-lg relative overflow-hidden flex items-end">
                 <div
                   className={`w-full transition-all duration-700 rounded-b-lg ${
                     item.traffic >= 88
@@ -363,14 +363,14 @@ export default function AdminDashboard({ user, profile }) {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-xs text-white font-bold">{item.traffic}%</span>
+                <span className="text-xs text-heading font-bold">{item.traffic}%</span>
                 <span
                   className={`text-[9px] font-medium px-1 rounded mt-0.5 ${
                     item.traffic >= 88
                       ? "text-rose-300 bg-rose-500/20"
                       : item.traffic >= 70
                       ? "text-amber-300 bg-amber-500/10"
-                      : "text-slate-400"
+                      : "text-muted-c"
                   }`}
                 >
                   {item.label}
@@ -382,13 +382,13 @@ export default function AdminDashboard({ user, profile }) {
       </div>
 
       {/* Doctor Presence & Clinic Room Monitor */}
-      <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+      <div className="glass-card rounded-3xl p-6 border border-[var(--card-border)] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">🩺</span>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">Active Doctor Roster & Room Status</h2>
-              <p className="text-[11px] text-slate-400">Assigned consultation suites and current occupancy</p>
+              <h2 className="text-base font-bold text-heading tracking-tight">Active Doctor Roster & Room Status</h2>
+              <p className="text-[11px] text-muted-c">Assigned consultation suites and current occupancy</p>
             </div>
           </div>
           <Link href="/appointments/manage" className="text-xs text-purple-400 hover:text-purple-300 font-semibold">
@@ -399,7 +399,7 @@ export default function AdminDashboard({ user, profile }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-white/10 text-slate-400 font-semibold">
+              <tr className="border-b border-[var(--card-border)] text-muted-c font-semibold">
                 <th className="pb-3 pl-2">Doctor</th>
                 <th className="pb-3">Specialty</th>
                 <th className="pb-3">Assigned Room</th>
@@ -410,16 +410,16 @@ export default function AdminDashboard({ user, profile }) {
             <tbody className="divide-y divide-white/5">
               {doctorsList.map((doc, idx) => (
                 <tr key={doc.id || idx} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-3.5 pl-2 font-medium text-white flex items-center gap-2.5">
+                  <td className="py-3.5 pl-2 font-medium text-heading flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-[11px] border border-purple-500/30">
                       {doc.name ? doc.name.charAt(4) || doc.name.charAt(0) : "D"}
                     </div>
                     <div>
                       <div className="font-semibold">{doc.name || "Dr. Medical Staff, MD"}</div>
-                      <div className="text-[10px] text-slate-400">ID: DOC-00{doc.id || idx + 1}</div>
+                      <div className="text-[10px] text-muted-c">ID: DOC-00{doc.id || idx + 1}</div>
                     </div>
                   </td>
-                  <td className="py-3.5 text-slate-300">{doc.specialty || doc.specialization || "General Medicine"}</td>
+                  <td className="py-3.5 text-body">{doc.specialty || doc.specialization || "General Medicine"}</td>
                   <td className="py-3.5 font-semibold">
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px]">
                       <span>🚪</span> {doc.room_number}
@@ -433,14 +433,14 @@ export default function AdminDashboard({ user, profile }) {
                           : doc.status === "On Break"
                           ? "bg-orange-500/15 text-orange-300 border-orange-500/30"
                           : doc.status === "Off Duty"
-                          ? "bg-slate-500/15 text-slate-400 border-slate-500/30"
+                          ? "bg-[var(--surface-2)] text-muted-c border-[var(--card-border)]"
                           : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                       }`}
                     >
                       {doc.status || "Available"}
                     </span>
                   </td>
-                  <td className="py-3.5 text-right pr-2 text-slate-300 font-medium">
+                  <td className="py-3.5 text-right pr-2 text-body font-medium">
                     {doc.current_patient || "None (Ready)"}
                   </td>
                 </tr>
@@ -451,13 +451,13 @@ export default function AdminDashboard({ user, profile }) {
       </div>
 
       {/* Appointment History (Moved from Patient Queue to Admin Dashboard) */}
-      <div className="glass-card rounded-3xl p-6 border border-white/10 space-y-4">
+      <div className="glass-card rounded-3xl p-6 border border-[var(--card-border)] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">📋</span>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">Appointment History</h2>
-              <p className="text-[11px] text-slate-400">Past completed, cancelled, and expired patient consultations</p>
+              <h2 className="text-base font-bold text-heading tracking-tight">Appointment History</h2>
+              <p className="text-[11px] text-muted-c">Past completed, cancelled, and expired patient consultations</p>
             </div>
           </div>
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">
@@ -466,14 +466,14 @@ export default function AdminDashboard({ user, profile }) {
         </div>
 
         {appointmentHistory.length === 0 ? (
-          <div className="p-6 text-center rounded-2xl bg-white/[0.02] border border-white/5 text-xs text-slate-400">
+          <div className="p-6 text-center rounded-2xl bg-white/[0.02] border border-[var(--card-border)] text-xs text-muted-c">
             No past appointment history found.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/10 text-slate-400 font-semibold">
+                <tr className="border-b border-[var(--card-border)] text-muted-c font-semibold">
                   <th className="pb-3 pl-2">Patient</th>
                   <th className="pb-3">Doctor</th>
                   <th className="pb-3">Date & Time</th>
@@ -484,27 +484,27 @@ export default function AdminDashboard({ user, profile }) {
               <tbody className="divide-y divide-white/5">
                 {appointmentHistory.map((appt, idx) => (
                   <tr key={appt.id || idx} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 pl-2 font-medium text-white">
+                    <td className="py-3.5 pl-2 font-medium text-heading">
                       <div>
-                        <div className="font-semibold text-slate-200">
+                        <div className="font-semibold text-heading">
                           {appt.patients
                             ? `${appt.patients.first_name || ""} ${appt.patients.last_name || ""}`.trim() || "Patient"
                             : "Patient"}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="text-[10px] text-muted-c">
                           {appt.patients?.patient_number ? `ID: ${appt.patients.patient_number}` : ""}
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 text-slate-300">
-                      <div className="font-medium text-slate-200">{appt.doctors?.name || "Dr. Staff"}</div>
-                      <div className="text-[10px] text-slate-400">{appt.doctors?.specialization || "General Med"}</div>
+                    <td className="py-3.5 text-body">
+                      <div className="font-medium text-heading">{appt.doctors?.name || "Dr. Staff"}</div>
+                      <div className="text-[10px] text-muted-c">{appt.doctors?.specialization || "General Med"}</div>
                     </td>
                     <td className="py-3.5 text-cyan-300 font-medium">
                       <div>{appt.appointment_date || "N/A"}</div>
-                      <div className="text-[10px] text-slate-400">{appt.start_time ? String(appt.start_time).substring(0, 5) : ""}</div>
+                      <div className="text-[10px] text-muted-c">{appt.start_time ? String(appt.start_time).substring(0, 5) : ""}</div>
                     </td>
-                    <td className="py-3.5 text-slate-300 max-w-[200px] truncate">
+                    <td className="py-3.5 text-body max-w-[200px] truncate">
                       {appt.reason || "General Consultation"}
                     </td>
                     <td className="py-3.5 text-right pr-2">
@@ -514,7 +514,7 @@ export default function AdminDashboard({ user, profile }) {
                             ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                             : appt.status === "Cancelled"
                             ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
-                            : "bg-slate-500/15 text-slate-400 border-slate-500/30"
+                            : "bg-[var(--surface-2)] text-muted-c border-[var(--card-border)]"
                         }`}
                       >
                         {appt.status || "Completed"}

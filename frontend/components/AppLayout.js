@@ -156,7 +156,7 @@ export default function AppLayout({
       {mobileMenuOpen && (
         <div
           onClick={() => setMobileMenuOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-[var(--card-bg)] backdrop-blur-sm lg:hidden"
         />
       )}
 
@@ -166,10 +166,10 @@ export default function AppLayout({
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+        <div className="p-5 border-b border-slate-200 dark:border-[var(--card-border)] flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-md shadow-blue-500/20">
-              <div className="w-full h-full bg-white dark:bg-slate-900 rounded-[11px] flex items-center justify-center text-blue-500 font-bold text-lg">
+              <div className="w-full h-full bg-white dark:bg-[var(--card-bg)] rounded-[11px] flex items-center justify-center text-blue-500 font-bold text-lg">
                 ✚
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function AppLayout({
               <span>{currentBadge.icon}</span>
               <span className="truncate">{currentBadge.label} Portal</span>
             </span>
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-white/10 dark:text-white font-bold uppercase tracking-wider flex-shrink-0">
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-[var(--surface-2)] dark:text-heading font-bold uppercase tracking-wider flex-shrink-0">
               Active
             </span>
           </div>
@@ -218,7 +218,7 @@ export default function AppLayout({
                 className={`flex items-center justify-between px-3 py-2 text-sm font-medium transition-all ${
                   isActive
                     ? "nav-item-active"
-                    : "rounded-xl text-body hover:text-heading hover:bg-slate-100 dark:hover:bg-white/5"
+                    : "rounded-xl text-body hover:text-heading hover:bg-slate-100 dark:hover:bg-[var(--surface-2)]"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ export default function AppLayout({
         </nav>
 
         {/* User Card */}
-        <div className="p-3 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20">
+        <div className="p-3 border-t border-slate-200 dark:border-[var(--card-border)] bg-[var(--surface-2)]">
           <div className="flex items-center justify-between gap-2">
             <Link href="/profile" className="flex items-center gap-2.5 overflow-hidden flex-1 group">
               {userProfile?.avatar_url ? (
@@ -270,11 +270,11 @@ export default function AppLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-slate-200 dark:border-[var(--card-border)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-muted-c hover:text-heading hover:bg-slate-100 dark:hover:bg-white/5 border border-slate-200 dark:border-white/10"
+              className="lg:hidden p-2 rounded-xl text-muted-c hover:text-heading hover:bg-slate-100 dark:hover:bg-[var(--surface-2)] border border-slate-200 dark:border-[var(--card-border)]"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>

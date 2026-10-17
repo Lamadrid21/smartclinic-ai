@@ -69,15 +69,15 @@ export default function DictationField({
     padding: "12px",
     marginTop: "6px",
     border: flashing
-      ? "2px solid #22c55e"
-      : "1px solid rgba(255, 255, 255, 0.12)",
+      ? "2px solid var(--success)"
+      : "1px solid var(--card-border)",
     borderRadius: "8px",
     background: flashing
-      ? "rgba(34, 197, 94, 0.15)"
-      : "rgba(15, 23, 42, 0.6)",
+      ? "var(--success-bg)"
+      : "var(--surface-2)",
     color: "var(--text-heading)",
     outline: "none",
-    boxShadow: flashing ? "0 0 0 3px rgba(34, 197, 94, 0.25)" : "none",
+    boxShadow: flashing ? "0 0 0 3px var(--card-border)" : "none",
     transition:
       "border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease",
   };
@@ -97,7 +97,7 @@ export default function DictationField({
 
       {inputType === "textarea" ? (
         <textarea
-          className="glass-input placeholder:text-slate-500"
+          className="glass-input placeholder:text-muted-c"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -107,7 +107,7 @@ export default function DictationField({
       ) : (
         <input
           type="text"
-          className="glass-input placeholder:text-slate-500"
+          className="glass-input placeholder:text-muted-c"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -122,7 +122,7 @@ export default function DictationField({
             margin: "6px 0 0",
             fontSize: "12px",
             fontWeight: "600",
-            color: "#4ade80",
+            color: "var(--success-text)",
           }}
         >
           ✅ Dictated &amp; written to this field: “{lastWritten}”

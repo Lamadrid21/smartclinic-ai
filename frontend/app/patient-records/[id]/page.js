@@ -763,7 +763,7 @@ export default function PatientDetails() {
       <AppLayout title="Patient Details" subtitle="Medical history and patient information" activeNav="patients">
         <div className="flex flex-col items-center justify-center py-24">
           <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4" />
-          <p className="text-slate-400 text-sm">Loading patient records...</p>
+          <p className="text-muted-c text-sm">Loading patient records...</p>
         </div>
       </AppLayout>
     );
@@ -833,7 +833,7 @@ export default function PatientDetails() {
           border:
             "1px solid var(--card-border)",
           borderRadius: "8px",
-          background: "rgba(255, 255, 255, 0.06)",
+          background: "var(--surface-2)",
           color: "var(--text-heading)",
           cursor: "pointer",
         }}
@@ -851,9 +851,9 @@ export default function PatientDetails() {
             background:
               "var(--danger-bg)",
             border:
-              "1px solid rgba(244, 63, 94, 0.3)",
+              "1px solid var(--danger-border)",
             borderRadius: "8px",
-            color: "#fda4af",
+            color: "var(--danger-text)",
           }}
         >
           <strong>
@@ -871,11 +871,11 @@ export default function PatientDetails() {
             marginBottom: "20px",
             padding: "15px",
             background:
-              "rgba(16, 185, 129, 0.15)",
+              "var(--surface-2)",
             border:
-              "1px solid rgba(16, 185, 129, 0.3)",
+              "1px solid var(--card-border)",
             borderRadius: "8px",
-            color: "#6ee7b7",
+            color: "var(--success-text)",
           }}
         >
           {successMessage}
@@ -1101,7 +1101,7 @@ export default function PatientDetails() {
           {uploading && (
             <p
               style={{
-                color: "#60a5fa",
+                color: "var(--text-link)",
                 fontWeight: "bold",
               }}
             >
@@ -1132,7 +1132,7 @@ export default function PatientDetails() {
                     padding:
                       "15px",
                     background:
-                      "rgba(255, 255, 255, 0.03)",
+                      "var(--surface-2)",
                     border:
                       "1px solid var(--card-border)",
                     borderRadius:
@@ -1213,7 +1213,7 @@ export default function PatientDetails() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Condition Name *</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={conditionName} onChange={(e) => setConditionName(e.target.value)} placeholder="e.g. Hypertension" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={conditionName} onChange={(e) => setConditionName(e.target.value)} placeholder="e.g. Hypertension" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Status</strong></label>
@@ -1249,7 +1249,7 @@ export default function PatientDetails() {
         {patientConditions.length === 0 ? <p style={{ color: "var(--text-muted)" }}>No previous conditions recorded.</p> : (
           <div>
             {patientConditions.map((c) => (
-              <div key={c.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+              <div key={c.id} style={{ marginBottom: "15px", padding: "15px", background: "var(--surface-2)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
                 <p style={{ margin: 0, color: "var(--text-heading)" }}><strong>{c.condition_name}</strong> <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>({c.status}, {c.severity})</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>{c.diagnosed_date ? `Diagnosed: ${c.diagnosed_date}` : "No date"}{c.notes ? ` — ${c.notes}` : ""}</p>
               </div>
@@ -1268,7 +1268,7 @@ export default function PatientDetails() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Test Name *</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. CBC, Blood Sugar" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={labTestName} onChange={(e) => setLabTestName(e.target.value)} placeholder="e.g. CBC, Blood Sugar" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Test Date</strong></label>
@@ -1276,15 +1276,15 @@ export default function PatientDetails() {
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Result Value</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={labResultValue} onChange={(e) => setLabResultValue(e.target.value)} placeholder="e.g. 120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={labResultValue} onChange={(e) => setLabResultValue(e.target.value)} placeholder="e.g. 120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Unit</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={labUnit} onChange={(e) => setLabUnit(e.target.value)} placeholder="e.g. mg/dL" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={labUnit} onChange={(e) => setLabUnit(e.target.value)} placeholder="e.g. mg/dL" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Reference Range</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={labReferenceRange} onChange={(e) => setLabReferenceRange(e.target.value)} placeholder="e.g. 70-110" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={labReferenceRange} onChange={(e) => setLabReferenceRange(e.target.value)} placeholder="e.g. 70-110" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Status</strong></label>
@@ -1308,7 +1308,7 @@ export default function PatientDetails() {
         {labResults.length === 0 ? <p style={{ color: "var(--text-muted)" }}>No lab results recorded.</p> : (
           <div>
             {labResults.map((r) => (
-              <div key={r.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+              <div key={r.id} style={{ marginBottom: "15px", padding: "15px", background: "var(--surface-2)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
                 <p style={{ margin: 0, color: "var(--text-heading)" }}><strong>{r.test_name}</strong>{" "}<span style={{ color: "var(--text-muted)", fontSize: "13px" }}>{r.result_value ? `${r.result_value} ${r.unit || ""}` : "No result"}{r.reference_range ? ` (ref: ${r.reference_range})` : ""}</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>{r.test_date ? `Date: ${r.test_date}` : ""}{r.status ? ` — ${r.status}` : ""}{r.notes ? ` — ${r.notes}` : ""}</p>
               </div>
@@ -1327,7 +1327,7 @@ export default function PatientDetails() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Procedure Name *</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={procedureName} onChange={(e) => setProcedureName(e.target.value)} placeholder="e.g. Appendectomy" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={procedureName} onChange={(e) => setProcedureName(e.target.value)} placeholder="e.g. Appendectomy" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Procedure Date</strong></label>
@@ -1335,7 +1335,7 @@ export default function PatientDetails() {
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Performed By</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={procedurePerformedBy} onChange={(e) => setProcedurePerformedBy(e.target.value)} placeholder="Doctor or facility" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={procedurePerformedBy} onChange={(e) => setProcedurePerformedBy(e.target.value)} placeholder="Doctor or facility" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Outcome</strong></label>
@@ -1360,7 +1360,7 @@ export default function PatientDetails() {
         {procedures.length === 0 ? <p style={{ color: "var(--text-muted)" }}>No procedures recorded.</p> : (
           <div>
             {procedures.map((p) => (
-              <div key={p.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+              <div key={p.id} style={{ marginBottom: "15px", padding: "15px", background: "var(--surface-2)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
                 <p style={{ margin: 0, color: "var(--text-heading)" }}><strong>{p.procedure_name}</strong> <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>({p.outcome})</span></p>
                 <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>{p.procedure_date ? `Date: ${p.procedure_date}` : ""}{p.performed_by ? ` — By: ${p.performed_by}` : ""}{p.notes ? ` — ${p.notes}` : ""}</p>
               </div>
@@ -1408,7 +1408,7 @@ export default function PatientDetails() {
 
             <input
               type="text"
-              className="glass-input placeholder:text-slate-500"
+              className="glass-input placeholder:text-muted-c"
               value={diagnosis}
               onChange={(e) =>
                 setDiagnosis(
@@ -1542,7 +1542,7 @@ export default function PatientDetails() {
                     padding:
                       "20px",
                     background:
-                      "rgba(255, 255, 255, 0.03)",
+                      "var(--surface-2)",
                     border:
                       "1px solid var(--card-border)",
                     borderRadius:
@@ -1550,7 +1550,7 @@ export default function PatientDetails() {
                   }}
                 >
                   <p style={{ margin: "0 0 6px", color: "var(--text-heading)" }}>
-                    <strong style={{ color: "#93c5fd" }}>
+                    <strong style={{ color: "var(--text-link)" }}>
                       Diagnosis:
                     </strong>{" "}
                     {record.diagnosis ||

@@ -492,7 +492,7 @@ export default function PrescriptionsPage() {
             padding: "10px 16px",
             border: "1px solid var(--card-border)",
             borderRadius: "8px",
-            background: "rgba(255, 255, 255, 0.06)",
+            background: "var(--surface-2)",
             color: "var(--text-heading)",
             cursor: "pointer",
           }}
@@ -537,35 +537,35 @@ export default function PrescriptionsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }}>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Heart Rate (bpm)</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" className="glass-input placeholder:text-muted-c" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>BP Systolic</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" className="glass-input placeholder:text-muted-c" value={bpSystolic} onChange={(e) => setBpSystolic(e.target.value)} placeholder="120" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>BP Diastolic</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" className="glass-input placeholder:text-muted-c" value={bpDiastolic} onChange={(e) => setBpDiastolic(e.target.value)} placeholder="80" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Temperature (°C)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" step="0.1" className="glass-input placeholder:text-muted-c" value={temperature} onChange={(e) => setTemperature(e.target.value)} placeholder="36.6" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Weight (kg)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" step="0.1" className="glass-input placeholder:text-muted-c" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="65.5" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Height (cm)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" step="0.1" className="glass-input placeholder:text-muted-c" value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="165" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Respiratory Rate</strong></label>
-                <input type="number" className="glass-input placeholder:text-slate-500" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" className="glass-input placeholder:text-muted-c" value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value)} placeholder="16" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>O₂ Saturation (%)</strong></label>
-                <input type="number" step="0.1" className="glass-input placeholder:text-slate-500" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+                <input type="number" step="0.1" className="glass-input placeholder:text-muted-c" value={oxygenSaturation} onChange={(e) => setOxygenSaturation(e.target.value)} placeholder="98" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
               </div>
             </div>
             <DictationField
@@ -586,7 +586,7 @@ export default function PrescriptionsPage() {
           ) : (
             <div>
               {vitals.map((v) => (
-                <div key={v.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+                <div key={v.id} style={{ marginBottom: "15px", padding: "15px", background: "var(--surface-2)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
                   <p style={{ margin: 0, color: "var(--text-heading)" }}>
                     ❤️ <strong>{v.heart_rate || "—"}</strong> bpm · BP <strong>{v.blood_pressure_systolic || "—"}/{v.blood_pressure_diastolic || "—"}</strong> · 🌡️ <strong>{v.temperature ? `${v.temperature}°C` : "—"}</strong> · ⚖️ <strong>{v.weight_kg ? `${v.weight_kg} kg` : "—"}</strong> · 📏 <strong>{v.height_cm ? `${v.height_cm} cm` : "—"}</strong> · RR <strong>{v.respiratory_rate || "—"}</strong> · SpO₂ <strong>{v.oxygen_saturation ? `${v.oxygen_saturation}%` : "—"}</strong>
                   </p>
@@ -650,9 +650,9 @@ export default function PrescriptionsPage() {
             </div>
             <div style={{ marginBottom: "15px" }}>
               <label style={{ color: "var(--text-heading)" }}><strong>Follow-up</strong></label>
-              <input type="text" className="glass-input placeholder:text-slate-500" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
+              <input type="text" className="glass-input placeholder:text-muted-c" value={followUp} onChange={(e) => setFollowUp(e.target.value)} placeholder="e.g. Return in 1 week" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />
             </div>
-            <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "#7c3aed", color: "var(--on-primary)", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
+            <button type="submit" disabled={saving} style={{ padding: "12px 20px", border: "none", borderRadius: "8px", background: "var(--primary)", color: "var(--on-primary)", fontWeight: "600", cursor: saving ? "not-allowed" : "pointer" }}>
               {saving ? "Saving..." : "Save Consultation Notes"}
             </button>
           </form>
@@ -660,7 +660,7 @@ export default function PrescriptionsPage() {
           {consultationNotes.length === 0 ? <p style={{ color: "var(--text-muted)" }}>No consultation notes recorded.</p> : (
             <div>
               {consultationNotes.map((n) => (
-                <div key={n.id} style={{ marginBottom: "15px", padding: "15px", background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
+                <div key={n.id} style={{ marginBottom: "15px", padding: "15px", background: "var(--surface-2)", border: "1px solid var(--card-border)", borderRadius: "10px" }}>
                   <p style={{ margin: 0, color: "var(--text-heading)" }}><strong>{n.chief_complaint}</strong></p>
                   {n.history_of_present_illness && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>HPI:</strong> {n.history_of_present_illness}</p>}
                   {n.physical_examination && <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-body)" }}><strong style={{ color: "var(--text-muted)" }}>PE:</strong> {n.physical_examination}</p>}
@@ -700,7 +700,7 @@ export default function PrescriptionsPage() {
 
               <input
                 type="text"
-                className="glass-input placeholder:text-slate-500"
+                className="glass-input placeholder:text-muted-c"
                 value={medicationName}
                 onChange={(e) =>
                   setMedicationName(e.target.value)
@@ -727,7 +727,7 @@ export default function PrescriptionsPage() {
 
               <input
                 type="text"
-                className="glass-input placeholder:text-slate-500"
+                className="glass-input placeholder:text-muted-c"
                 value={dosage}
                 onChange={(e) =>
                   setDosage(e.target.value)
@@ -754,7 +754,7 @@ export default function PrescriptionsPage() {
 
               <input
                 type="text"
-                className="glass-input placeholder:text-slate-500"
+                className="glass-input placeholder:text-muted-c"
                 value={frequency}
                 onChange={(e) =>
                   setFrequency(e.target.value)
@@ -781,7 +781,7 @@ export default function PrescriptionsPage() {
 
               <input
                 type="text"
-                className="glass-input placeholder:text-slate-500"
+                className="glass-input placeholder:text-muted-c"
                 value={duration}
                 onChange={(e) =>
                   setDuration(e.target.value)
@@ -839,9 +839,9 @@ export default function PrescriptionsPage() {
                 marginTop: "15px",
                 padding: "12px 16px",
                 borderRadius: "8px",
-                background: "rgba(59, 130, 246, 0.15)",
-                border: "1px solid rgba(59, 130, 246, 0.3)",
-                color: "#93c5fd",
+                background: "var(--surface-2)",
+                border: "1px solid var(--card-border)",
+                color: "var(--text-link)",
                 fontWeight: "600",
               }}
             >
@@ -877,7 +877,7 @@ export default function PrescriptionsPage() {
                   style={{
                     marginBottom: "20px",
                     padding: "20px",
-                    background: "rgba(255, 255, 255, 0.03)",
+                    background: "var(--surface-2)",
                     border: "1px solid var(--card-border)",
                     borderRadius: "12px",
                   }}

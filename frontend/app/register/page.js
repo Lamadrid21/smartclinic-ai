@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
 import { ROLES, setUserRole } from "@/lib/auth-role";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function RegisterContent() {
   const searchParams = useSearchParams();
@@ -160,31 +161,34 @@ function RegisterContent() {
       </div>
 
       <div className="w-full max-w-[440px]">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          <div className="absolute right-0 top-0">
+            <ThemeToggle />
+          </div>
           <Link href="/" className="inline-flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/25">
-              <div className="w-full h-full bg-slate-900 rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
+              <div className="w-full h-full bg-[var(--card-bg)] rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
                 ✚
               </div>
             </div>
           </Link>
-          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-heading">
             SmartClinic <span className="text-cyan-400">AI</span>
           </h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted-c">
             Intelligent Medical & Patient Care Suite
           </p>
         </div>
 
         {/* Role Selector Tabs */}
-        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-white/10 mb-4 shadow-xl max-w-[320px] mx-auto">
+        <div className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] mb-4 shadow-xl max-w-[320px] mx-auto">
           <button
             type="button"
             onClick={() => setSelectedRole(ROLES.PATIENT)}
             className={`py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
               selectedRole === ROLES.PATIENT
                 ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
+                : "text-muted-c hover:text-heading hover:bg-[var(--surface-2)]"
             }`}
           >
             <span className="text-sm">👤</span>
@@ -197,7 +201,7 @@ function RegisterContent() {
             className={`py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
               selectedRole === ROLES.DOCTOR
                 ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
+                : "text-muted-c hover:text-heading hover:bg-[var(--surface-2)]"
             }`}
           >
             <span className="text-sm">🩺</span>
@@ -206,9 +210,9 @@ function RegisterContent() {
         </div>
 
         <div className="glass-card p-6 sm:p-8 rounded-3xl">
-          <div className="mb-5 pb-4 border-b border-white/10">
-            <h2 className="text-xl font-bold text-white tracking-tight">{currentMeta.title}</h2>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{currentMeta.subtitle}</p>
+          <div className="mb-5 pb-4 border-b border-[var(--card-border)]">
+            <h2 className="text-xl font-bold text-heading tracking-tight">{currentMeta.title}</h2>
+            <p className="text-xs text-muted-c mt-1 leading-relaxed">{currentMeta.subtitle}</p>
           </div>
           {errorMsg && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
@@ -224,7 +228,7 @@ function RegisterContent() {
 
           <form onSubmit={registerUser} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">
                 Email Address
               </label>
               <input
@@ -238,7 +242,7 @@ function RegisterContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">
                 Create Password
               </label>
               <input
@@ -263,7 +267,7 @@ function RegisterContent() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-slate-400">
+          <p className="mt-6 text-center text-xs text-muted-c">
             Already have an account?{" "}
             <Link href={`/login?role=${selectedRole}`} className="text-blue-400 hover:text-blue-300 font-semibold">
               Sign In
@@ -277,7 +281,7 @@ function RegisterContent() {
 
 export default function Register() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--card-bg)] flex items-center justify-center text-muted-c">Loading...</div>}>
       <RegisterContent />
     </Suspense>
   );

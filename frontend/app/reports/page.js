@@ -483,7 +483,7 @@ marginBottom: "25px",
 padding: "10px 16px",
 border: "none",
 borderRadius: "8px",
-backgroundColor: "rgba(226,232,240,0.15)",
+backgroundColor: "var(--surface-2)",
 color: "var(--text-heading)",
 cursor: "pointer",
 fontWeight: "600",
@@ -498,7 +498,7 @@ fontWeight: "600",
         padding: "30px",
         borderRadius: "14px",
         boxShadow:
-          "0 4px 15px rgba(0,0,0,0.08)",
+          "var(--shadow-card)",
       }}
     >
       <h1
@@ -540,12 +540,12 @@ fontWeight: "600",
             borderRadius: "8px",
             backgroundColor:
               reportType === "daily"
-                ? "#2563eb"
-                : "#e5e7eb",
+                ? "var(--primary)"
+                : "var(--card-border)",
             color:
               reportType === "daily"
                 ? "white"
-                : "#111827",
+                : "var(--text-heading)",
             cursor: "pointer",
             fontWeight: "600",
           }}
@@ -563,12 +563,12 @@ fontWeight: "600",
             borderRadius: "8px",
             backgroundColor:
               reportType === "monthly"
-                ? "#2563eb"
-                : "#e5e7eb",
+                ? "var(--primary)"
+                : "var(--card-border)",
             color:
               reportType === "monthly"
                 ? "white"
-                : "#111827",
+                : "var(--text-heading)",
             cursor: "pointer",
             fontWeight: "600",
           }}
@@ -613,7 +613,7 @@ fontWeight: "600",
                 borderRadius: "8px",
                 color: "var(--text-body)",
                 backgroundColor:
-                  "rgba(255,255,255,0.06)",
+                  "var(--surface-2)",
               }}
             />
           </div>
@@ -645,7 +645,7 @@ fontWeight: "600",
                 borderRadius: "8px",
                 color: "var(--text-body)",
                 backgroundColor:
-                  "rgba(255,255,255,0.06)",
+                  "var(--surface-2)",
               }}
             />
           </div>
@@ -740,7 +740,7 @@ fontWeight: "600",
                 padding: "35px",
                 textAlign: "center",
                 backgroundColor:
-                  "rgba(255,255,255,0.03)",
+                  "var(--surface-2)",
                 border: "1px solid var(--card-border)",
                 borderRadius: "10px",
               }}
@@ -772,7 +772,7 @@ fontWeight: "600",
                   <tr
                     style={{
                       backgroundColor:
-                        "rgba(255,255,255,0.04)",
+                        "var(--surface-2)",
                     }}
                   >
                     <th
@@ -950,7 +950,7 @@ whiteSpace: "nowrap",
 
 const cellStyle = {
 padding: "13px",
-borderBottom: "1px solid #eee",
+borderBottom: "1px solid var(--card-border)",
 color: "var(--text-heading)",
 whiteSpace: "nowrap",
 };

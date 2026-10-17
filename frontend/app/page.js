@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
@@ -14,19 +15,20 @@ export default function Home() {
       <header className="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/20">
-            <div className="w-full h-full bg-slate-900 rounded-[11px] flex items-center justify-center text-blue-400 font-bold text-lg">
+            <div className="w-full h-full bg-[var(--card-bg)] rounded-[11px] flex items-center justify-center text-blue-400 font-bold text-lg">
               ✚
             </div>
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">
+          <span className="text-xl font-bold tracking-tight text-heading">
             SmartClinic <span className="text-cyan-400">AI</span>
           </span>
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link
             href="/login"
-            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+            className="px-4 py-2 rounded-xl text-sm font-medium text-body hover:text-heading hover:bg-[var(--surface-2)] transition-all"
           >
             Sign In
           </Link>
@@ -46,12 +48,12 @@ export default function Home() {
           Intelligent Clinical Platform v2.4
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-4xl leading-[1.15]">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-heading max-w-4xl leading-[1.15]">
           Smarter Care. Faster Decisions.{" "}
           <span className="text-gradient-cyan">Powered by AI.</span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-xl text-slate-400 max-w-2xl leading-relaxed">
+        <p className="mt-6 text-base sm:text-xl text-muted-c max-w-2xl leading-relaxed">
           The all-in-one healthcare management suite featuring predictive scheduling, automated EMR records, digital prescription generation, and AI-assisted clinical workflow.
         </p>
 
@@ -79,38 +81,38 @@ export default function Home() {
             <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-3">
               ⚡
             </div>
-            <h3 className="font-semibold text-white text-sm">Peak Hours AI</h3>
-            <p className="text-xs text-slate-400 mt-1">Predict patient traffic and optimize clinic staffing automatically.</p>
+            <h3 className="font-semibold text-heading text-sm">Peak Hours AI</h3>
+            <p className="text-xs text-muted-c mt-1">Predict patient traffic and optimize clinic staffing automatically.</p>
           </div>
 
           <div className="glass-card-interactive p-5 rounded-2xl">
             <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-3">
               📋
             </div>
-            <h3 className="font-semibold text-white text-sm">EMR & History</h3>
-            <p className="text-xs text-slate-400 mt-1">Structured medical records and file vault at doctor fingertips.</p>
+            <h3 className="font-semibold text-heading text-sm">EMR & History</h3>
+            <p className="text-xs text-muted-c mt-1">Structured medical records and file vault at doctor fingertips.</p>
           </div>
 
           <div className="glass-card-interactive p-5 rounded-2xl">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3">
               💊
             </div>
-            <h3 className="font-semibold text-white text-sm">Digital Rx & PDF</h3>
-            <p className="text-xs text-slate-400 mt-1">Instant digital prescription generation with official PDF export.</p>
+            <h3 className="font-semibold text-heading text-sm">Digital Rx & PDF</h3>
+            <p className="text-xs text-muted-c mt-1">Instant digital prescription generation with official PDF export.</p>
           </div>
 
           <div className="glass-card-interactive p-5 rounded-2xl">
             <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3">
               🤖
             </div>
-            <h3 className="font-semibold text-white text-sm">AI Assistant</h3>
-            <p className="text-xs text-slate-400 mt-1">24/7 clinical AI agent answering patient & operational queries.</p>
+            <h3 className="font-semibold text-heading text-sm">AI Assistant</h3>
+            <p className="text-xs text-muted-c mt-1">24/7 clinical AI agent answering patient & operational queries.</p>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-[var(--card-border)] py-6 text-center text-xs text-muted-c">
         <p>© 2026 SmartClinic AI. Advanced Medical Management System. All rights reserved.</p>
       </footer>
     </main>

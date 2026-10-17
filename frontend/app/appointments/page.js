@@ -630,7 +630,7 @@ function AppointmentsContent() {
               style={{
                 marginTop: "7px",
                 marginBottom: 0,
-                color: "#64748b",
+                color: "var(--text-muted)",
                 fontSize: "14px",
               }}
             >
@@ -649,7 +649,7 @@ function AppointmentsContent() {
               style={{
                 textAlign: "right",
                 fontSize: "11px",
-                color: "#64748b",
+                color: "var(--text-muted)",
                 lineHeight: "1.5",
               }}
             >
@@ -684,7 +684,7 @@ function AppointmentsContent() {
                 alignItems: "center",
                 gap: "10px",
                 paddingLeft: "15px",
-                borderLeft: "1px solid #dbe3ed",
+                borderLeft: "1px solid var(--card-border)",
               }}
             >
               <div
@@ -692,7 +692,7 @@ function AppointmentsContent() {
                   width: "38px",
                   height: "38px",
                   borderRadius: "50%",
-                  backgroundColor: "#dbeafe",
+                  backgroundColor: "var(--surface-2)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -707,7 +707,7 @@ function AppointmentsContent() {
                   style={{
                     fontSize: "13px",
                     fontWeight: "700",
-                    color: "#1e293b",
+                    color: "var(--text-heading)",
                   }}
                 >
                   {user?.user_metadata?.full_name ||
@@ -718,7 +718,7 @@ function AppointmentsContent() {
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "#64748b",
+                    color: "var(--text-muted)",
                   }}
                 >
                   Patient
@@ -730,7 +730,7 @@ function AppointmentsContent() {
 
         <div
           style={{
-            borderBottom: "1px solid #dbe3ed",
+            borderBottom: "1px solid var(--card-border)",
             marginBottom: "22px",
             display: "flex",
             justifyContent: "space-between",
@@ -749,12 +749,12 @@ function AppointmentsContent() {
                 border: "none",
                 backgroundColor:
                   activeTab === "book"
-                    ? "#2563eb"
+                    ? "var(--primary)"
                     : "transparent",
                 color:
                   activeTab === "book"
                     ? "white"
-                    : "#475569",
+                    : "var(--text-muted)",
                 padding: "11px 18px",
                 borderRadius: "7px 7px 0 0",
                 fontWeight: "600",
@@ -795,11 +795,11 @@ function AppointmentsContent() {
           <div
             style={{
               backgroundColor: "var(--card-bg)",
-              border: "1px solid #dce5ef",
+              border: "1px solid var(--card-border)",
               borderRadius: "10px",
               padding: "25px",
               boxShadow:
-                "0 2px 8px rgba(15, 23, 42, 0.04)",
+                "var(--shadow-card)",
             }}
           >
             <h2
@@ -820,7 +820,7 @@ function AppointmentsContent() {
                 marginTop: "7px",
                 marginBottom: "25px",
                 fontSize: "12px",
-                color: "#64748b",
+                color: "var(--text-muted)",
               }}
             >
               Select your preferred doctor, date, and appointment time.
@@ -846,10 +846,10 @@ function AppointmentsContent() {
               {loading ? (
                 <div
                   style={{
-                    border: "1px solid #d5dee9",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "7px",
                     padding: "11px",
-                    color: "#64748b",
+                    color: "var(--text-muted)",
                     fontSize: "13px",
                   }}
                 >
@@ -864,7 +864,7 @@ function AppointmentsContent() {
                   style={{
                     width: "100%",
                     padding: "11px 12px",
-                    border: "1px solid #cbd5e1",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "7px",
                     fontSize: "13px",
                     color: "var(--text-body)",
@@ -920,7 +920,7 @@ function AppointmentsContent() {
                     width: "100%",
                     boxSizing: "border-box",
                     padding: "11px 12px",
-                    border: "1px solid #cbd5e1",
+                    border: "1px solid var(--card-border)",
                     borderRadius: "7px",
                     fontSize: "13px",
                     color: "var(--text-body)",
@@ -962,8 +962,8 @@ function AppointmentsContent() {
                     backgroundColor:
                       !selectedDoctor ||
                       !selectedDate
-                        ? "rgba(255,255,255,0.03)"
-                        : "rgba(255,255,255,0.06)",
+                        ? "var(--surface-2)"
+                        : "var(--surface-2)",
                   }}
                 >
                   <option value="">
@@ -1020,7 +1020,7 @@ function AppointmentsContent() {
                   width: "100%",
                   boxSizing: "border-box",
                   padding: "12px",
-                  border: "1px solid #cbd5e1",
+                  border: "1px solid var(--card-border)",
                   borderRadius: "7px",
                   fontSize: "13px",
                   color: "var(--text-body)",
@@ -1034,7 +1034,7 @@ function AppointmentsContent() {
                   style={{
                     marginTop: "9px",
                     fontSize: "12px",
-                    color: "#64748b",
+                    color: "var(--text-muted)",
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
@@ -1054,14 +1054,14 @@ function AppointmentsContent() {
                     fontSize: "12px",
                     lineHeight: "1.5",
                     border: specialtyHint.matches
-                      ? "1px solid rgba(16,185,129,0.35)"
-                      : "1px solid rgba(245,158,11,0.45)",
+                      ? "1px solid var(--success-bg)"
+                      : "1px solid var(--warning-bg)",
                     backgroundColor: specialtyHint.matches
-                      ? "rgba(16,185,129,0.10)"
-                      : "rgba(245,158,11,0.10)",
+                      ? "var(--success-bg)"
+                      : "var(--warning-bg)",
                     color: specialtyHint.matches
-                      ? "#34d399"
-                      : "#fbbf24",
+                      ? "var(--success-text)"
+                      : "var(--warning-text)",
                   }}
                 >
                   {specialtyHint.matches ? "✅" : "⚠️"}{" "}
@@ -1077,8 +1077,8 @@ function AppointmentsContent() {
                   style={{
                     padding: "14px",
                     borderRadius: "8px",
-                    backgroundColor: "#f0f7ff",
-                    border: "1px solid #dbeafe",
+                    backgroundColor: "var(--surface-2)",
+                    border: "1px solid var(--surface-2)",
                     marginBottom: "18px",
                   }}
                 >
@@ -1086,7 +1086,7 @@ function AppointmentsContent() {
                     style={{
                       fontSize: "13px",
                       fontWeight: "700",
-                      color: "#1e40af",
+                      color: "var(--text-link)",
                       marginBottom: "8px",
                     }}
                   >
@@ -1173,8 +1173,8 @@ function AppointmentsContent() {
                   !selectedDoctor ||
                   !selectedDate ||
                   !selectedTime
-                    ? "#9ca3af"
-                    : "#2563eb",
+                    ? "var(--text-muted)"
+                    : "var(--primary)",
                 color: "var(--on-primary)",
                 fontSize: "13px",
                 fontWeight: "700",
@@ -1205,11 +1205,11 @@ function AppointmentsContent() {
             <div
               style={{
                 backgroundColor: "var(--card-bg)",
-                border: "1px solid #dce5ef",
+                border: "1px solid var(--card-border)",
                 borderRadius: "10px",
                 padding: "22px",
                 boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.04)",
+                  "var(--shadow-card)",
               }}
             >
               <h2
@@ -1234,13 +1234,13 @@ function AppointmentsContent() {
                     justifyContent: "space-between",
                     padding: "12px 0",
                     borderBottom:
-                      "1px solid #edf2f7",
+                      "1px solid var(--card-border)",
                     fontSize: "12px",
                   }}
                 >
                   <span
                     style={{
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                     }}
                   >
                     Shortest
@@ -1261,13 +1261,13 @@ function AppointmentsContent() {
                     justifyContent: "space-between",
                     padding: "12px 0",
                     borderBottom:
-                      "1px solid #edf2f7",
+                      "1px solid var(--card-border)",
                     fontSize: "12px",
                   }}
                 >
                   <span
                     style={{
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                     }}
                   >
                     Expected
@@ -1275,7 +1275,7 @@ function AppointmentsContent() {
 
                   <strong
                     style={{
-                      color: "#60a5fa",
+                      color: "var(--text-link)",
                     }}
                   >
                     {AVERAGE_WAITING_TIME} min
@@ -1292,7 +1292,7 @@ function AppointmentsContent() {
                 >
                   <span
                     style={{
-                      color: "#64748b",
+                      color: "var(--text-muted)",
                     }}
                   >
                     Longest
@@ -1311,8 +1311,8 @@ function AppointmentsContent() {
 
             <div
               style={{
-                backgroundColor: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                backgroundColor: "var(--surface-2)",
+                border: "1px solid var(--card-border)",
                 borderRadius: "10px",
                 padding: "18px",
               }}
@@ -1321,7 +1321,7 @@ function AppointmentsContent() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: "#34d399",
+                  color: "var(--success-text)",
                   marginBottom: "7px",
                 }}
               >
@@ -1333,7 +1333,7 @@ function AppointmentsContent() {
                   margin: 0,
                   fontSize: "12px",
                   lineHeight: "1.6",
-                  color: "#34d399",
+                  color: "var(--success-text)",
                 }}
               >
                 Please arrive a few minutes before
@@ -1356,7 +1356,7 @@ export default function AppointmentsPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#090d16",
+            background: "var(--background)",
             color: "var(--text-muted)",
             fontSize: "14px",
             fontWeight: "600",

@@ -23,21 +23,23 @@
 
     /* text roles */
     --text-heading: #0f172a;
-    --text-body: #334155;
-    --text-muted: #64748b;
-    --text-link: #3b82f6;
+    --text-body: #1e293b;
+    --text-muted: #475569;
+    --text-link: #1d4ed8;
 
     /* brand (blue -> cyan, as on the login button) */
     --primary: #2563eb;
     --accent-from: #2563eb;
     --accent-to: #06b6d4;
     --accent-gradient: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+    --accent-text-from: #1d4ed8;
+    --accent-text-to: #0e7490;
 
     /* sidebar + hero */
     --sidebar-bg: #ffffff;
     --sidebar-border: #e5e9f0;
-    --hero-bg: #ffffff;
-    --hero-border: #e5e9f0;
+    --hero-bg: linear-gradient(135deg, #ffffff 0%, #eff6ff 55%, #ecfeff 100%);
+    --hero-border: #bfdbfe;
 
     --shadow-card: 0 10px 40px rgba(15, 23, 42, 0.08);
   }
@@ -54,10 +56,12 @@
     --text-body: #cbd5e1;
     --text-muted: #94a3b8;
     --text-link: #60a5fa;
+    --accent-text-from: #38bdf8;
+    --accent-text-to: #22d3ee;
 
     --sidebar-bg: #0b1220;
     --sidebar-border: rgba(255, 255, 255, 0.08);
-    --hero-bg: #0f1b3d;
+    --hero-bg: linear-gradient(135deg, #0f1b3d 0%, #10244d 55%, #0f2f4a 100%);
     --hero-border: rgba(255, 255, 255, 0.08);
 
     --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -109,7 +113,7 @@
   .text-link-c  { color: var(--text-link); }
 
   .text-gradient-cyan {
-    background: var(--accent-gradient);
+    background: linear-gradient(90deg, var(--accent-text-from), var(--accent-text-to));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -166,7 +170,7 @@
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
   }
-  .glass-input::placeholder { color: #94a3b8; }
+  .glass-input::placeholder { color: var(--text-muted); }
 
   .field-label {
     font-size: 12px;

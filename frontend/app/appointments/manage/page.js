@@ -332,29 +332,29 @@ export default function ManageAppointmentsPage() {
     switch (status) {
       case "Pending":
         return {
-          backgroundColor: "#fff7ed",
+          backgroundColor: "var(--warning-bg)",
           color: "var(--warning-text)",
-          border: "1px solid #fed7aa",
+          border: "1px solid var(--card-border)",
         };
 
       case "Confirmed":
         return {
-          backgroundColor: "#ecfdf5",
+          backgroundColor: "var(--success-bg)",
           color: "var(--success-text)",
-          border: "1px solid #a7f3d0",
+          border: "1px solid var(--card-border)",
         };
 
       case "Completed":
         return {
-          backgroundColor: "rgba(59,130,246,0.12)",
-          color: "#93c5fd",
-          border: "1px solid rgba(59,130,246,0.25)",
+          backgroundColor: "var(--surface-2)",
+          color: "var(--text-link)",
+          border: "1px solid var(--card-border)",
         };
 
       case "Cancelled":
         return {
           backgroundColor: "var(--danger-bg)",
-          color: "#fda4af",
+          color: "var(--danger-text)",
           border: "1px solid var(--danger-border)",
         };
 
@@ -460,7 +460,7 @@ export default function ManageAppointmentsPage() {
             fontSize: "14px",
             fontWeight: "600",
             cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            boxShadow: "var(--shadow-card)",
             marginBottom: "24px",
           }}
         >
@@ -509,7 +509,7 @@ export default function ManageAppointmentsPage() {
               backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
-              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              boxShadow: "var(--shadow-card)",
               border: "1px solid var(--card-border)",
             }}
           >
@@ -540,7 +540,7 @@ export default function ManageAppointmentsPage() {
               backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
-              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              boxShadow: "var(--shadow-card)",
               border: "1px solid var(--card-border)",
             }}
           >
@@ -571,7 +571,7 @@ export default function ManageAppointmentsPage() {
               backgroundColor: "var(--card-bg)",
               borderRadius: "14px",
               padding: "20px",
-              boxShadow: "0 3px 12px rgba(0,0,0,0.05)",
+              boxShadow: "var(--shadow-card)",
               border: "1px solid var(--card-border)",
             }}
           >
@@ -603,7 +603,7 @@ export default function ManageAppointmentsPage() {
             backgroundColor: "var(--card-bg)",
             borderRadius: "16px",
             padding: "28px",
-            boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
+            boxShadow: "var(--shadow-card)",
             border: "1px solid var(--card-border)",
           }}
         >

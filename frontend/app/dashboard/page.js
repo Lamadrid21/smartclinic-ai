@@ -75,7 +75,7 @@ function DashboardContent() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 space-y-4">
           <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-          <p className="text-xs text-slate-400 font-medium tracking-wider uppercase">
+          <p className="text-xs text-muted-c font-medium tracking-wider uppercase">
             Loading {ROLE_LABELS[activeRole] || "Portal"} Experience...
           </p>
         </div>
@@ -100,7 +100,7 @@ export default function Dashboard() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#090d16] flex items-center justify-center">
+        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
           <div className="w-10 h-10 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
         </div>
       }

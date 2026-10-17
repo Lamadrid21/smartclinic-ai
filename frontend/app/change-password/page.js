@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function ChangePassword() {
   const [password, setPassword] = useState("");
@@ -47,18 +48,21 @@ export default function ChangePassword() {
       </div>
 
       <div className="w-full max-w-[440px]">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+          <div className="absolute right-0 top-0">
+            <ThemeToggle />
+          </div>
           <Link href="/" className="inline-flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/25">
-              <div className="w-full h-full bg-slate-900 rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
+              <div className="w-full h-full bg-[var(--card-bg)] rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
                 ✚
               </div>
             </div>
           </Link>
-          <h1 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h1 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-heading">
             Set New Password
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm text-slate-400">
+          <p className="mt-1.5 text-xs sm:text-sm text-muted-c">
             Create a secure password for your clinical account
           </p>
         </div>
@@ -78,7 +82,7 @@ export default function ChangePassword() {
 
           <form onSubmit={updatePassword} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">
                 New Password
               </label>
               <input
@@ -100,7 +104,7 @@ export default function ChangePassword() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-slate-400">
+          <p className="mt-6 text-center text-xs text-muted-c">
             Finished updating?{" "}
             <Link href="/profile" className="text-blue-400 hover:text-blue-300 font-semibold">
               Return to Profile

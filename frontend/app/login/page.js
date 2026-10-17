@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
 import { ROLES, getUserRole, setUserRole } from "@/lib/auth-role";
+import ThemeToggle from "@/components/ThemeToggle";
 
 function LoginContent() {
   const router = useRouter();
@@ -17,30 +18,6 @@ function LoginContent() {
       ? initialRole
       : ROLES.PATIENT
   );
-
-  const [isLightMode, setIsLightMode] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("smartclinic_theme");
-    if (saved === "light") {
-      setIsLightMode(true);
-      document.documentElement.classList.add("light");
-    } else {
-      document.documentElement.classList.remove("light");
-    }
-  }, []);
-
-  function toggleTheme() {
-    const next = !isLightMode;
-    setIsLightMode(next);
-    if (next) {
-      document.documentElement.classList.add("light");
-      localStorage.setItem("smartclinic_theme", "light");
-    } else {
-      document.documentElement.classList.remove("light");
-      localStorage.setItem("smartclinic_theme", "dark");
-    }
-  }
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -278,49 +255,32 @@ function LoginContent() {
       <div className="w-full max-w-[440px]">
         <div className="text-center mb-8 relative">
           <div className="absolute right-0 top-0">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 transition-all flex items-center gap-1.5 shadow-md"
-            >
-              {isLightMode ? (
-                <>
-                  <span className="text-amber-400">☀️</span>
-                  <span>Light</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-blue-400">🌙</span>
-                  <span>Dark</span>
-                </>
-              )}
-            </button>
+            <ThemeToggle />
           </div>
           <Link href="/" className="inline-flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 p-[1px] shadow-lg shadow-blue-500/25">
-              <div className="w-full h-full bg-slate-900 rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
+              <div className="w-full h-full bg-[var(--card-bg)] rounded-[15px] flex items-center justify-center text-blue-400 font-bold text-2xl">
                 ✚
               </div>
             </div>
           </Link>
-          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h1 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-heading">
             SmartClinic <span className="text-cyan-400">AI</span>
           </h1>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-muted-c">
             Intelligent Medical & Patient Care Suite
           </p>
         </div>
 
         {/* Role Selector Tabs */}
-        <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-white/10 mb-4 shadow-xl">
+        <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-[var(--card-bg)] border border-[var(--card-border)] mb-4 shadow-xl">
           <button
             type="button"
             onClick={() => setSelectedRole(ROLES.PATIENT)}
             className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
               selectedRole === ROLES.PATIENT
                 ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
+                : "text-muted-c hover:text-heading hover:bg-[var(--surface-2)]"
             }`}
           >
             <span className="text-base">👤</span>
@@ -333,7 +293,7 @@ function LoginContent() {
             className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
               selectedRole === ROLES.DOCTOR
                 ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
+                : "text-muted-c hover:text-heading hover:bg-[var(--surface-2)]"
             }`}
           >
             <span className="text-base">🩺</span>
@@ -346,7 +306,7 @@ function LoginContent() {
             className={`py-2.5 px-2 rounded-xl text-xs font-semibold flex flex-col items-center gap-1 transition-all ${
               selectedRole === ROLES.ADMIN
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
+                : "text-muted-c hover:text-heading hover:bg-[var(--surface-2)]"
             }`}
           >
             <span className="text-base">⚙️</span>
@@ -355,12 +315,12 @@ function LoginContent() {
         </div>
 
         <div className="glass-card p-6 sm:p-8 rounded-3xl">
-          <div className="mb-5 pb-4 border-b border-white/10">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/5 border border-white/10 text-slate-300 mb-2">
+          <div className="mb-5 pb-4 border-b border-[var(--card-border)]">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[var(--surface-2)] border border-[var(--card-border)] text-body mb-2">
               {currentMeta.badge}
             </div>
-            <h2 className="text-xl font-bold text-white tracking-tight">{currentMeta.title}</h2>
-            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{currentMeta.subtitle}</p>
+            <h2 className="text-xl font-bold text-heading tracking-tight">{currentMeta.title}</h2>
+            <p className="text-xs text-muted-c mt-1 leading-relaxed">{currentMeta.subtitle}</p>
           </div>
           {errorMsg && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium">
@@ -370,7 +330,7 @@ function LoginContent() {
 
           <form onSubmit={loginUser} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-body mb-1.5 uppercase tracking-wider">
                 Email Address
               </label>
               <input
@@ -385,7 +345,7 @@ function LoginContent() {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-body uppercase tracking-wider">
                   Password
                 </label>
                 <Link href="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300">
@@ -404,7 +364,7 @@ function LoginContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-medium"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-c hover:text-heading text-xs font-medium"
                 >
                   {showPassword ? "🙈 Hide" : "👁️ View"}
                 </button>
@@ -427,10 +387,10 @@ function LoginContent() {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
+              <div className="w-full border-t border-[var(--card-border)]" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-[#0f172a] px-3 text-slate-400">or</span>
+              <span className="bg-[var(--card-bg)] px-3 text-muted-c">or</span>
             </div>
           </div>
 
@@ -443,7 +403,7 @@ function LoginContent() {
             <span>Sign in with Google</span>
           </button>
 
-          <p className="mt-6 text-center text-xs text-slate-400">
+          <p className="mt-6 text-center text-xs text-muted-c">
             Don&apos;t have an account yet?{" "}
             <Link
               href={`/register?role=${selectedRole}`}
@@ -462,7 +422,7 @@ export default function Login() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#090d16]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
           <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
         </div>
       }
