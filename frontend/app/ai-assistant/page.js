@@ -125,7 +125,7 @@ export default function AIAssistant() {
 
   return (
     <AppLayout title="SmartClinic AI" subtitle="Your clinical information assistant" activeNav="ai">
-      <div className="glass-card rounded-2xl overflow-hidden flex flex-col" style={{ minHeight: "calc(100vh - 210px)" }}>
+      <div className="glass-card rounded-2xl overflow-hidden flex flex-col m-vh" style={{ minHeight: "calc(100vh - 210px)" }}>
         {/* Chat Header */}
         <div className="px-6 py-4 border-b border-[var(--card-border)] bg-gradient-to-r from-blue-600/20 via-indigo-600/10 to-cyan-500/20 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
@@ -148,7 +148,7 @@ export default function AIAssistant() {
               <p className="text-muted-c mt-2 max-w-md mx-auto text-sm leading-relaxed">
                 Ask about clinic hours, appointment scheduling, fees, medical procedures, or general health information.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8 max-w-2xl mx-auto m-stack">
                 {suggestions.map((s) => (
                   <button key={s} onClick={() => askAI(s)} className="text-left px-4 py-3 rounded-xl bg-white/[0.03] border border-[var(--card-border)] text-xs text-body hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-white transition-all">
                     {s}

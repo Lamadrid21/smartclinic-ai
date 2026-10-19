@@ -117,7 +117,7 @@ export default function Profile() {
 
   return (
     <AppLayout title="My Profile" subtitle="Manage your personal information" activeNav="profile">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 m-stack">
         {/* Profile Card */}
         <div className="glass-card p-6 rounded-2xl text-center h-fit">
           <div className="flex flex-col items-center">
