@@ -534,7 +534,7 @@ export default function PrescriptionsPage() {
         <section style={{ marginBottom: "30px", padding: "25px", background: "var(--card-bg)", border: "1px solid var(--card-border)", borderRadius: "16px" }}>
           <h2 style={{ color: "var(--text-heading)" }}>Vital Signs</h2>
           <form onSubmit={handleSaveVitals} style={{ marginBottom: "25px", borderBottom: "1px solid var(--card-border)", paddingBottom: "22px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "15px" }} className="m-stack">
               <div>
                 <label style={{ color: "var(--text-heading)" }}><strong>Heart Rate (bpm)</strong></label>
                 <input type="number" className="glass-input placeholder:text-muted-c" value={heartRate} onChange={(e) => setHeartRate(e.target.value)} placeholder="72" style={{ width: "100%", padding: "12px", marginTop: "6px", border: "1px solid var(--card-border)", borderRadius: "8px", background: "var(--card-bg)", color: "var(--text-heading)" }} />

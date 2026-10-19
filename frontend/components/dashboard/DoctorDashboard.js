@@ -209,7 +209,7 @@ export default function DoctorDashboard({ user, profile }) {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto m-scroll-x">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[var(--card-border)] text-muted-c font-semibold">

@@ -630,7 +630,7 @@ export default function PatientRecordsPage() {
             <p className="text-muted-c text-sm">No active patient records found.</p>
           </div>
           ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto m-scroll-x">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--card-border)] text-muted-c text-xs uppercase tracking-wider">
@@ -697,7 +697,7 @@ export default function PatientRecordsPage() {
             <p className="text-muted-c text-sm">No archived patients.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto m-scroll-x">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--card-border)] text-muted-c text-xs uppercase tracking-wider">

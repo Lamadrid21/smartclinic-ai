@@ -791,6 +791,7 @@ function AppointmentsContent() {
             gap: "22px",
             alignItems: "start",
           }}
+          className="m-stack"
         >
           <div
             style={{

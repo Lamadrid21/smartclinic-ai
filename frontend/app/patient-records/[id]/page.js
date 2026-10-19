@@ -913,6 +913,7 @@ export default function PatientDetails() {
               "repeat(4, 1fr)",
             gap: "25px",
           }}
+          className="m-stack"
         >
           <div>
             <strong style={{ color: "var(--text-muted)", fontSize: "13px" }}>Name</strong>

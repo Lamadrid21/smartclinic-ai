@@ -664,6 +664,7 @@ fontWeight: "600",
               gap: "15px",
               marginBottom: "30px",
             }}
+            className="m-stack"
           >
             <SummaryCard
               title="Total Appointments"

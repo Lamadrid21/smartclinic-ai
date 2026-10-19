@@ -503,6 +503,7 @@ export default function ManageAppointmentsPage() {
             gap: "16px",
             marginBottom: "28px",
           }}
+          className="m-stack"
         >
           <div
             style={{
@@ -797,6 +798,7 @@ export default function ManageAppointmentsPage() {
                       borderRadius: "11px",
                       marginBottom: "18px",
                     }}
+                    className="m-stack"
                   >
                     <div>
                       <p
