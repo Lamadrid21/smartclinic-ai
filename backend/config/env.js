@@ -34,8 +34,11 @@ const config = {
   // Google reCAPTCHA v2 secret key (server-side only — never exposed to frontend).
   recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY || "",
 
-  // Frontend origin allowed by CORS
-  frontendUrl: process.env.FRONTEND_URL || "http://localhost:3000",
+  // CORS origins allowed
+  corsOrigins:
+    process.env.CORS_ORIGINS ||
+    process.env.FRONTEND_URL ||
+    "http://localhost:3000",
 };
 
 export default config;

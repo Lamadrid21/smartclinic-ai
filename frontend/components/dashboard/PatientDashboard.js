@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getApiUrl } from "@/lib/api";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -75,7 +76,7 @@ export default function PatientDashboard({ user, profile }) {
     setAiResponse(null);
 
     try {
-      const res = await fetch("/api/ai/patient-guide", {
+      const res = await fetch(getApiUrl("/api/ai/patient-guide"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

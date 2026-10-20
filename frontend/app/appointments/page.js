@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import { getApiUrl } from "@/lib/api";
 import { supabase } from "../../lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import AppLayout from "@/components/AppLayout";
@@ -78,7 +79,7 @@ function AppointmentsContent() {
 
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch("/api/ai/specialty-match", {
+        const response = await fetch(getApiUrl("/api/ai/specialty-match"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -464,7 +465,7 @@ function AppointmentsContent() {
       } = await supabase.auth.getSession();
 
       const emailResponse = await fetch(
-        "/api/send-confirmation",
+        getApiUrl("/api/send-confirmation"),
         {
           method: "POST",
           headers: {

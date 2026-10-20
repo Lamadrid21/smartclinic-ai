@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, Suspense } from "react";
+import { getApiUrl } from "@/lib/api";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -42,8 +43,8 @@ function LoginContent() {
     async function checkLoginStatus() {
       try {
         const url = email
-          ? `/api/auth/login-status?email=${encodeURIComponent(email)}`
-          : "/api/auth/login-status";
+          ? getApiUrl(`/api/auth/login-status?email=${encodeURIComponent(email)}`)
+          : getApiUrl("/api/auth/login-status");
         const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
@@ -74,7 +75,7 @@ function LoginContent() {
     }
 
     try {
-      const res = await fetch("/api/auth/verify-captcha", {
+      const res = await fetch(getApiUrl("/api/auth/verify-captcha"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: captchaToken, email }),
@@ -143,7 +144,7 @@ function LoginContent() {
     if (error) {
       // Record failed attempt on the server
       try {
-        const failRes = await fetch("/api/auth/record-login-failure", {
+        const failRes = await fetch(getApiUrl("/api/auth/record-login-failure"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -165,7 +166,7 @@ function LoginContent() {
 
     // Login successful — reset server-side failed login attempts counter
     try {
-      await fetch("/api/auth/record-login-success", {
+      await fetch(getApiUrl("/api/auth/record-login-success"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

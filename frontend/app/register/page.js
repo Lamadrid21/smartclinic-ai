@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, Suspense } from "react";
+import { getApiUrl } from "@/lib/api";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -67,7 +68,7 @@ function RegisterContent() {
 
     // ---- Server-side CAPTCHA verification (never trust the client) ----
     try {
-      const captchaRes = await fetch("/api/auth/verify-captcha", {
+      const captchaRes = await fetch(getApiUrl("/api/auth/verify-captcha"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: captchaToken }),

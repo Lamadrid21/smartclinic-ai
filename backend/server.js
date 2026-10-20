@@ -6,10 +6,21 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
-// CORS: allow the SmartClinic frontend origin (FRONTEND_URL).
+// CORS: allow origins from CORS_ORIGINS or FRONTEND_URL.
+const allowedOrigins = config.corsOrigins
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
@@ -29,9 +40,11 @@ app.use("/api", apiRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`[SmartClinic Backend] Listening on http://localhost:${config.port}`);
-  console.log(`[SmartClinic Backend] CORS origin: ${config.frontendUrl}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(config.port, () => {
+    console.log(`[SmartClinic Backend] Listening on http://localhost:${config.port}`);
+    console.log(`[SmartClinic Backend] CORS origins allowed: ${config.corsOrigins}`);
+  });
+}
 
 export default app;

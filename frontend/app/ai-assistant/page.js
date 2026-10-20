@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getApiUrl } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/lib/supabase";
@@ -88,7 +89,7 @@ export default function AIAssistant() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      const result = await fetch("/api/ai", {
+      const result = await fetch(getApiUrl("/api/ai"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
