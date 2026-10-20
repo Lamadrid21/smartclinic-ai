@@ -5,6 +5,8 @@ import apiRoutes from "./routes/index.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
+app.set("trust proxy", 1);
+
 
 // CORS: allow origins from CORS_ORIGINS or FRONTEND_URL.
 const allowedOrigins = config.corsOrigins

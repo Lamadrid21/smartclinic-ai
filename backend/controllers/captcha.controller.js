@@ -1,8 +1,5 @@
 import config from "../config/env.js";
-
-// Server-side in-memory tracking of consecutive failed login attempts.
-// Keyed by IP address and/or normalized email.
-const failedAttemptsMap = new Map();
+import { getAdminClient } from "../services/supabase.js";
 
 function getClientKey(req, customEmail = "") {
   const ip =
@@ -21,16 +18,6 @@ function getClientKey(req, customEmail = "") {
 
   return normalizedEmail ? `${ip}:${normalizedEmail}` : ip;
 }
-
-// Clean up stale attempt records older than 2 hours.
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of failedAttemptsMap.entries()) {
-    if (now - record.lastAttempt > 2 * 60 * 60 * 1000) {
-      failedAttemptsMap.delete(key);
-    }
-  }
-}, 15 * 60 * 1000);
 
 /**
  * Verify a Google reCAPTCHA v2 token server-side.
@@ -77,10 +64,29 @@ async function verifyWithGoogle(token) {
  * Response:
  *   { success: true, failedAttempts: number, captchaRequired: boolean }
  */
-export function getLoginStatus(req, res) {
+export async function getLoginStatus(req, res) {
   const key = getClientKey(req);
-  const record = failedAttemptsMap.get(key);
-  const count = record ? record.count : 0;
+  let count = 0;
+
+  try {
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from("login_attempts")
+      .select("failed_count, last_failed_at")
+      .eq("key", key)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[LoginStatus] Error reading login attempts:", error);
+    } else if (data) {
+      const now = Date.now();
+      const lastFailedTime = new Date(data.last_failed_at).getTime();
+      const isExpired = (now - lastFailedTime) > 2 * 60 * 60 * 1000;
+      count = isExpired ? 0 : (data.failed_count || 0);
+    }
+  } catch (err) {
+    console.error("[LoginStatus] Unexpected error:", err);
+  }
 
   return res.json({
     success: true,
@@ -97,32 +103,76 @@ export function getLoginStatus(req, res) {
  * Response:
  *   { success: true, failedAttempts: number, captchaRequired: boolean }
  */
-export function recordLoginFailure(req, res) {
+export async function recordLoginFailure(req, res) {
   const key = getClientKey(req);
-  const now = Date.now();
-  const record = failedAttemptsMap.get(key) || { count: 0, lastAttempt: now };
-
-  record.count += 1;
-  record.lastAttempt = now;
-  failedAttemptsMap.set(key, record);
-
-  // Also record on pure IP if email was provided
   const ip =
     req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
     req.socket?.remoteAddress ||
     req.ip ||
     "unknown-ip";
+
+  const keysToUpdate = [key];
   if (key !== ip) {
-    const ipRecord = failedAttemptsMap.get(ip) || { count: 0, lastAttempt: now };
-    ipRecord.count += 1;
-    ipRecord.lastAttempt = now;
-    failedAttemptsMap.set(ip, ipRecord);
+    keysToUpdate.push(ip);
+  }
+
+  let latestCount = 1;
+
+  try {
+    const supabase = getAdminClient();
+
+    // Opportunistic cleanup of rows older than 2 hours
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    await supabase
+      .from("login_attempts")
+      .delete()
+      .lt("last_failed_at", twoHoursAgo);
+
+    const now = new Date().toISOString();
+    const nowMs = Date.now();
+
+    for (const k of keysToUpdate) {
+      const { data: existing, error: selectError } = await supabase
+        .from("login_attempts")
+        .select("failed_count, last_failed_at")
+        .eq("key", k)
+        .maybeSingle();
+
+      if (selectError) {
+        console.error("[RecordLoginFailure] Error selecting login attempt for key", k, selectError);
+      }
+
+      let count = 1;
+      if (existing) {
+        const lastFailedTime = new Date(existing.last_failed_at).getTime();
+        const isExpired = (nowMs - lastFailedTime) > 2 * 60 * 60 * 1000;
+        count = isExpired ? 1 : (existing.failed_count || 0) + 1;
+      }
+
+      const { error: upsertError } = await supabase
+        .from("login_attempts")
+        .upsert({
+          key: k,
+          failed_count: count,
+          last_failed_at: now,
+        }, { onConflict: "key" });
+
+      if (upsertError) {
+        console.error("[RecordLoginFailure] Error upserting login attempt for key", k, upsertError);
+      }
+
+      if (k === key) {
+        latestCount = count;
+      }
+    }
+  } catch (error) {
+    console.error("[RecordLoginFailure] Unexpected error:", error);
   }
 
   return res.json({
     success: true,
-    failedAttempts: record.count,
-    captchaRequired: record.count >= 10,
+    failedAttempts: latestCount,
+    captchaRequired: latestCount >= 10,
   });
 }
 
@@ -134,16 +184,32 @@ export function recordLoginFailure(req, res) {
  * Response:
  *   { success: true, failedAttempts: 0, captchaRequired: false }
  */
-export function recordLoginSuccess(req, res) {
+export async function recordLoginSuccess(req, res) {
   const key = getClientKey(req);
-  failedAttemptsMap.delete(key);
-
   const ip =
     req.headers["x-forwarded-for"]?.split(",")[0].trim() ||
     req.socket?.remoteAddress ||
     req.ip ||
     "unknown-ip";
-  failedAttemptsMap.delete(ip);
+
+  const keysToDelete = [key];
+  if (key !== ip) {
+    keysToDelete.push(ip);
+  }
+
+  try {
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from("login_attempts")
+      .delete()
+      .in("key", keysToDelete);
+
+    if (error) {
+      console.error("[RecordLoginSuccess] Error deleting login attempts:", error);
+    }
+  } catch (error) {
+    console.error("[RecordLoginSuccess] Unexpected error:", error);
+  }
 
   return res.json({
     success: true,
