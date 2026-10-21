@@ -144,6 +144,40 @@ async function seedAccounts() {
     }
   }
 
+  console.log("\n=== Ensuring Sample Active Appointments Exist ===");
+  try {
+    const patientUser = existingUsers.find(u => u.email === "patient@example.com") || usersData?.users?.find(u => u.email === "patient@example.com");
+    const { data: docList } = await admin.from("doctors").select("id, name").limit(1);
+    const doctorRecord = docList?.[0];
+
+    if (patientUser && doctorRecord) {
+      const { data: existingAppts } = await admin.from("appointments").select("id").limit(1);
+      if (!existingAppts || existingAppts.length === 0) {
+        const todayStr = new Date().toISOString().split("T")[0];
+        const { error: apptError } = await admin.from("appointments").insert({
+          patient_id: patientUser.id,
+          doctor_id: doctorRecord.id,
+          appointment_date: todayStr,
+          start_time: "09:00",
+          end_time: "10:00",
+          reason: "Routine health review and consultation",
+          status: "Confirmed",
+          consultation_fee: 500,
+          waiting_time: 15
+        });
+        if (apptError) {
+          console.warn("Notice inserting sample appointment:", apptError.message);
+        } else {
+          console.log("✓ Successfully seeded sample active appointment for testing.");
+        }
+      } else {
+        console.log("✓ Appointments already exist in database.");
+      }
+    }
+  } catch (err) {
+    console.warn("Sample appointment seeding notice:", err.message);
+  }
+
   console.log("\n=== Demo Accounts Ready ===");
   console.log("Patient : patient@example.com / admin123");
   console.log("Doctor  : doctor@example.com  / admin123");

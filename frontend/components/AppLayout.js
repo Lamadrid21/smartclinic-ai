@@ -125,7 +125,7 @@ export default function AppLayout({
       { id: "dashboard", name: "Admin Dashboard", href: "/dashboard", icon: ICONS.dashboard },
       { id: "appointments-manage", name: "Clinic Appointments", href: "/appointments/manage", icon: ICONS.list },
       { id: "patients", name: "Patient Directory", href: "/patient-records", icon: ICONS.people },
-      { id: "reports", name: "Financials & Analytics", href: "/reports", icon: ICONS.chart },
+      { id: "reports", name: "Clinical Reports", href: "/reports", icon: ICONS.chart },
       { id: "ai", name: "AI Logs & Usage", href: "/ai-assistant", badge: "Admin", icon: ICONS.sparkle },
     ];
   }

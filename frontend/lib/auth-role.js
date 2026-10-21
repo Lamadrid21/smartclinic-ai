@@ -33,11 +33,11 @@ export function getUserRole(user) {
     return metaRole;
   }
 
-  // Heuristics for existing demo accounts
+  // Heuristics for existing demo accounts & specific locked accounts
   const email = (user?.email || "").toLowerCase();
   if (
     email.includes("admin") ||
-    email.includes("renzolamadrid14") ||
+    email === "renzolamadrid14@gmail.com" ||
     email.includes("godki21")
   ) {
     return ROLES.ADMIN;
@@ -45,7 +45,12 @@ export function getUserRole(user) {
   if (
     email.includes("doctor") ||
     email.includes("dr.") ||
-    email.includes("kobileonor")
+    email.includes("kobileonor") ||
+    email === "1-240349@asiatech.edu.ph" ||
+    email === "1-240484@asiatech.edu.ph" ||
+    email === "1-240448@asiatech.edu.ph" ||
+    email === "1-240176@asiatech.edu.ph" ||
+    email === "1-240581@asiatech.edu.ph"
   ) {
     return ROLES.DOCTOR;
   }

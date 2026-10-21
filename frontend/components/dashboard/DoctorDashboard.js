@@ -26,32 +26,62 @@ export default function DoctorDashboard({ user, profile }) {
     async function loadDoctorData() {
       try {
         setLoading(true);
-        const { data: apptData } = await supabase
+        const docName = user?.email === "1-240349@asiatech.edu.ph"
+          ? "Dr. Renzo Lamadrid"
+          : (profile?.full_name || user?.user_metadata?.full_name || user?.email || "");
+        const { data: docList } = await supabase.from("doctors").select("id, name");
+        const matchedDoc = docList?.find(d => 
+          d.name.toLowerCase().includes("renzo") ||
+          (docName && (
+            d.name.toLowerCase().includes(docName.toLowerCase().replace(/dr\.?|md|phd|,/g, "").trim()) ||
+            docName.toLowerCase().includes(d.name.toLowerCase().replace(/dr\.?|md|phd|,/g, "").trim())
+          ))
+        ) || docList?.[0];
+
+        let apptQuery = supabase
           .from("appointments")
           .select("*, doctors(name, specialty, room_number)")
-          .order("appointment_date", { ascending: true })
-          .limit(50);
+          .order("appointment_date", { ascending: true });
 
-        if (apptData && apptData.length > 0) {
-          setQueue(apptData);
-          setNotifications(apptData.map((a, idx) => ({
-            id: `notif-${a.id || idx}`,
-            title: a.status === "Pending" ? "New Appointment Request" : `Appointment ${a.status}`,
-            description: `Patient ${a.patient_name || "Patient"} scheduled for ${a.appointment_date} at ${a.start_time || "09:00 AM"}.`,
-            time: "Today",
-            read: idx > 2,
-            type: a.status?.toLowerCase() || "pending",
-          })));
-        } else {
-          setQueue([
-            { id: "q-101", patient_name: "Maria Santos", appointment_time: "09:00 AM", appointment_date: new Date().toISOString().split("T")[0], reason: "Hypertension review", status: "Pending" },
-            { id: "q-102", patient_name: "Juan Dela Cruz", appointment_time: "09:30 AM", appointment_date: new Date().toISOString().split("T")[0], reason: "Post-op evaluation", status: "Confirmed" },
-          ]);
-          setNotifications([
-            { id: "n-1", title: "New Appointment Request", description: "Maria Santos requested a consultation.", time: "08:30 AM", read: false, type: "pending" },
-            { id: "n-2", title: "Appointment Confirmed", description: "Juan Dela Cruz confirmed.", time: "08:00 AM", read: false, type: "confirmed" },
-          ]);
+        if (matchedDoc?.id) {
+          apptQuery = apptQuery.eq("doctor_id", matchedDoc.id);
         }
+
+        const { data: apptData } = await apptQuery.limit(50);
+
+        const { data: profilesData } = await supabase.from("profiles").select("id, full_name");
+        const { data: patientsData } = await supabase.from("patients").select("id, first_name, last_name, patient_number");
+        
+        const namesMap = {};
+        if (profilesData) {
+          profilesData.forEach(p => {
+            if (p.id && p.full_name) namesMap[p.id] = p.full_name;
+          });
+        }
+        if (patientsData) {
+          patientsData.forEach(p => {
+            if (p.id) {
+              const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+              if (name) namesMap[p.id] = name;
+            }
+          });
+        }
+
+        const enrichedApptData = (apptData || []).map(a => ({
+          ...a,
+          patient_name: namesMap[a.patient_id] || a.patient_name || "Valued Patient",
+          appointment_time: a.start_time || a.appointment_time || "09:00 AM"
+        }));
+
+        setQueue(enrichedApptData);
+        setNotifications(enrichedApptData.map((a, idx) => ({
+          id: `notif-${a.id || idx}`,
+          title: a.status === "Pending" ? "New Appointment Request" : `Appointment ${a.status}`,
+          description: `Patient ${a.patient_name} scheduled for ${a.appointment_date} at ${a.appointment_time}.`,
+          time: "Today",
+          read: idx > 2,
+          type: a.status?.toLowerCase() || "pending",
+        })));
       } catch (err) {
         console.error("Error loading doctor data:", err);
       } finally {

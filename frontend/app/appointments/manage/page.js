@@ -12,6 +12,7 @@ export default function ManageAppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(ROLES.PATIENT);
+  const [patientNames, setPatientNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -47,6 +48,31 @@ export default function ManageAppointmentsPage() {
       await updateExpiredAppointments(currentUser.id);
     }
 
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", currentUser.id)
+      .single();
+
+    const { data: profilesData } = await supabase.from("profiles").select("id, full_name");
+    const { data: patientsData } = await supabase.from("patients").select("id, first_name, last_name, patient_number");
+    
+    const namesMap = {};
+    if (profilesData) {
+      profilesData.forEach(p => {
+        if (p.id && p.full_name) namesMap[p.id] = p.full_name;
+      });
+    }
+    if (patientsData) {
+      patientsData.forEach(p => {
+        if (p.id) {
+          const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+          if (name) namesMap[p.id] = name;
+        }
+      });
+    }
+    setPatientNames(namesMap);
+
     let query = supabase
       .from("appointments")
       .select(`
@@ -71,6 +97,22 @@ export default function ManageAppointmentsPage() {
 
     if (role === ROLES.PATIENT) {
       query = query.eq("patient_id", currentUser.id);
+    } else if (role === ROLES.DOCTOR) {
+      const docName = currentUser?.email === "1-240349@asiatech.edu.ph"
+        ? "Dr. Renzo Lamadrid"
+        : (profileData?.full_name || currentUser?.user_metadata?.full_name || currentUser?.email || "");
+      const { data: docList } = await supabase.from("doctors").select("id, name");
+      const matchedDoc = docList?.find(d => 
+        d.name.toLowerCase().includes("renzo") ||
+        (docName && (
+          d.name.toLowerCase().includes(docName.toLowerCase().replace(/dr\.?|md|phd|,/g, "").trim()) ||
+          docName.toLowerCase().includes(d.name.toLowerCase().replace(/dr\.?|md|phd|,/g, "").trim())
+        ))
+      ) || docList?.[0];
+
+      if (matchedDoc?.id) {
+        query = query.eq("doctor_id", matchedDoc.id);
+      }
     }
 
     const { data, error } = await query;
@@ -318,6 +360,12 @@ export default function ManageAppointmentsPage() {
 
     setActionLoading(false);
     await loadAppointments();
+  }
+
+  function getPatientDisplayName(patientId) {
+    if (!patientId) return "Valued Patient";
+    if (patientNames[patientId]) return patientNames[patientId];
+    return "Patient";
   }
 
   function editAppointment(id) {
@@ -637,25 +685,65 @@ export default function ManageAppointmentsPage() {
                   fontSize: "14px",
                 }}
               >
-                Your upcoming appointments.
+                {userRole === ROLES.DOCTOR
+                  ? "Today's patient consultation queue and active visits."
+                  : userRole === ROLES.ADMIN
+                  ? "Clinic-wide appointment requests and schedule management."
+                  : "Your upcoming appointments."}
               </p>
             </div>
 
-            <button
-              onClick={() => router.push("/appointments")}
-              style={{
-                border: "none",
-                borderRadius: "9px",
-                padding: "11px 17px",
-                backgroundColor: "var(--primary)",
-                color: "var(--on-primary)",
-                fontSize: "14px",
-                fontWeight: "650",
-                cursor: "pointer",
-              }}
-            >
-              + Book Appointment
-            </button>
+            {userRole === ROLES.PATIENT ? (
+              <button
+                onClick={() => router.push("/appointments")}
+                style={{
+                  border: "none",
+                  borderRadius: "9px",
+                  padding: "11px 17px",
+                  backgroundColor: "var(--primary)",
+                  color: "var(--on-primary)",
+                  fontSize: "14px",
+                  fontWeight: "650",
+                  cursor: "pointer",
+                }}
+              >
+                + Book Appointment
+              </button>
+            ) : userRole === ROLES.DOCTOR ? (
+              <button
+                onClick={() => router.push("/ai-assistant")}
+                style={{
+                  border: "none",
+                  borderRadius: "9px",
+                  padding: "11px 17px",
+                  backgroundColor: "var(--surface-2)",
+                  color: "var(--text-heading)",
+                  border: "1px solid var(--card-border)",
+                  fontSize: "14px",
+                  fontWeight: "650",
+                  cursor: "pointer",
+                }}
+              >
+                🤖 Clinical AI Co-Pilot
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/reports")}
+                style={{
+                  border: "none",
+                  borderRadius: "9px",
+                  padding: "11px 17px",
+                  backgroundColor: "var(--surface-2)",
+                  color: "var(--text-heading)",
+                  border: "1px solid var(--card-border)",
+                  fontSize: "14px",
+                  fontWeight: "650",
+                  cursor: "pointer",
+                }}
+              >
+                📊 View Analytics
+              </button>
+            )}
           </div>
 
           {loading ? (
@@ -694,7 +782,11 @@ export default function ManageAppointmentsPage() {
                   fontSize: "18px",
                 }}
               >
-                No active appointments
+                {userRole === ROLES.PATIENT
+                  ? "No active appointments"
+                  : userRole === ROLES.DOCTOR
+                  ? "No patients in your queue"
+                  : "No clinic appointments found"}
               </h3>
 
               <p
@@ -703,23 +795,29 @@ export default function ManageAppointmentsPage() {
                   margin: "8px 0 18px",
                 }}
               >
-                You currently have no upcoming appointments.
+                {userRole === ROLES.PATIENT
+                  ? "You currently have no upcoming appointments."
+                  : userRole === ROLES.DOCTOR
+                  ? "You have no upcoming patient consultations assigned at this time."
+                  : "There are currently no active appointments in the clinic system."}
               </p>
 
-              <button
-                onClick={() => router.push("/appointments")}
-                style={{
-                  border: "none",
-                  borderRadius: "9px",
-                  padding: "11px 18px",
-                  backgroundColor: "var(--primary)",
-                  color: "var(--on-primary)",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
-                Book an Appointment
-              </button>
+              {userRole === ROLES.PATIENT && (
+                <button
+                  onClick={() => router.push("/appointments")}
+                  style={{
+                    border: "none",
+                    borderRadius: "9px",
+                    padding: "11px 18px",
+                    backgroundColor: "var(--primary)",
+                    color: "var(--on-primary)",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  Book an Appointment
+                </button>
+              )}
             </div>
           ) : (
             <div
@@ -757,7 +855,9 @@ export default function ManageAppointmentsPage() {
                           color: "var(--text-heading)",
                         }}
                       >
-                        {appointment.doctors?.name || "Doctor"}
+                        {userRole === ROLES.PATIENT
+                          ? (appointment.doctors?.name || "Doctor")
+                          : (`Patient: ${getPatientDisplayName(appointment.patient_id)}`)}
                       </h3>
 
                       <p
@@ -767,8 +867,9 @@ export default function ManageAppointmentsPage() {
                           fontSize: "14px",
                         }}
                       >
-                        {appointment.doctors?.specialization ||
-                          "General Practice"}
+                        {userRole === ROLES.PATIENT
+                          ? (appointment.doctors?.specialization || "General Practice")
+                          : (`Attending: ${appointment.doctors?.name || "Doctor"} (${appointment.doctors?.specialization || "General Medicine"})`)}
                       </p>
                     </div>
 

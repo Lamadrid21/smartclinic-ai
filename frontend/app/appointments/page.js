@@ -125,6 +125,13 @@ function AppointmentsContent() {
     } = await supabase.auth.getUser();
 
     setUser(user);
+
+    const role = getUserRole(user);
+    if (role === ROLES.ADMIN || role === ROLES.DOCTOR) {
+      alert("Admins and doctors are not permitted to book appointments. Redirecting to appointment management.");
+      router.push("/appointments/manage");
+      return;
+    }
   }
 
   async function fetchDoctors() {
@@ -132,7 +139,7 @@ function AppointmentsContent() {
 
     const { data, error } = await supabase
       .from("doctors")
-      .select("id, name, specialization")
+      .select("id, name, specialization, consultation_fee")
       .order("name");
 
     if (error) {
@@ -267,8 +274,17 @@ function AppointmentsContent() {
     )}:${String(date.getMinutes()).padStart(2, "0")}:00`;
   }
 
-  function getConsultationFee(specialization) {
-    const value = specialization?.toLowerCase().trim();
+  function getConsultationFee(doctorObjOrSpecialization) {
+    if (doctorObjOrSpecialization && typeof doctorObjOrSpecialization === "object") {
+      if (doctorObjOrSpecialization.consultation_fee != null && !isNaN(doctorObjOrSpecialization.consultation_fee)) {
+        return Number(doctorObjOrSpecialization.consultation_fee);
+      }
+      var specialization = doctorObjOrSpecialization.specialization;
+    } else {
+      var specialization = doctorObjOrSpecialization;
+    }
+
+    const value = String(specialization || "").toLowerCase().trim();
 
     if (value === "general medicine") {
       return 500;
@@ -290,7 +306,7 @@ function AppointmentsContent() {
       return 700;
     }
 
-    return 0;
+    return 500;
   }
 
   async function confirmAppointment() {
@@ -388,7 +404,7 @@ function AppointmentsContent() {
       "Patient";
 
     const consultationFee = getConsultationFee(
-      selectedDoctorData?.specialization
+      selectedDoctorData
     );
 
     let appointmentId = rescheduleId;
@@ -585,7 +601,7 @@ function AppointmentsContent() {
     selectedDoctorData?.specialization || "";
 
   const selectedConsultationFee = getConsultationFee(
-    selectedDoctorSpecialization
+    selectedDoctorData
   );
 
   const today = new Date();

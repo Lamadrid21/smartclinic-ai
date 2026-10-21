@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import ReCaptcha from "@/components/ReCaptcha";
-import { ROLES, getUserRole, setUserRole } from "@/lib/auth-role";
+import { ROLES, ROLE_LABELS, getUserRole, setUserRole } from "@/lib/auth-role";
 import ThemeToggle from "@/components/ThemeToggle";
 
 function LoginContent() {
@@ -176,6 +176,22 @@ function LoginContent() {
     }
 
     const actualRole = getUserRole(authData?.user);
+
+    // Enforce role lock: account role must match the selected login portal tab
+    if (actualRole !== selectedRole) {
+      await supabase.auth.signOut();
+      const portalNames = {
+        [ROLES.PATIENT]: "Patient Portal",
+        [ROLES.DOCTOR]: "Doctor Portal",
+        [ROLES.ADMIN]: "Clinic Administration Portal",
+      };
+      setErrorMsg(
+        `This account is locked as a ${ROLE_LABELS[actualRole] || actualRole}. Please select the ${portalNames[actualRole] || "correct"} tab to sign in.`
+      );
+      setLoading(false);
+      return;
+    }
+
     await setUserRole(actualRole, authData?.user);
 
     router.push("/dashboard");
@@ -237,7 +253,7 @@ function LoginContent() {
     },
     [ROLES.ADMIN]: {
       title: "Clinic Administration",
-      subtitle: "Clinic analytics, doctor monitor, revenue & system audit",
+      subtitle: "Clinic analytics, doctor monitor & system audit",
       badge: "⚙️ Administrator",
       emailPlaceholder: "admin@example.com",
       accent: "from-purple-600 to-indigo-500",
