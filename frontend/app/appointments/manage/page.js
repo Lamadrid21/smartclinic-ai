@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import AppLayout from "@/components/AppLayout";
+import AppointmentCard from "@/components/AppointmentCard";
 import { ROLES, getUserRole } from "@/lib/auth-role";
 
 export default function ManageAppointmentsPage() {
@@ -15,6 +16,7 @@ export default function ManageAppointmentsPage() {
   const [patientNames, setPatientNames] = useState({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [statsCollapsed, setStatsCollapsed] = useState(false);
 
   useEffect(() => {
     loadAppointments();
@@ -467,6 +469,22 @@ export default function ManageAppointmentsPage() {
       appointment.status !== "Expired"
   );
 
+  const now = new Date();
+  const todayStr =
+    now.getFullYear() +
+    "-" +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(now.getDate()).padStart(2, "0");
+
+  const todaysQueue = activeAppointments.filter(
+    (a) => a.appointment_date <= todayStr || a.status === "Confirmed"
+  );
+
+  const pendingFutureAppointments = activeAppointments.filter(
+    (a) => a.status === "Pending" && a.appointment_date > todayStr
+  );
+
   const pendingCount = appointments.filter(
     (appointment) => appointment.status === "Pending"
   ).length;
@@ -543,109 +561,132 @@ export default function ManageAppointmentsPage() {
           </p>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "16px",
-            marginBottom: "28px",
-          }}
-          className="m-stack"
-        >
-          <div
+        <div style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "var(--text-heading)" }}>
+            📊 Summary Statistics
+          </h3>
+          <button
+            onClick={() => setStatsCollapsed(!statsCollapsed)}
             style={{
-              backgroundColor: "var(--card-bg)",
-              borderRadius: "14px",
-              padding: "20px",
-              boxShadow: "var(--shadow-card)",
               border: "1px solid var(--card-border)",
+              backgroundColor: "var(--card-bg)",
+              color: "var(--text-body)",
+              padding: "6px 14px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor: "pointer",
             }}
           >
-            <p
-              style={{
-                margin: 0,
-                color: "var(--text-muted)",
-                fontSize: "13px",
-                fontWeight: "600",
-              }}
-            >
-              Total Appointments
-            </p>
-
-            <h2
-              style={{
-                margin: "8px 0 0",
-                fontSize: "28px",
-                color: "var(--text-heading)",
-              }}
-            >
-              {activeAppointments.length}
-            </h2>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "var(--card-bg)",
-              borderRadius: "14px",
-              padding: "20px",
-              boxShadow: "var(--shadow-card)",
-              border: "1px solid var(--card-border)",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "var(--text-muted)",
-                fontSize: "13px",
-                fontWeight: "600",
-              }}
-            >
-              Pending Requests
-            </p>
-
-            <h2
-              style={{
-                margin: "8px 0 0",
-                fontSize: "28px",
-                color: "var(--warning-text)",
-              }}
-            >
-              {pendingCount}
-            </h2>
-          </div>
-
-          <div
-            style={{
-              backgroundColor: "var(--card-bg)",
-              borderRadius: "14px",
-              padding: "20px",
-              boxShadow: "var(--shadow-card)",
-              border: "1px solid var(--card-border)",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "var(--text-muted)",
-                fontSize: "13px",
-                fontWeight: "600",
-              }}
-            >
-              Confirmed
-            </p>
-
-            <h2
-              style={{
-                margin: "8px 0 0",
-                fontSize: "28px",
-                color: "var(--success-text)",
-              }}
-            >
-              {confirmedCount}
-            </h2>
-          </div>
+            {statsCollapsed ? "Show Stats 🔽" : "Hide Stats 🔼"}
+          </button>
         </div>
+
+        {!statsCollapsed && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "16px",
+              marginBottom: "28px",
+            }}
+            className="m-stack"
+          >
+            <div
+              style={{
+                backgroundColor: "var(--card-bg)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid var(--card-border)",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--text-muted)",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                Total Appointments
+              </p>
+
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "28px",
+                  color: "var(--text-heading)",
+                }}
+              >
+                {activeAppointments.length}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "var(--card-bg)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid var(--card-border)",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--text-muted)",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                Pending Requests
+              </p>
+
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "28px",
+                  color: "var(--warning-text)",
+                }}
+              >
+                {pendingCount}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "var(--card-bg)",
+                borderRadius: "14px",
+                padding: "20px",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid var(--card-border)",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--text-muted)",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                }}
+              >
+                Confirmed
+              </p>
+
+              <h2
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: "28px",
+                  color: "var(--success-text)",
+                }}
+              >
+                {confirmedCount}
+              </h2>
+            </div>
+          </div>
+        )}
 
         <section
           style={{
@@ -820,387 +861,101 @@ export default function ManageAppointmentsPage() {
               )}
             </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gap: "18px",
-              }}
-            >
-              {activeAppointments.map((appointment) => (
-                <div
-                  key={appointment.id}
+            <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+              <div>
+                <h3
                   style={{
-                    border: "1px solid var(--card-border)",
-                    borderRadius: "14px",
-                    padding: "22px",
-                    backgroundColor: "var(--card-bg)",
+                    fontSize: "18px",
+                    fontWeight: "750",
+                    color: "var(--text-heading)",
+                    marginBottom: "16px",
                   }}
                 >
+                  🟢 Active & Today's Queue ({todaysQueue.length})
+                </h3>
+
+                {todaysQueue.length === 0 ? (
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: "15px",
-                      flexWrap: "wrap",
-                      marginBottom: "18px",
-                    }}
-                  >
-                    <div>
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "20px",
-                          fontWeight: "750",
-                          color: "var(--text-heading)",
-                        }}
-                      >
-                        {userRole === ROLES.PATIENT
-                          ? (appointment.doctors?.name || "Doctor")
-                          : (`Patient: ${getPatientDisplayName(appointment.patient_id)}`)}
-                      </h3>
-
-                      <p
-                        style={{
-                          margin: "5px 0 0",
-                          color: "var(--text-muted)",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {userRole === ROLES.PATIENT
-                          ? (appointment.doctors?.specialization || "General Practice")
-                          : (`Attending: ${appointment.doctors?.name || "Doctor"} (${appointment.doctors?.specialization || "General Medicine"})`)}
-                      </p>
-                    </div>
-
-                    <span
-                      style={{
-                        padding: "7px 13px",
-                        borderRadius: "999px",
-                        fontSize: "12px",
-                        fontWeight: "700",
-                        ...getStatusStyle(
-                          appointment.status
-                        ),
-                      }}
-                    >
-                      {appointment.status}
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(180px, 1fr))",
-                      gap: "14px",
-                      padding: "18px",
+                      padding: "24px",
+                      textAlign: "center",
                       backgroundColor: "var(--surface-2)",
-                      borderRadius: "11px",
-                      marginBottom: "18px",
+                      borderRadius: "12px",
+                      border: "1px dashed var(--card-border)",
+                      color: "var(--text-muted)",
+                      fontSize: "14px",
                     }}
-                    className="m-stack"
                   >
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "var(--text-muted)",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        DATE
-                      </p>
-
-                      <p
-                        style={{
-                          margin: "5px 0 0",
-                          color: "var(--text-heading)",
-                          fontWeight: "650",
-                        }}
-                      >
-                        {formatDate(
-                          appointment.appointment_date
-                        )}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "var(--text-muted)",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        TIME
-                      </p>
-
-                      <p
-                        style={{
-                          margin: "5px 0 0",
-                          color: "var(--text-heading)",
-                          fontWeight: "650",
-                        }}
-                      >
-                        {formatTime(
-                          appointment.start_time
-                        )}{" "}
-                        -{" "}
-                        {formatTime(
-                          appointment.end_time
-                        )}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "var(--text-muted)",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        WAITING TIME
-                      </p>
-
-                      <p
-                        style={{
-                          margin: "5px 0 0",
-                          color: "var(--text-heading)",
-                          fontWeight: "650",
-                        }}
-                      >
-                        {appointment.waiting_time ||
-                          10}{" "}
-                        minutes
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          color: "var(--text-muted)",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        CONSULTATION FEE
-                      </p>
-
-                      <p
-                        style={{
-                          margin: "5px 0 0",
-                          color: "var(--text-heading)",
-                          fontWeight: "650",
-                        }}
-                      >
-                        {formatFee(
-                          appointment.consultation_fee
-                        )}
-                      </p>
-                    </div>
+                    No active or today's appointments in queue.
                   </div>
-
-                  <div
-                    style={{
-                      marginBottom: "18px",
-                    }}
-                  >
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "var(--text-muted)",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      REASON FOR APPOINTMENT
-                    </p>
-
-                    <p
-                      style={{
-                        margin: "6px 0 0",
-                        color: "var(--text-body)",
-                        lineHeight: "1.5",
-                      }}
-                    >
-                      {appointment.reason ||
-                        "No reason provided"}
-                    </p>
+                ) : (
+                  <div style={{ display: "grid", gap: "18px" }}>
+                    {todaysQueue.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                        userRole={userRole}
+                        actionLoading={actionLoading}
+                        getPatientDisplayName={getPatientDisplayName}
+                        getStatusStyle={getStatusStyle}
+                        formatDate={formatDate}
+                        formatTime={formatTime}
+                        formatFee={formatFee}
+                        confirmAppointment={confirmAppointment}
+                        completeAppointment={completeAppointment}
+                        editAppointment={editAppointment}
+                        cancelAppointment={cancelAppointment}
+                        removeDoctorFromAppointment={removeDoctorFromAppointment}
+                      />
+                    ))}
                   </div>
+                )}
+              </div>
 
-                  <div
+              {pendingFutureAppointments.length > 0 && (
+                <div>
+                  <h3
                     style={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "9px",
+                      fontSize: "18px",
+                      fontWeight: "750",
+                      color: "var(--text-heading)",
+                      marginBottom: "16px",
                     }}
                   >
-                    {appointment.status === "Pending" && (
-                      <>
-                        {userRole === ROLES.ADMIN && (
-                          <button
-                            onClick={() =>
-                              confirmAppointment(
-                                appointment.id
-                              )
-                            }
-                            disabled={actionLoading}
-                            style={{
-                              padding: "10px 15px",
-                              border: "none",
-                              borderRadius: "8px",
-                              backgroundColor: "var(--success)",
-                              color: "var(--on-primary)",
-                              fontWeight: "650",
-                              cursor: actionLoading
-                                ? "not-allowed"
-                                : "pointer",
-                            }}
-                          >
-                            Confirm
-                          </button>
-                        )}
+                    ⏳ Pending Future Appointments ({pendingFutureAppointments.length})
+                  </h3>
 
-                        {userRole !== ROLES.DOCTOR && (
-                          <button
-                            onClick={() =>
-                              editAppointment(
-                                appointment.id
-                              )
-                            }
-                            disabled={actionLoading}
-                            style={{
-                              padding: "10px 15px",
-                              border: "none",
-                              borderRadius: "8px",
-                              backgroundColor: "var(--primary)",
-                              color: "var(--on-primary)",
-                              fontWeight: "650",
-                              cursor: actionLoading
-                                ? "not-allowed"
-                                : "pointer",
-                            }}
-                          >
-                            Edit
-                          </button>
-                        )}
-
-                        {userRole === ROLES.ADMIN && (
-                          <button
-                            onClick={() =>
-                              removeDoctorFromAppointment(
-                                appointment.id
-                              )
-                            }
-                            disabled={actionLoading}
-                            style={{
-                              padding: "10px 15px",
-                              border: "none",
-                              borderRadius: "8px",
-                              backgroundColor: "var(--surface-2)",
-                              color: "var(--danger-text)",
-                              border:
-                                "1px solid var(--danger-border)",
-                              fontWeight: "650",
-                              cursor: actionLoading
-                                ? "not-allowed"
-                                : "pointer",
-                            }}
-                          >
-                            Remove Doctor
-                          </button>
-                        )}
-                      </>
-                    )}
-
-                    {appointment.status === "Confirmed" && (
-                      <button
-                        onClick={() =>
-                          completeAppointment(
-                            appointment.id
-                          )
-                        }
-                        disabled={actionLoading}
-                        style={{
-                          padding: "10px 15px",
-                          border: "none",
-                          borderRadius: "8px",
-                          backgroundColor: "var(--primary)",
-                          color: "var(--on-primary)",
-                          fontWeight: "650",
-                          cursor: actionLoading
-                            ? "not-allowed"
-                            : "pointer",
-                        }}
-                      >
-                        Mark Completed
-                      </button>
-                    )}
-
-                    {appointment.status !== "Confirmed" &&
-                      userRole !== ROLES.DOCTOR && (
-                      <button
-                        onClick={() =>
-                          editAppointment(
-                            appointment.id
-                          )
-                        }
-                        disabled={actionLoading}
-                        style={{
-                          padding: "10px 15px",
-                          border: "none",
-                          borderRadius: "8px",
-                          backgroundColor: "var(--surface-2)",
-                          color: "var(--text-body)",
-                          border:
-                            "1px solid var(--card-border)",
-                          fontWeight: "650",
-                          cursor: actionLoading
-                            ? "not-allowed"
-                            : "pointer",
-                        }}
-                      >
-                        Reschedule
-                      </button>
-                    )}
-
-                    {(appointment.status === "Pending" ||
-                      appointment.status === "Confirmed") &&
-                      userRole !== ROLES.DOCTOR && (
-                      <button
-                        onClick={() =>
-                          cancelAppointment(
-                            appointment.id
-                          )
-                        }
-                        disabled={actionLoading}
-                        style={{
-                          padding: "10px 15px",
-                          border: "none",
-                          borderRadius: "8px",
-                          backgroundColor: "var(--danger-bg)",
-                          color: "var(--danger-text)",
-                          border:
-                            "1px solid var(--danger-border)",
-                          fontWeight: "650",
-                          cursor: actionLoading
-                            ? "not-allowed"
-                            : "pointer",
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    )}
+                  <div style={{ display: "grid", gap: "18px" }}>
+                    {pendingFutureAppointments.map((appointment) => (
+                      <AppointmentCard
+                        key={appointment.id}
+                        appointment={appointment}
+                        userRole={userRole}
+                        actionLoading={actionLoading}
+                        getPatientDisplayName={getPatientDisplayName}
+                        getStatusStyle={getStatusStyle}
+                        formatDate={formatDate}
+                        formatTime={formatTime}
+                        formatFee={formatFee}
+                        confirmAppointment={confirmAppointment}
+                        completeAppointment={completeAppointment}
+                        editAppointment={editAppointment}
+                        cancelAppointment={cancelAppointment}
+                        removeDoctorFromAppointment={removeDoctorFromAppointment}
+                      />
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
+
+
+
+
+
+
+
+
           )}
         </section>
       </div>
